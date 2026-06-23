@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RAW Summary & Dodolan Dashboard</title>
+  <style>
+    :root {
+      --ink: #17211f;
+      --muted: #5f706a;
+      --line: #d9e1dc;
+      --paper: #f6f7f1;
+      --panel: #fff;
+      --dark: #203632;
+      --green: #1e9b66;
+      --red: #d64e47;
+      --amber: #d19a22;
+      --blue: #327aa8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, Aptos, Segoe UI, Arial, sans-serif;
+    }
+    header {
+      background: var(--dark);
+      color: white;
+      padding: 22px 28px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+    }
+    h1 { margin: 0; font-size: clamp(24px, 3vw, 38px); letter-spacing: 0; }
+    h2 { margin: 0; font-size: 18px; }
+    .sub { color: #dce9e2; margin-top: 6px; font-size: 14px; }
+    main { max-width: 1540px; margin: 0 auto; padding: 20px; }
+    button, a.button, select, input {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--dark);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 750;
+    }
+    button, a.button { cursor: pointer; text-decoration: none; }
+    header button, header a.button { border-color: rgba(255,255,255,.25); }
+    .actions, .filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; }
+    .tab { white-space: nowrap; }
+    .tab.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+    .toolbar {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .label { color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .status { min-height: 20px; color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+    .error { display: none; background: #ffe1de; border: 1px solid #f0aaa5; color: #7d221f; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .kpis { display: grid; grid-template-columns: repeat(5, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 15px; box-shadow: 0 1px 0 rgba(20,30,28,.04); }
+    .value { margin-top: 7px; font-size: clamp(23px, 3vw, 32px); font-weight: 900; }
+    .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .split { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .metric-list { display: grid; gap: 10px; }
+    .metric-row { display: grid; grid-template-columns: minmax(160px,1fr) 130px 80px; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 9px; }
+    .metric-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .name { font-weight: 780; overflow-wrap: anywhere; }
+    .money, .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 780; }
+    .bar { height: 12px; border-radius: 999px; background: #e8eee9; overflow: hidden; margin-top: 6px; }
+    .bar > span { display: block; height: 100%; border-radius: 999px; background: var(--blue); min-width: 2px; }
+    .table-wrap { overflow: auto; max-height: 620px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+    table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 13px; }
+    th, td { padding: 9px 11px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; vertical-align: top; }
+    th { position: sticky; top: 0; z-index: 1; background: #eef4ef; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+    td.number, th.number { text-align: right; font-variant-numeric: tabular-nums; }
+    @media (max-width: 1100px) {
+      header, .toolbar { align-items: start; flex-direction: column; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .grid, .split { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      main { padding: 14px; }
+      .kpis { grid-template-columns: 1fr; }
+      .metric-row { grid-template-columns: 1fr; }
+      .money, .num { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Summary All Month & Dodolan</h1>
+      <div class="sub">Sales dari sheet RAW, incentive dari sheet Incentive.</div>
+    </div>
+    <div class="actions">
+      <button id="refresh">Refresh Data</button>
+      <a class="button" href="https://docs.google.com/spreadsheets/d/1nI9uXMjZwSKTKHXcdLdqhKRWVBOi1eiBHTwjri8QxWo/edit" target="_blank" rel="noreferrer">Buka Sheet</a>
+    </div>
+  </header>
+  <main>
+    <nav class="tabs">
+      <button class="tab active" data-view="summary">Summary All Month</button>
+      <button class="tab" data-view="dodolan">Dodolan</button>
+      <button class="tab" data-view="universe">UNIVERSE</button>
+      <button class="tab" data-view="allIncentive">All Incentive Agent</button>
+      <button class="tab" data-view="baoEarl">Link Harga BAO Early Bird/Extend</button>
+      <button class="tab" data-view="ruangbelajar">Ruangbelajar</button>
+      <button class="tab" data-view="flashSaleRg">Flash Sale Festival RG</button>
+      <button class="tab" data-view="jadwalBac">Jadwal & Deeplink BAC26/27</button>
+    </nav>
+    <section class="toolbar">
+      <div class="filters">
+        <div>
+          <div class="label">Month</div>
+          <select id="monthFilter"></select>
+        </div>
+        <div>
+          <div class="label">Week</div>
+          <select id="weekFilter"></select>
+        </div>
+        <div>
+          <div class="label">Coach</div>
+          <select id="coachFilter"></select>
+        </div>
+        <div>
+          <div class="label">SPV</div>
+          <select id="spvFilter"></select>
+        </div>
+        <div>
+          <div class="label">Kategori Team</div>
+          <select id="teamFilter"></select>
+        </div>
+        <div>
+          <div class="label">Agent Name</div>
+          <select id="agentFilter"></select>
+        </div>
+        <div>
+          <div class="label">Cari</div>
+          <input id="searchFilter" placeholder="agent, package, campaign..." autocomplete="off">
+        </div>
+      </div>
+      <div class="note">Filter week juga menghitung ulang total incentive.</div>
+    </section>
+    <div id="status" class="status">Memuat data...</div>
+    <div id="error" class="error"></div>
+    <div id="content"></div>
+  </main>
+
+  <script>
+    const SHEET_ID = "1nI9uXMjZwSKTKHXcdLdqhKRWVBOi1eiBHTwjri8QxWo";
+    const BAO_EARL_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
+    const BAO_EARL_GID = "514509076";
+    const BAO_EXTEND_SHEET_ID = "13tUkUpdwyd2KuN141kR46yWjyhCWLxPzYfwdiP9z7D0";
+    const BAO_EXTEND_GID = "1576979382";
+    const RUANGBELAJAR_SHEET_ID = "1GFN0S7EVVXy42oU_EHwh1GE1b_MihzR-i-2aZG9jjeE";
+    const RUANGBELAJAR_GID = "1529053994";
+    const RUANGBELAJAR_HIDDEN_ROWS = new Set([3, 4, 100, 101, 102]);
+    const EARLYBIRD_RUBEL_SHEET_ID = "1VRW9hVMTT9DQBkSz6SMJN_Kgb4p0EQnTF5FUCM-jxEk";
+    const EARLYBIRD_RUBEL_GID = "123313084";
+    const FLASHSALE_RG_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
+    const FLASHSALE_RG_GID = "1252873967";
+    const JADWAL_BAC_SHEET_ID = "1oChTs2KBk7GgjKXMfmbabE38ng4NQol86lMYR90ib-A";
+    const JADWAL_BAC_GID = "917707966";
+    const HARGA_BAC_GID = "1090858992";
+    const tabs = document.querySelectorAll(".tab");
+    const monthFilter = document.getElementById("monthFilter");
+    const weekFilter = document.getElementById("weekFilter");
+    const coachFilter = document.getElementById("coachFilter");
+    const spvFilter = document.getElementById("spvFilter");
+    const teamFilter = document.getElementById("teamFilter");
+    const agentFilter = document.getElementById("agentFilter");
+    const searchFilter = document.getElementById("searchFilter");
+    const contentEl = document.getElementById("content");
+    const statusEl = document.getElementById("status");
+    const errorEl = document.getElementById("error");
+    let rawTable = null;
+    let incentiveTable = null;
+    let calculatorTable = null;
+    let baoEarlTableData = null;
+    let baoExtendTableData = null;
+    let ruangbelajarTableData = null;
+    let earlybirdRubelTableData = null;
+    let flashSaleRgTableData = null;
+    let jadwalBacTableData = null;
+    let hargaBacTableData = null;
+    let rawRows = [];
+    let incentiveRows = [];
+    let baoEarlRows = [];
+    let ruangbelajarRows = [];
+    let earlybirdRubelRows = [];
+    let flashSaleRgRows = [];
+    let jadwalBacRows = [];
+    let jadwalBacHeaders = [];
+    let jadwalBacError = "";
+    let hargaBacRows = [];
+    let hargaBacError = "";
+    let calculatorSchema = null;
+    let activeView = "summary";
+
+    const rupiah = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n || 0);
+    const num = (n, d = 0) => new Intl.NumberFormat("id-ID", { maximumFractionDigits: d, minimumFractionDigits: d }).format(n || 0);
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const cell = (row, i) => row?.c?.[i]?.v ?? "";
+    const fmt = (row, i) => row?.c?.[i]?.f ?? row?.c?.[i]?.v ?? "";
+    const normalizeWeek = (v) => {
+      const n = Number(String(v ?? "").replace(",", "."));
+      return Number.isFinite(n) ? String(Math.trunc(n)) : String(v ?? "").trim();
+    };
+    const EXCLUDED_TOP_INCENTIVE_AGENTS = new Set(["satyadi ambia", "imam nugroho", "erna erviana purnamasari"]);
+    const LAYER_1_WEEK_TARGETS = {
+      "23": 10700000,
+      "24": 13400000,
+      "25": 9800000,
+      "26": 12300000
+    };
+    const LAYER_2_WEEK_TARGETS = {
+      "23": 7400000,
+      "24": 9200000,
+      "25": 7400000,
+      "26": 9200000
+    };
+    const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
+    const WEEK_25_LAYER_1_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0153, 0.75: 0.0185, 1: 0.0345, 1.25: 0.04 },
+      "BAON Elite": { 0: 0, 0.5: 0.0188, 0.75: 0.0185, 1: 0.0333, 1.25: 0.0373 },
+      "BAON Prem": { 0: 0, 0.5: 0.0308, 0.75: 0.0355, 1: 0.0705, 1.25: 0.084 },
+      "BAON Reg": { 0: 0, 0.5: 0.0258, 0.75: 0.0303, 1: 0.0605, 1.25: 0.0753 },
+      "Others": { 0: 0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
+      "RB": { 0: 0, 0.5: 0.0268, 0.75: 0.0315, 1: 0.063, 1.25: 0.0795 },
+      "RGP Online": { 0: 0, 0.5: 0.0072, 0.75: 0.012, 1: 0.024, 1.25: 0.028 },
+      "RGP Offline": { 0: 0, 0.5: 0.0024, 0.75: 0.004, 1: 0.008, 1.25: 0.008 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_25_LAYER_2_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0108, 0.75: 0.013, 1: 0.0245, 1.25: 0.028 },
+      "BAON Elite": { 0: 0, 0.5: 0.0118, 0.75: 0.0135, 1: 0.0238, 1.25: 0.028 },
+      "BAON Prem": { 0: 0, 0.5: 0.0215, 0.75: 0.025, 1: 0.048, 1.25: 0.0588 },
+      "BAON Reg": { 0: 0, 0.5: 0.0179, 0.75: 0.0212, 1: 0.0421, 1.25: 0.0527 },
+      "Others": { 0: 0, 0.5: 0.0108, 0.75: 0.0123, 1: 0.013, 1.25: 0.014 },
+      "RB": { 0: 0, 0.5: 0.032, 0.75: 0.038, 1: 0.0758, 1.25: 0.095 },
+      "RGP Online": { 0: 0, 0.5: 0.0072, 0.75: 0.012, 1: 0.024, 1.25: 0.028 },
+      "RGP Offline": { 0: 0, 0.5: 0.0024, 0.75: 0.004, 1: 0.008, 1.25: 0.008 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_23_24_LAYER_1_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0198, 0.75: 0.024, 1: 0.045, 1.25: 0.052 },
+      "BAON Elite": { 0: 0, 0.5: 0.0217, 0.75: 0.024, 1: 0.0433, 1.25: 0.0485 },
+      "BAON Prem": { 0: 0, 0.5: 0.04, 0.75: 0.048, 1: 0.0917, 1.25: 0.1093 },
+      "BAON Reg": { 0: 0, 0.5: 0.0335, 0.75: 0.0385, 1: 0.0787, 1.25: 0.0878 },
+      "Others": { 0: 0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
+      "RB": { 0: 0, 0.5: 0.0348, 0.75: 0.041, 1: 0.082, 1.25: 0.1033 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_23_24_LAYER_2_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.014, 0.75: 0.0167, 1: 0.0318, 1.25: 0.0365 },
+      "BAON Elite": { 0: 0, 0.5: 0.0153, 0.75: 0.0175, 1: 0.0308, 1.25: 0.0363 },
+      "BAON Prem": { 0: 0, 0.5: 0.028, 0.75: 0.0325, 1: 0.0625, 1.25: 0.0765 },
+      "BAON Reg": { 0: 0, 0.5: 0.0233, 0.75: 0.0275, 1: 0.0547, 1.25: 0.0685 },
+      "Others": { 0: 0, 0.5: 0.0108, 0.75: 0.0123, 1: 0.013, 1.25: 0.014 },
+      "RB": { 0: 0, 0.5: 0.0418, 0.75: 0.0493, 1: 0.0985, 1.25: 0.1235 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_26_LAYER_1_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.018, 0.75: 0.022, 1: 0.0413, 1.25: 0.0475 },
+      "BAON Elite": { 0: 0, 0.5: 0.02, 0.75: 0.022, 1: 0.0395, 1.25: 0.0445 },
+      "BAON Prem": { 0: 0, 0.5: 0.0365, 0.75: 0.042, 1: 0.084, 1.25: 0.1 },
+      "BAON Reg": { 0: 0, 0.5: 0.0308, 0.75: 0.036, 1: 0.072, 1.25: 0.0895 },
+      "Others": { 0: 0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
+      "RB": { 0: 0, 0.5: 0.0318, 0.75: 0.0375, 1: 0.075, 1.25: 0.0945 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_26_LAYER_2_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0128, 0.75: 0.0153, 1: 0.029, 1.25: 0.0335 },
+      "BAON Elite": { 0: 0, 0.5: 0.014, 0.75: 0.016, 1: 0.0283, 1.25: 0.0333 },
+      "BAON Prem": { 0: 0, 0.5: 0.0255, 0.75: 0.0298, 1: 0.0573, 1.25: 0.07 },
+      "BAON Reg": { 0: 0, 0.5: 0.0213, 0.75: 0.0253, 1: 0.05, 1.25: 0.0628 },
+      "Others": { 0: 0, 0.5: 0.0108, 0.75: 0.0123, 1: 0.013, 1.25: 0.014 },
+      "RB": { 0: 0, 0.5: 0.0383, 0.75: 0.045, 1: 0.09, 1.25: 0.113 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
+    function isExcludedTopIncentiveAgent(name) {
+      return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
+    }
+    function isDwiAgustinTargetOverride(agent, week) {
+      return String(agent || "").trim().toLowerCase() === "dwi agustin setyaningrum" && ["23", "24"].includes(String(week));
+    }
+    function normalizedTeamCategory(teamCategory) {
+      return String(teamCategory || "").trim().toUpperCase();
+    }
+    function isSchemaTeam(teamCategory) {
+      return ["LAYER 1", "LAYER 2"].includes(normalizedTeamCategory(teamCategory));
+    }
+    function isAllIncentiveSchemaRow(row) {
+      const team = normalizedTeamCategory(row.teamCategory);
+      if (team === "LAYER 1") return true;
+      return team === "LAYER 2" && ["23", "24", "25", "26"].includes(String(row.week));
+    }
+    function targetForWeek(week, teamCategory = "LAYER 1", agent = "") {
+      if (isDwiAgustinTargetOverride(agent, week)) return 2800000;
+      const normalizedTeam = normalizedTeamCategory(teamCategory);
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26"].includes(String(week))) {
+        return LAYER_2_WEEK_TARGETS[String(week)] || 0;
+      }
+      return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
+    }
+    function parseMoney(v) {
+      if (typeof v === "number") return v;
+      const text = String(v || "").replace(/[^0-9,-]/g, "").replace(/\./g, "").replace(",", ".");
+      return Number(text) || 0;
+    }
+    function parsePercent(v) {
+      if (typeof v === "number") return v;
+      const text = String(v || "").replace("%", "").replace(/\./g, "").replace(",", ".");
+      const n = Number(text);
+      return Number.isFinite(n) ? n / 100 : 0;
+    }
+    function normalizeHeader(label) {
+      const raw = String(label || "").trim();
+      const parts = raw.split(/\s+/);
+      const mid = parts.length / 2;
+      if (parts.length % 2 === 0 && parts.slice(0, mid).join(" ") === parts.slice(mid).join(" ")) return parts.slice(0, mid).join(" ");
+      return raw;
+    }
+    function colMap(table) {
+      const map = new Map();
+      (table.cols || []).forEach((col, i) => {
+        const label = normalizeHeader(col.label);
+        if (!label) return;
+        if (!map.has(label)) map.set(label, []);
+        map.get(label).push(i);
+      });
+      return map;
+    }
+    function first(map, label) { return map.get(label)?.[0] ?? -1; }
+    function last(map, label) {
+      const arr = map.get(label) || [];
+      return arr.length ? arr[arr.length - 1] : -1;
+    }
+    function loadJsonp(sheet, options = {}) {
+      return new Promise((resolve, reject) => {
+        const cb = `cb_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        const script = document.createElement("script");
+        const sheetId = options.sheetId || SHEET_ID;
+        const sourceParam = options.gid ? `gid=${encodeURIComponent(options.gid)}` : `sheet=${encodeURIComponent(sheet)}`;
+        window[cb] = (res) => {
+          delete window[cb];
+          script.remove();
+          if (res.status !== "ok") reject(new Error(res.errors?.[0]?.detailed_message || `Gagal memuat ${sheet}`));
+          else resolve(res.table);
+        };
+        script.onerror = () => {
+          delete window[cb];
+          script.remove();
+          reject(new Error(`Tidak bisa mengakses ${sheet}`));
+        };
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${cb};out:json&${sourceParam}&cacheBust=${Date.now()}`;
+        document.body.appendChild(script);
+      });
+    }
+    async function loadOptionalJsonp(sheet, options = {}) {
+      try {
+        return { table: await loadJsonp(sheet, options), error: "" };
+      } catch (err) {
+        return { table: { cols: [], rows: [] }, error: err.message || `Gagal memuat ${sheet}` };
+      }
+    }
+    function parseRaw(table) {
+      const m = colMap(table);
+      const idx = {
+        date: first(m, "Date"),
+        month: first(m, "Month"),
+        week: first(m, "Week"),
+        agent: first(m, "Agent Name"),
+        coach: first(m, "Leader Name"),
+        spv: first(m, "SPV"),
+        teamCategory: first(m, "Kategori Team"),
+        package: first(m, "Package Name"),
+        product: first(m, "Product Type"),
+        campaign: first(m, "Campaign"),
+        amount: first(m, "Amount"),
+        txn: first(m, "Txn"),
+        status: first(m, "Status"),
+        productAdjust: first(m, "product_adjust")
+      };
+      return table.rows.map((row) => ({
+        date: fmt(row, idx.date),
+        month: String(fmt(row, idx.month) || cell(row, idx.month) || "").trim(),
+        week: normalizeWeek(cell(row, idx.week) || fmt(row, idx.week)),
+        agent: String(fmt(row, idx.agent) || cell(row, idx.agent) || "").trim(),
+        coach: String(fmt(row, idx.coach) || cell(row, idx.coach) || "").trim(),
+        spv: String(fmt(row, idx.spv) || cell(row, idx.spv) || "").trim(),
+        teamCategory: String(fmt(row, idx.teamCategory) || cell(row, idx.teamCategory) || "").trim(),
+        package: String(fmt(row, idx.package) || cell(row, idx.package) || "").trim(),
+        product: String(fmt(row, idx.product) || cell(row, idx.product) || "").trim(),
+        campaign: String(fmt(row, idx.campaign) || cell(row, idx.campaign) || "").trim(),
+        productAdjust: String(fmt(row, idx.productAdjust) || cell(row, idx.productAdjust) || "").trim(),
+        amount: parseMoney(cell(row, idx.amount) || fmt(row, idx.amount)),
+        txn: Number(cell(row, idx.txn) || parseMoney(fmt(row, idx.txn)) || 0),
+        status: String(fmt(row, idx.status) || cell(row, idx.status) || "").trim()
+      })).filter((r) => r.agent && r.agent !== "Agent Name" && r.coach !== "Leader Name" && r.amount >= 0);
+    }
+    function parseIncentive(table) {
+      const m = colMap(table);
+      const weekIdx = last(m, "Week");
+      const agentIdx = first(m, "Nama Agent");
+      const incentiveIdx = first(m, "Incentive");
+      const dateIdx = first(m, "Tanggal");
+      const amountIdx = last(m, "Amount");
+      return table.rows.map((row) => ({
+        week: normalizeWeek(cell(row, weekIdx) || fmt(row, weekIdx)),
+        date: String(fmt(row, dateIdx) || cell(row, dateIdx) || "").trim(),
+        agent: String(fmt(row, agentIdx) || cell(row, agentIdx) || "").trim(),
+        amount: parseMoney(cell(row, amountIdx) || fmt(row, amountIdx)),
+        incentive: parseMoney(cell(row, incentiveIdx) || fmt(row, incentiveIdx))
+      })).filter((r) => r.agent && r.week && Number(r.week) >= 1 && r.incentive >= 0);
+    }
+    function parseBaoEarl(table, source = "Early Bird") {
+      const isExtend = source === "Extend";
+      return table.rows.map((row, index) => ({
+        source,
+        deeplink: String(fmt(row, isExtend ? 0 : -1) || cell(row, isExtend ? 0 : -1) || "").trim(),
+        serial: String(fmt(row, isExtend ? 1 : 0) || cell(row, isExtend ? 1 : 0) || "").trim(),
+        packageName: String(fmt(row, isExtend ? 2 : 1) || cell(row, isExtend ? 2 : 1) || "").trim(),
+        activeEndDate: String(fmt(row, isExtend ? 3 : -1) || cell(row, isExtend ? 3 : -1) || "").trim(),
+        basePrice: parseMoney(cell(row, isExtend ? 4 : 2) || fmt(row, isExtend ? 4 : 2)),
+        btlDiscountBefore: fmt(row, isExtend ? 9 : 7) || cell(row, isExtend ? 9 : 7) || "",
+        btlPriceBefore: parseMoney(cell(row, isExtend ? 11 : 8) || fmt(row, isExtend ? 11 : 8)),
+        btlDiscountAfter: fmt(row, isExtend ? 10 : 9) || cell(row, isExtend ? 10 : 9) || "",
+        btlPriceAfter: parseMoney(cell(row, isExtend ? 12 : 10) || fmt(row, isExtend ? 12 : 10)),
+        cashback: parseMoney(cell(row, isExtend ? 14 : 11) || fmt(row, isExtend ? 14 : 11)),
+        maxSispres: parseMoney(cell(row, isExtend ? -1 : 12) || fmt(row, isExtend ? -1 : 12)),
+        extraGimmick: String(fmt(row, isExtend ? 13 : -1) || cell(row, isExtend ? 13 : -1) || "").trim(),
+        bonus: String(fmt(row, isExtend ? 15 : 13) || cell(row, isExtend ? 15 : 13) || "").trim(),
+        sourceRow: index + 5
+      })).filter((r) => r.serial || r.packageName);
+    }
+    function parseRuangbelajar(table) {
+      let currentPackageGroup = "SINGLE SETARA";
+      return table.rows.map((row, index) => {
+        const sourceRow = index + 2;
+        const variant = String(fmt(row, 0) || cell(row, 0) || "").trim();
+        const packageName = String(fmt(row, 5) || cell(row, 5) || "").trim();
+        const serial = String(fmt(row, 7) || cell(row, 7) || "").trim();
+        if (!serial && !packageName && /^(SINGLE|DOUBLE|TRIPLE)\s+(SETARA|UPGRADE)$/i.test(variant)) {
+          currentPackageGroup = variant.toUpperCase();
+          return null;
+        }
+        return {
+          sourceRow,
+          packageGroup: currentPackageGroup,
+          variant,
+          duration: String(fmt(row, 1) || cell(row, 1) || "").trim(),
+          grade: String(fmt(row, 2) || cell(row, 2) || "").trim(),
+          ruleSerial: String(fmt(row, 3) || cell(row, 3) || "").trim(),
+          category: String(fmt(row, 4) || cell(row, 4) || "").trim(),
+          packageName,
+          deeplink: String(fmt(row, 6) || cell(row, 6) || "").trim(),
+          serial,
+          endDate: String(fmt(row, 8) || cell(row, 8) || "").trim(),
+          basePrice: parseMoney(cell(row, 9) || fmt(row, 9)),
+          btlDiscount: fmt(row, 13) || cell(row, 13) || "",
+          btlPrice: parseMoney(cell(row, 14) || fmt(row, 14)),
+          level1Coupon: parseMoney(cell(row, 15) || fmt(row, 15)),
+          level1Final: parseMoney(cell(row, 16) || fmt(row, 16)),
+          level1Gift: String(fmt(row, 17) || cell(row, 17) || "").trim(),
+          level2Coupon: parseMoney(cell(row, 18) || fmt(row, 18)),
+          level2Final: parseMoney(cell(row, 19) || fmt(row, 19)),
+          level2Gift: String(fmt(row, 20) || cell(row, 20) || "").trim(),
+          level3Coupon: parseMoney(cell(row, 21) || fmt(row, 21)),
+          level3Final: parseMoney(cell(row, 22) || fmt(row, 22)),
+          level3Gift: String(fmt(row, 23) || cell(row, 23) || "").trim(),
+          gimmick: String(fmt(row, 24) || cell(row, 24) || "").trim(),
+          cashback: String(fmt(row, 25) || cell(row, 25) || "").trim(),
+          couponStart: String(fmt(row, 26) || cell(row, 26) || "").trim(),
+          couponEnd: String(fmt(row, 27) || cell(row, 27) || "").trim()
+        };
+      }).filter((r) => r && !RUANGBELAJAR_HIDDEN_ROWS.has(r.sourceRow) && (r.serial || r.packageName));
+    }
+    function priceCell(row, index) {
+      const formatted = String(fmt(row, index) || "").replace(/[^0-9-]/g, "");
+      if (formatted) return Number(formatted) || 0;
+      return parseMoney(cell(row, index));
+    }
+    function parseEarlybirdRubel(table) {
+      let currentGroup = "";
+      return table.rows.map((row) => {
+        const serial = String(fmt(row, 3) || cell(row, 3) || "").trim();
+        const packageName = String(fmt(row, 4) || cell(row, 4) || "").trim();
+        if (!serial && packageName) {
+          currentGroup = packageName;
+          return null;
+        }
+        return {
+          group: currentGroup,
+          releaseDate: String(fmt(row, 0) || cell(row, 0) || "").trim(),
+          deeplink: String(fmt(row, 1) || cell(row, 1) || "").trim(),
+          packageType: String(fmt(row, 2) || cell(row, 2) || "").trim(),
+          serial,
+          packageName,
+          activeUntil: String(fmt(row, 5) || cell(row, 5) || "").trim(),
+          basePrice: priceCell(row, 6),
+          installment1Base: priceCell(row, 7),
+          installment2Base: priceCell(row, 8),
+          installment1: priceCell(row, 9),
+          installment2: priceCell(row, 10),
+          installment3: priceCell(row, 11),
+          atlDiscount: fmt(row, 12) || cell(row, 12) || "",
+          atlAfterPrice: priceCell(row, 13),
+          roundingAfterPrice: priceCell(row, 14),
+          btlDiscount: fmt(row, 15) || cell(row, 15) || "",
+          lunas: priceCell(row, 16),
+          cashback: priceCell(row, 17),
+          flashSaleDiscount: fmt(row, 18) || cell(row, 18) || "",
+          flashSalePrice: priceCell(row, 19)
+        };
+      }).filter((r) => r && (r.serial || r.packageName));
+    }
+    function parseFlashSaleRg(table) {
+      let currentGroup = "EARLY BIRD 1 TA 2026/2027";
+      return table.rows.map((row) => {
+        const serial = String(fmt(row, 0) || cell(row, 0) || "").trim();
+        const packageName = String(fmt(row, 1) || cell(row, 1) || "").trim();
+        if (!serial && packageName) {
+          currentGroup = packageName;
+          return null;
+        }
+        return {
+          group: currentGroup,
+          serial,
+          packageName,
+          basePrice: priceCell(row, 2),
+          atlDiscountAfter: fmt(row, 5) || cell(row, 5) || "",
+          atlPriceAfter: priceCell(row, 6),
+          btlDiscountAfter: fmt(row, 9) || cell(row, 9) || "",
+          btlPriceAfter: priceCell(row, 10),
+          cashback: priceCell(row, 11),
+          maxSispres: priceCell(row, 12),
+          bonus: String(fmt(row, 13) || cell(row, 13) || "").trim()
+        };
+      }).filter((r) => r && (r.serial || r.packageName));
+    }
+    function parseGenericSheet(table) {
+      const sourceHeaders = (table.cols || []).map((col) => normalizeHeader(col.label));
+      const visibleIndexes = sourceHeaders.map((header, index) => ({ header, index }))
+        .filter(({ header, index }) => header || (table.rows || []).some((row) => String(fmt(row, index) || cell(row, index) || "").trim()));
+      const headers = visibleIndexes.map(({ header, index }) => header || `Kolom ${index + 1}`);
+      const rows = (table.rows || []).map((row) => visibleIndexes.map(({ index }) => {
+        const rawValue = String(cell(row, index) || "").trim();
+        if (/^https?:\/\//i.test(rawValue)) return rawValue;
+        return String(fmt(row, index) || rawValue || "").trim();
+      }))
+        .filter((values) => values.some(Boolean));
+      return { headers, rows };
+    }
+    function parseJadwalBac(table) {
+      const rows = (table.rows || []).map((row) => ({
+        branchName: String(fmt(row, 2) || cell(row, 2) || "").trim(),
+        link: String(cell(row, 3) || fmt(row, 3) || "").trim()
+      })).filter((row) => row.branchName || row.link);
+      return {
+        headers: ["Branch Name", "Link Jadwal / Deck Sales"],
+        rows: rows.map((row) => [row.branchName, row.link])
+      };
+    }
+    function parseHargaBac(table) {
+      return (table.rows || []).map((row) => ({
+        deeplink: String(cell(row, 0) || fmt(row, 0) || "").trim(),
+        status: String(fmt(row, 1) || cell(row, 1) || "").trim(),
+        tier: String(fmt(row, 2) || cell(row, 2) || "").trim(),
+        branch: String(fmt(row, 3) || cell(row, 3) || "").trim(),
+        branchGrade: String(fmt(row, 4) || cell(row, 4) || "").trim(),
+        serial: String(fmt(row, 6) || cell(row, 6) || "").trim(),
+        packageName: String(fmt(row, 7) || cell(row, 7) || "").trim(),
+        basePrice: parseMoney(cell(row, 8) || fmt(row, 8)),
+        lunasDiscount: String(fmt(row, 9) || cell(row, 9) || "").trim(),
+        lunasPrice: parseMoney(cell(row, 10) || fmt(row, 10)),
+        cicilan2Price1: parseMoney(cell(row, 12) || fmt(row, 12)),
+        cicilan2Price2: parseMoney(cell(row, 13) || fmt(row, 13)),
+        cicilan3Price1: parseMoney(cell(row, 15) || fmt(row, 15)),
+        cicilan3Price2: parseMoney(cell(row, 16) || fmt(row, 16)),
+        cicilan3Price3: parseMoney(cell(row, 17) || fmt(row, 17)),
+        dpPelunasanDp: parseMoney(cell(row, 19) || fmt(row, 19)),
+        dpPelunasan: parseMoney(cell(row, 20) || fmt(row, 20))
+      })).filter((row) => row.status.toUpperCase() === "OPEN" && (row.serial || row.packageName || row.branch));
+    }
+    function parseCalculatorSchema(table) {
+      const products = [];
+      for (let col = 13; col <= 20; col += 1) {
+        const label = normalizeHeader(table.cols?.[col]?.label || "");
+        if (label) products.push({ col, label });
+      }
+      const tiers = [];
+      for (let rowIndex = 0; rowIndex <= 4; rowIndex += 1) {
+        const row = table.rows[rowIndex];
+        const threshold = parsePercent(cell(row, 11) || fmt(row, 11));
+        if (!threshold) continue;
+        const rates = {};
+        products.forEach((product) => {
+          rates[product.label] = parsePercent(cell(row, product.col) || fmt(row, product.col));
+        });
+        tiers.push({ threshold, rates });
+      }
+      let targetRevenue = 10720000;
+      for (let rowIndex = 5; rowIndex <= 10; rowIndex += 1) {
+        const row = table.rows[rowIndex];
+        const threshold = parsePercent(cell(row, 12) || fmt(row, 12));
+        if (Math.abs(threshold - 1) < 0.001) {
+          targetRevenue = parseMoney(cell(row, 11) || fmt(row, 11));
+          break;
+        }
+      }
+      return { products, tiers: tiers.sort((a, b) => a.threshold - b.threshold), targetRevenue };
+    }
+    function setupFilters() {
+      const months = [...new Set(rawRows.map((r) => r.month).filter(Boolean))].sort();
+      const weeks = [...new Set([
+        ...rawRows.map((r) => r.week),
+        ...Object.keys(LAYER_1_WEEK_TARGETS),
+        ...Object.keys(LAYER_2_WEEK_TARGETS)
+      ].filter((w) => Number(w) >= 1 && Number(w) <= 53))]
+        .sort((a, b) => Number(a) - Number(b));
+      const coaches = [...new Set(rawRows.map((r) => r.coach).filter((c) => c && c !== "Leader Name"))]
+        .sort((a, b) => a.localeCompare(b, "id"));
+      const spvs = [...new Set(rawRows.map((r) => r.spv).filter((s) => s && s !== "SPV"))]
+        .sort((a, b) => a.localeCompare(b, "id"));
+      const teams = [...new Set(rawRows.map((r) => r.teamCategory).filter((t) => t && t !== "Kategori Team"))]
+        .sort((a, b) => a.localeCompare(b, "id"));
+      const agents = [...new Set(rawRows.map((r) => r.agent).filter((a) => a && a !== "Agent Name"))]
+        .sort((a, b) => a.localeCompare(b, "id"));
+      monthFilter.innerHTML = `<option value="all">All Month</option>${months.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join("")}`;
+      weekFilter.innerHTML = `<option value="all">All Week</option>${weeks.map((w) => `<option value="${esc(w)}">Week ${esc(w)}</option>`).join("")}`;
+      coachFilter.innerHTML = `<option value="all">All Coach</option>${coaches.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("")}`;
+      spvFilter.innerHTML = `<option value="all">All SPV</option>${spvs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}`;
+      teamFilter.innerHTML = `<option value="all">All Team</option>${teams.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join("")}`;
+      agentFilter.innerHTML = `<option value="all">All Agent</option>${agents.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}`;
+    }
+    function filteredRaw(options = {}) {
+      const month = monthFilter.value || "all";
+      const week = weekFilter.value || "all";
+      const coach = options.ignoreCoach ? "all" : (coachFilter.value || "all");
+      const spv = spvFilter.value || "all";
+      const team = teamFilter.value || "all";
+      const agent = agentFilter.value || "all";
+      const weekSet = options.weekSet || null;
+      const q = searchFilter.value.trim().toLowerCase();
+      return rawRows.filter((r) => {
+        const monthMatch = month === "all" || r.month === month;
+        const weekMatch = weekSet ? weekSet.has(String(r.week)) : (week === "all" || r.week === week);
+        const coachMatch = coach === "all" || r.coach === coach;
+        const spvMatch = spv === "all" || r.spv === spv;
+        const teamMatch = team === "all" || r.teamCategory === team;
+        const agentMatch = agent === "all" || r.agent === agent;
+        const searchMatch = !q || [r.agent, r.package, r.product, r.campaign].some((v) => v.toLowerCase().includes(q));
+        return monthMatch && weekMatch && coachMatch && spvMatch && teamMatch && agentMatch && searchMatch;
+      });
+    }
+    function filteredIncentive() {
+      const week = weekFilter.value || "all";
+      const agent = agentFilter.value || "all";
+      const q = searchFilter.value.trim().toLowerCase();
+      return incentiveRows.filter((r) => {
+        const weekMatch = week === "all" || r.week === week;
+        const agentMatch = agent === "all" || r.agent === agent;
+        const searchMatch = !q || r.agent.toLowerCase().includes(q);
+        return weekMatch && agentMatch && searchMatch;
+      });
+    }
+    function groupBy(rows, keyFn, valueFn) {
+      const map = new Map();
+      rows.forEach((row) => {
+        const key = keyFn(row) || "-";
+        const current = map.get(key) || { key, amount: 0, txn: 0, incentive: 0, rows: 0, agents: new Set() };
+        const value = valueFn(row);
+        current.amount += value.amount || 0;
+        current.txn += value.txn || 0;
+        current.incentive += value.incentive || 0;
+        current.rows += 1;
+        if (row.agent) current.agents.add(row.agent);
+        map.set(key, current);
+      });
+      return [...map.values()].sort((a, b) => b.amount - a.amount);
+    }
+    function addIncentive(groups, incRows) {
+      const byAgent = new Map(groups.map((g) => [g.key, g]));
+      incRows.forEach((r) => {
+        const g = byAgent.get(r.agent);
+        if (g) g.incentive += r.incentive;
+      });
+      return groups;
+    }
+    function kpi(label, value, note) {
+      return `<div class="card"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div><div class="note">${esc(note)}</div></div>`;
+    }
+    function metricCard(title, rows, mode = "amount") {
+      const max = Math.max(...rows.map((r) => mode === "incentive" ? r.incentive : r.amount), 1);
+      return `<div class="card"><div class="section-title"><h2>${esc(title)}</h2><span class="note">Top 10</span></div><div class="metric-list">${rows.slice(0,10).map((r) => {
+        const value = mode === "incentive" ? r.incentive : r.amount;
+        return `<div class="metric-row"><div><div class="name">${esc(r.key)}</div><div class="bar"><span style="width:${Math.min(100, value / max * 100)}%"></span></div></div><div class="money">${rupiah(value)}</div><div class="num">${num(r.txn || r.rows)}</div></div>`;
+      }).join("") || `<div class="note">Tidak ada data.</div>`}</div></div>`;
+    }
+    function render() {
+      const sales = filteredRaw();
+      const salesAgents = new Set(sales.map((r) => r.agent).filter(Boolean));
+      let incentives = filteredIncentive();
+      incentives = incentives.filter((r) => salesAgents.has(r.agent));
+      const totalAmount = sales.reduce((s, r) => s + r.amount, 0);
+      const totalTxn = sales.reduce((s, r) => s + r.txn, 0);
+      const totalIncentive = incentives.reduce((s, r) => s + r.incentive, 0);
+      const uniqueAgents = new Set(sales.map((r) => r.agent)).size;
+      const arpu = totalTxn ? totalAmount / totalTxn : 0;
+      if (activeView === "summary") renderSummary(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
+      else if (activeView === "dodolan") renderDodolan(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
+      else if (activeView === "universe") renderUniverse();
+      else if (activeView === "allIncentive") renderAllIncentiveAgent();
+      else if (activeView === "baoEarl") renderBaoEarl();
+      else if (activeView === "ruangbelajar") renderRuangbelajar();
+      else if (activeView === "flashSaleRg") renderFlashSaleRg();
+      else renderJadwalBac();
+      statusEl.textContent = `Terakhir dimuat: ${new Date().toLocaleString("id-ID")} · sumber sales: RAW · sumber incentive: Incentive/Kalkulator`;
+    }
+    function renderSummary(sales, incentives, totals) {
+      const byCoach = groupBy(sales, (r) => r.coach, (r) => ({ amount: r.amount, txn: r.txn }));
+      const selectedSummaryWeek = weekFilter.value || "all";
+      const summaryIncentiveWeeks = selectedSummaryWeek === "all" ? JUNE_INCENTIVE_WEEKS : new Set([selectedSummaryWeek]);
+      const juneWeekRowsForSchema = filteredRaw({ weekSet: summaryIncentiveWeeks })
+        .filter(isAllIncentiveSchemaRow);
+      const juneWeekIncentives = calculateSchemaIncentives(juneWeekRowsForSchema).agents.map((r) => ({ agent: r.key, incentive: r.incentive }));
+      const byAgent = addIncentive(groupBy(sales, (r) => r.agent, (r) => ({ amount: r.amount, txn: r.txn })), juneWeekIncentives);
+      const agentLayerMap = new Map();
+      sales.forEach((r) => {
+        if (!agentLayerMap.has(r.agent) && r.teamCategory) agentLayerMap.set(r.agent, r.teamCategory);
+      });
+      byAgent.forEach((r) => {
+        r.teamCategory = agentLayerMap.get(r.key) || "-";
+        if (!isSchemaTeam(r.teamCategory)) r.incentive = 0;
+      });
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Total Revenue", rupiah(totals.totalAmount), "RAW Amount")}
+          ${kpi("Total TXN", num(totals.totalTxn), "RAW Txn")}
+          ${kpi("Unique Agent", num(totals.uniqueAgents), "Agent dari RAW")}
+          ${kpi("ARPU", rupiah(totals.arpu), "Revenue / TXN")}
+        </section>
+        <section class="grid">
+          ${metricCard("Top Revenue by Coach", byCoach)}
+          ${metricCard("Top Revenue by Agent", byAgent)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Summary Agent All Month</h2><span class="note">${num(byAgent.length)} agent · incentive LAYER 1 + LAYER 2 · ${selectedSummaryWeek === "all" ? "incentive Week 23 + Week 24" : `incentive Week ${selectedSummaryWeek}`}</span></div>
+          ${summaryAgentTable(byAgent)}
+        </section>`;
+    }
+    function renderUniverse() {
+      const month = monthFilter.value || "all";
+      const week = weekFilter.value || "all";
+      const q = searchFilter.value.trim().toLowerCase();
+      const teamRows = rawRows.filter((r) => {
+        const isTeam = /yosua|josua/i.test(r.coach);
+        const monthMatch = month === "all" || r.month === month;
+        const weekMatch = week === "all" || r.week === week;
+        const searchMatch = !q || [r.agent, r.package, r.product, r.campaign].some((v) => v.toLowerCase().includes(q));
+        return isTeam && monthMatch && weekMatch && searchMatch;
+      });
+      const teamAgents = new Set(teamRows.map((r) => r.agent).filter(Boolean));
+      const teamIncentives = incentiveRows.filter((r) => {
+        const weekMatch = week === "all" || r.week === week;
+        const searchMatch = !q || r.agent.toLowerCase().includes(q);
+        return teamAgents.has(r.agent) && weekMatch && searchMatch;
+      });
+      const totalAmount = teamRows.reduce((s, r) => s + r.amount, 0);
+      const totalTxn = teamRows.reduce((s, r) => s + r.txn, 0);
+      const totalIncentive = teamIncentives.reduce((s, r) => s + r.incentive, 0);
+      const byAgent = addIncentive(groupBy(teamRows, (r) => r.agent, (r) => ({ amount: r.amount, txn: r.txn })), teamIncentives);
+      const byWeek = buildTeamWeekly(teamRows, teamIncentives);
+      const byIncentive = groupBy(teamIncentives, (r) => r.agent, (r) => ({ incentive: r.incentive, amount: r.incentive, txn: 0 }));
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("UNIVERSE Revenue", rupiah(totalAmount), "RAW · Leader Name Yosua Sitorus")}
+          ${kpi("UNIVERSE Incentive", rupiah(totalIncentive), week === "all" ? "All week dari sheet Incentive" : `Week ${week} dari sheet Incentive`)}
+          ${kpi("Team TXN", num(totalTxn), "RAW Txn")}
+          ${kpi("Team Agent", num(teamAgents.size), "Agent aktif di RAW")}
+          ${kpi("ARPU", rupiah(totalTxn ? totalAmount / totalTxn : 0), "Revenue / TXN")}
+        </section>
+        <section class="grid">
+          ${metricCard("Top Revenue UNIVERSE", byAgent)}
+          ${metricCard("Top Incentive UNIVERSE", byIncentive, "incentive")}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Incentive UNIVERSE per Minggu</h2><span class="note">${num(byWeek.length)} minggu</span></div>
+          ${weeklyTable(byWeek)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Detail Agent UNIVERSE</h2><span class="note">${num(byAgent.length)} agent</span></div>
+          ${summaryTable(byAgent)}
+        </section>`;
+    }
+    function buildTeamWeekly(salesRows, incRows) {
+      const map = new Map();
+      salesRows.forEach((r) => {
+        const key = r.week || "-";
+        const item = map.get(key) || { key, amount: 0, txn: 0, incentive: 0, agents: new Set() };
+        item.amount += r.amount;
+        item.txn += r.txn;
+        item.agents.add(r.agent);
+        map.set(key, item);
+      });
+      incRows.forEach((r) => {
+        const key = r.week || "-";
+        const item = map.get(key) || { key, amount: 0, txn: 0, incentive: 0, agents: new Set() };
+        item.incentive += r.incentive;
+        item.agents.add(r.agent);
+        map.set(key, item);
+      });
+      return [...map.values()].sort((a, b) => Number(a.key) - Number(b.key));
+    }
+    function renderDodolan(sales, incentives, totals) {
+      const byPackage = groupBy(sales, (r) => r.package, (r) => ({ amount: r.amount, txn: r.txn }));
+      const byProduct = groupBy(sales, (r) => r.product, (r) => ({ amount: r.amount, txn: r.txn }));
+      const byCampaign = groupBy(sales, (r) => r.campaign, (r) => ({ amount: r.amount, txn: r.txn }));
+      const sortedSales = [...sales].sort((a, b) => b.txn - a.txn || b.amount - a.amount);
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Total Dodolan", rupiah(totals.totalAmount), "RAW Amount sesuai filter")}
+          ${kpi("Total TXN", num(totals.totalTxn), "RAW Txn")}
+          ${kpi("Unique Package", num(new Set(sales.map((r) => r.package).filter(Boolean)).size), "Package dari RAW")}
+          ${kpi("Unique Campaign", num(new Set(sales.map((r) => r.campaign).filter(Boolean)).size), "Campaign dari RAW")}
+        </section>
+        <section class="split">
+          ${metricCard("Top Package", byPackage)}
+          ${metricCard("Top Product", byProduct)}
+          ${metricCard("Top Campaign", byCampaign)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Detail Dodolan dari RAW</h2><span class="note">${num(Math.min(sales.length, 1500))} dari ${num(sales.length)} baris</span></div>
+          ${detailTable(sortedSales.slice(0, 1500))}
+        </section>`;
+    }
+    function isBrainAcademyProduct(row) {
+      const productType = String(row.product || "").toLowerCase();
+      return productType.trim() === "brain academy";
+    }
+    function hasCityPackageName(row) {
+      const packageName = String(row.package || "").toLowerCase();
+      return /[a-z]+(?:\s+[a-z]+)*\s+-\s+[a-z0-9]/i.test(packageName) && /(regular|snbt|tka|\bsd\b|\bsmp\b|\bsma\b|\bsmk\b|\butbk\b|persiapan)/i.test(packageName);
+    }
+    function isBacSchema(row) {
+      return isBrainAcademyProduct(row) || hasCityPackageName(row);
+    }
+    function productCategory(row) {
+      const text = `${row.productAdjust} ${row.product} ${row.package}`.toLowerCase();
+      if (isBacSchema(row)) return "BAC";
+      if (/\bbac\b|brain academy center/.test(text)) return "BAC";
+      if (/elite/.test(text)) return "Elite";
+      if (/premium|\bprem\b/.test(text)) return "Premium";
+      if (/regular|\breg\b/.test(text)) return "Regular";
+      if (/ruang\s*belajar|rubel|\brb\b/.test(text)) return "Rubel";
+      if (/privat.*off|offline/.test(text)) return "Privat Off";
+      if (/privat.*on|online privat|rgp online/.test(text)) return "Privat On";
+      return "Others";
+    }
+    function week25ProductCategory(row) {
+      const text = `${row.productAdjust} ${row.product} ${row.package}`.toLowerCase();
+      if (isBacSchema(row)) return "BAC & Mathchamps Offline";
+      if (/skill\s*academy|skillacademy/.test(text)) return "Skill Academy";
+      if (/math\s*champs?.*online|mathchamps?.*online/.test(text)) return "Math Champs Online";
+      if (/(rgp|privat).*offline|offline.*(rgp|privat)/.test(text)) return "RGP Offline";
+      if (/(rgp|privat).*online|online.*(rgp|privat)/.test(text)) return "RGP Online";
+      if (/\brb\b|ruang\s*belajar|rubel/.test(text)) return "RB";
+      if (/baon.*elite|elite/.test(text)) return "BAON Elite";
+      if (/baon.*prem|premium|\bprem\b/.test(text)) return "BAON Prem";
+      if (/baon.*reg|regular|\breg\b/.test(text)) return "BAON Reg";
+      if (/\bbac\b|brain academy center|math\s*champs?.*offline|mathchamps?.*offline/.test(text)) return "BAC & Mathchamps Offline";
+      return "Others";
+    }
+    function week25RateFor(category, achievement, teamCategory = "LAYER 1") {
+      let selected = 0;
+      WEEK_25_LAYER_1_TIERS.forEach((tier) => {
+        if (achievement >= tier) selected = tier;
+      });
+      const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_25_LAYER_2_RATES : WEEK_25_LAYER_1_RATES;
+      return rates[category]?.[selected] ?? rates.Others[selected] ?? 0;
+    }
+    function layer1RateFor(rates, category, achievement) {
+      let selected = 0;
+      WEEK_25_LAYER_1_TIERS.forEach((tier) => {
+        if (achievement >= tier) selected = tier;
+      });
+      return rates[category]?.[selected] ?? rates.Others[selected] ?? 0;
+    }
+    function schemaRateFor(category, achievement, week, teamCategory = "LAYER 1") {
+      if (["23", "24"].includes(String(week))) {
+        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
+        return layer1RateFor(rates, category, achievement);
+      }
+      if (String(week) === "25") return week25RateFor(category, achievement, teamCategory);
+      if (String(week) === "26") {
+        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
+        return layer1RateFor(rates, category, achievement);
+      }
+      if (!calculatorSchema) return 0;
+      let selected = null;
+      calculatorSchema.tiers.forEach((tier) => {
+        if (achievement >= tier.threshold) selected = tier;
+      });
+      if (!selected) return 0;
+      return selected.rates[category] ?? selected.rates.Others ?? 0;
+    }
+    function calculateSchemaIncentives(rows) {
+      const grouped = new Map();
+      rows.forEach((row) => {
+        const teamCategory = normalizedTeamCategory(row.teamCategory) || "-";
+        const key = `${row.agent}||${row.week}||${teamCategory}`;
+        const current = grouped.get(key) || { agent: row.agent, week: row.week, teamCategory, revenue: 0, txn: 0, rows: [] };
+        current.revenue += row.amount;
+        current.txn += row.txn;
+        current.rows.push(row);
+        grouped.set(key, current);
+      });
+      const weekly = [...grouped.values()].map((group) => {
+        const schemaTeamCategory = isDwiAgustinTargetOverride(group.agent, group.week) ? "LAYER 2" : group.teamCategory;
+        const targetRevenue = targetForWeek(group.week, schemaTeamCategory, group.agent);
+        const achievement = targetRevenue ? group.revenue / targetRevenue : 0;
+        const categories = {};
+        let incentive = 0;
+        group.rows.forEach((row) => {
+          const category = ["23", "24", "25", "26"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const amount = row.amount;
+          const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
+          const value = amount * rate;
+          incentive += value;
+          const item = categories[category] || { amount: 0, incentive: 0, txn: 0 };
+          item.amount += amount;
+          item.incentive += value;
+          item.txn += row.txn;
+          categories[category] = item;
+        });
+        return { ...group, teamCategory: schemaTeamCategory, targetRevenue, achievement, incentive, categories };
+      });
+      const agents = new Map();
+      weekly.forEach((row) => {
+        const key = `${row.agent}||${row.teamCategory}`;
+        const item = agents.get(key) || { key: row.agent, teamCategory: row.teamCategory, amount: 0, txn: 0, incentive: 0, weeks: 0, maxAchievement: 0 };
+        item.amount += row.revenue;
+        item.txn += row.txn;
+        item.incentive += row.incentive;
+        item.weeks += 1;
+        item.maxAchievement = Math.max(item.maxAchievement, row.achievement);
+        agents.set(key, item);
+      });
+      return {
+        weekly: weekly.sort((a, b) => Number(a.week) - Number(b.week) || b.incentive - a.incentive),
+        agents: [...agents.values()].sort((a, b) => b.incentive - a.incentive)
+      };
+    }
+    function renderAllIncentiveAgent() {
+      const sales = filteredRaw().filter(isAllIncentiveSchemaRow);
+      const result = calculateSchemaIncentives(sales);
+      const visibleAgents = result.agents.filter((r) => !isExcludedTopIncentiveAgent(r.key));
+      const visibleWeekly = result.weekly.filter((r) => !isExcludedTopIncentiveAgent(r.agent));
+      const totalRevenue = visibleAgents.reduce((s, r) => s + r.amount, 0);
+      const totalTxn = visibleAgents.reduce((s, r) => s + r.txn, 0);
+      const totalSchemaIncentive = visibleAgents.reduce((s, r) => s + r.incentive, 0);
+      const juneRows = filteredRaw({ weekSet: JUNE_INCENTIVE_WEEKS }).filter(isAllIncentiveSchemaRow);
+      const juneAgents = calculateSchemaIncentives(juneRows).agents.filter((r) => !isExcludedTopIncentiveAgent(r.key));
+      const juneSchemaIncentive = juneAgents.reduce((s, r) => s + r.incentive, 0);
+      const selectedWeek = weekFilter.value || "all";
+      const targetNoteText = selectedWeek === "all" ? "L1 W23 Rp10.700.000 | L1 W24 Rp13.400.000 | L1 W25 Rp9.800.000 | L1 W26 Rp12.300.000 | L2 W23 Rp7.400.000 | L2 W24 Rp9.200.000 | L2 W25 Rp7.400.000 | L2 W26 Rp9.200.000" : `Week ${selectedWeek}: L1 ${rupiah(targetForWeek(selectedWeek, "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeek, "LAYER 2"))}`;
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Schema Incentive", rupiah(totalSchemaIncentive), "Schema incentive sesuai week")}
+          ${kpi("Incentive Juni", rupiah(juneSchemaIncentive), "Layer 1 + Layer 2, Week 23 + Week 24")}
+          ${kpi("Revenue RAW", rupiah(totalRevenue), "Sesuai filter")}
+          ${kpi("Target 100%", selectedWeek === "all" ? "By Week & Layer" : "By Layer", targetNoteText)}
+          ${kpi("Total TXN", num(totalTxn), "RAW Txn")}
+          ${kpi("Agent", num(visibleAgents.length), "LAYER 1 + LAYER 2, exclude Satyadi/Imam/Erna")}
+        </section>
+        <section class="grid">
+          ${metricCard("Top Schema Incentive", visibleAgents.map((r) => ({ ...r, amount: r.incentive })), "amount")}
+          ${schemaInfoCard()}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>All Incentive Agent</h2><span class="note">Kategori Team LAYER 1 + LAYER 2, 3 agent dipisahkan</span></div>
+          ${schemaAgentTable(visibleAgents)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Detail Incentive Agent per Week</h2><span class="note">${num(visibleWeekly.length)} agent-week</span></div>
+          ${schemaWeeklyTable(visibleWeekly)}
+        </section>`;
+    }
+    function schemaSimulationTable(rates, targetRevenue) {
+      const products = [
+        "BAC & Mathchamps Offline",
+        "BAON Elite",
+        "BAON Prem",
+        "BAON Reg",
+        "RB"
+      ].filter((product) => rates[product]);
+      return `<div class="section-title" style="margin-top:14px"><h2>Simulasi Incentive</h2><span class="note">Target x TH x rate product</span></div><div class="table-wrap" style="max-height:320px"><table><thead><tr><th>Product</th>${WEEK_25_LAYER_1_TIERS.map((tier) => `<th class="number">${num(tier * 100, 0)}%</th>`).join("")}</tr></thead><tbody>${products.map((product) => `<tr><td>${esc(product)}</td>${WEEK_25_LAYER_1_TIERS.map((tier) => `<td class="number">${rupiah(targetRevenue * tier * (rates[product][tier] || 0))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    }
+    function schemaRateTable(rates) {
+      const products = Object.keys(rates);
+      return `<div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${products.map((p) => `<th class="number">${esc(p)}</th>`).join("")}</tr></thead><tbody>${WEEK_25_LAYER_1_TIERS.map((tier) => `<tr><td>${num(tier * 100, 0)}%</td>${products.map((p) => `<td class="number">${num((rates[p][tier] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    }
+    function selectedSchemaLayers() {
+      const selectedTeam = normalizedTeamCategory(teamFilter.value);
+      if (selectedTeam === "LAYER 1" || selectedTeam === "LAYER 2") return [selectedTeam];
+      return ["LAYER 1", "LAYER 2"];
+    }
+    function schemaRatesFor(week, layer) {
+      if (String(week) === "25") return layer === "LAYER 2" ? WEEK_25_LAYER_2_RATES : WEEK_25_LAYER_1_RATES;
+      if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
+      return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
+    }
+    function schemaInfoForWeek(week) {
+      return selectedSchemaLayers().map((layer) => {
+        const rates = schemaRatesFor(week, layer);
+        return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetForWeek(week, layer))}</span></div>${schemaRateTable(rates)}${schemaSimulationTable(rates, targetForWeek(week, layer))}`;
+      }).join("");
+    }
+    function schemaInfoCard() {
+      if (["23", "24", "25", "26"].includes(weekFilter.value || "all")) {
+        const week = weekFilter.value;
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
+      }
+      if (selectedSchemaLayers().length < 2) {
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${["23", "24", "25", "26"].map((week) => schemaInfoForWeek(week)).join("")}</div>`;
+      }
+      const rows = calculatorSchema?.tiers || [];
+      return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Threshold achievement</span></div><div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${(calculatorSchema?.products || []).map((p) => `<th class="number">${esc(p.label)}</th>`).join("")}</tr></thead><tbody>${rows.map((tier) => `<tr><td>${num(tier.threshold * 100, 0)}%</td>${(calculatorSchema?.products || []).map((p) => `<td class="number">${num((tier.rates[p.label] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+    }
+    function schemaAgentTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Schema Incentive</th><th class="number">Revenue</th><th class="number">TXN</th><th class="number">Weeks</th><th class="number">Max Achievement</th><th class="number">Incentive / Revenue</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.weeks)}</td><td class="number">${num(r.maxAchievement * 100, 1)}%</td><td class="number">${num(r.amount ? r.incentive / r.amount * 100 : 0, 2)}%</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function renderBaoEarl() {
+      const q = searchFilter.value.trim().toLowerCase();
+      const rows = baoEarlRows.filter((r) => !q || [r.source, r.serial, r.packageName, r.activeEndDate, r.extraGimmick, r.bonus].some((v) => String(v || "").toLowerCase().includes(q)));
+      const earlyRows = rows.filter((r) => r.source === "Early Bird");
+      const extendRows = rows.filter((r) => r.source === "Extend");
+      const lowestBtl = rows.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Package", num(rows.length), "Data dari sheet Link Harga BAO Early Bird/Extend")}
+          ${kpi("Harga BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Sesuai filter")}
+          ${kpi("Early Bird", num(earlyRows.length), "Package")}
+          ${kpi("Extend", num(extendRows.length), "Package")}
+        </section>
+        <section class="card">
+          <div class="section-title"><h2>Link Harga BAO Early Bird</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${baoEarlTable(earlyRows)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Link Harga BAO Extend</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EXTEND_SHEET_ID}/edit?gid=${BAO_EXTEND_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${baoEarlTable(extendRows)}
+        </section>`;
+    }
+    function baoEarlTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After</th><th class="number">Cashback</th><th class="number">Max Sispres</th><th>Extra Gimmick</th><th>Bonus Tambahan</th></tr></thead><tbody>${rows.map((r) => {
+        if (!r.serial) return `<tr><td></td><td>${esc(r.packageName)}</td><td></td><td class="number"></td><td class="number"></td><td class="number"></td><td class="number"></td><td class="number"></td><td></td><td></td></tr>`;
+        const link = r.deeplink || `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=`;
+        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.extraGimmick || "")}</td><td>${esc(r.bonus || "")}</td></tr>`;
+      }).join("") || `<tr><td colspan="10">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function renderRuangbelajar() {
+      const q = searchFilter.value.trim().toLowerCase();
+      const rows = ruangbelajarRows.filter((r) => !q || [r.packageGroup, r.variant, r.duration, r.grade, r.ruleSerial, r.category, r.packageName, r.serial, r.gimmick, r.cashback].some((v) => String(v || "").toLowerCase().includes(q)));
+      const rubelRows = earlybirdRubelRows.filter((r) => !q || [r.group, r.packageType, r.serial, r.packageName].some((v) => String(v || "").toLowerCase().includes(q)));
+      const lowestFinal = rows.reduce((min, r) => r.level3Final ? Math.min(min, r.level3Final) : min, Infinity);
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Package", num(rows.length), "Hidden row sheet tidak ditampilkan")}
+          ${kpi("Final Price Terendah", Number.isFinite(lowestFinal) ? rupiah(lowestFinal) : "-", "Level 3 sesuai filter")}
+          ${kpi("Sumber", "Ruangbelajar", "Spreadsheet harga")}
+          ${kpi("Earlybird Rubel", num(rubelRows.length), "Package")}
+        </section>
+        <section class="card">
+          <div class="section-title"><h2>Rubel Extend</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${RUANGBELAJAR_SHEET_ID}/edit?gid=${RUANGBELAJAR_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${ruangbelajarTable(rows)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Earlybird Rubel</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${earlybirdRubelTable(rubelRows)}
+        </section>`;
+    }
+    function ruangbelajarTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Paket</th><th>Jenis Variant</th><th>Durasi</th><th>Package Name</th><th>Deeplink</th><th>PKG Serial</th><th>End Date</th><th class="number">Base Price</th><th class="number">BTL Discount</th><th class="number">BTL After Price</th><th class="number">Level 1 Final</th><th class="number">Level 2 Final</th><th class="number">Level 3 Final</th></tr></thead><tbody>${rows.map((r) => {
+        const link = r.deeplink || (r.serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=` : "");
+        return `<tr><td>${esc(r.packageGroup)}</td><td>${esc(r.variant)}</td><td>${esc(r.duration)}</td><td>${esc(r.packageName)}</td><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td>${esc(r.serial)}</td><td>${esc(r.endDate)}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscount)}</td><td class="number">${rupiah(r.btlPrice)}</td><td class="number">${rupiah(r.level1Final)}</td><td class="number">${rupiah(r.level2Final)}</td><td class="number">${rupiah(r.level3Final)}</td></tr>`;
+      }).join("") || `<tr><td colspan="13">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function earlybirdRubelTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Group</th><th>Tanggal Rilis</th><th>Deeplink</th><th>Paket</th><th>PKG Serial</th><th>Package Name</th><th>Masa Aktif</th><th class="number">Base Price</th><th class="number">ATL Disc</th><th class="number">After Price Lunas</th><th class="number">Rounding After Price</th><th class="number">BTL Disc</th><th class="number">Lunas</th><th class="number">Cashback</th><th class="number">Flash Sale Disc</th><th class="number">Flash Sale Price</th></tr></thead><tbody>${rows.map((r) => {
+        const link = r.deeplink || (r.serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=` : "");
+        return `<tr><td>${esc(r.group)}</td><td>${esc(r.releaseDate)}</td><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td>${esc(r.packageType)}</td><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${esc(r.activeUntil)}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscount)}</td><td class="number">${rupiah(r.atlAfterPrice)}</td><td class="number">${rupiah(r.roundingAfterPrice)}</td><td class="number">${esc(r.btlDiscount)}</td><td class="number">${rupiah(r.lunas)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${esc(r.flashSaleDiscount)}</td><td class="number">${rupiah(r.flashSalePrice)}</td></tr>`;
+      }).join("") || `<tr><td colspan="16">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function renderFlashSaleRg() {
+      const q = searchFilter.value.trim().toLowerCase();
+      const rows = flashSaleRgRows.filter((r) => !q || [r.group, r.serial, r.packageName, r.bonus].some((v) => String(v || "").toLowerCase().includes(q)));
+      const rubelRows = earlybirdRubelRows.filter((r) => !q || [r.group, r.packageType, r.serial, r.packageName].some((v) => String(v || "").toLowerCase().includes(q)));
+      const lowestBtl = rows.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
+      const groups = new Set(rows.map((r) => r.group).filter(Boolean)).size;
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Package", num(rows.length), "Hidden row/column sheet tidak ditampilkan")}
+          ${kpi("Group", num(groups), "Section dari sheet")}
+          ${kpi("BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Price After Disc")}
+          ${kpi("Ruangbelajar", num(rubelRows.length), "Package")}
+        </section>
+        <section class="card">
+          <div class="section-title"><h2>Flash Sale RG (18-20 JUN 2026)</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${FLASHSALE_RG_SHEET_ID}/edit?gid=${FLASHSALE_RG_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${flashSaleRgTable(rows)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Ruangbelajar</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${earlybirdRubelTable(rubelRows)}
+        </section>`;
+    }
+    function flashSaleRgTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Group</th><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">ATL Discount After</th><th class="number">ATL Price After Disc</th><th class="number">BTL Discount After</th><th class="number">BTL Price After Disc</th><th class="number">Cashback E-Wallet</th><th class="number">Max Sispres</th><th>Bonus Tambahan</th></tr></thead><tbody>${rows.map((r) => {
+        const link = r.serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=` : "";
+        return `<tr><td>${esc(r.group)}</td><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscountAfter)}</td><td class="number">${rupiah(r.atlPriceAfter)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.bonus)}</td></tr>`;
+      }).join("") || `<tr><td colspan="12">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function renderJadwalBac() {
+      const q = searchFilter.value.trim().toLowerCase();
+      const rows = combinedJadwalHargaBacRows().filter((row) => !q || [row.branchName, row.link, row.tier, row.branchGrade, row.serial, row.packageName].some((value) => String(value || "").toLowerCase().includes(q)));
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Baris Jadwal", num(rows.length), jadwalBacError ? "Data belum bisa dimuat" : "Sesuai filter pencarian")}
+          ${kpi("Harga BAC Open", num(hargaBacRows.length), hargaBacError ? "Data belum bisa dimuat" : "Status OPEN")}
+          ${kpi("Branch", num(new Set(rows.map((row) => row.branchName).filter(Boolean)).size), "Gabungan jadwal + harga")}
+          ${kpi("Sheet", "PLOTING JADWAL", "BAC 26/27")}
+        </section>
+        <section class="card">
+          <div class="section-title"><h2>Jadwal & Deeplink BAC26/27</h2><div><a class="button" href="https://docs.google.com/spreadsheets/d/${JADWAL_BAC_SHEET_ID}/edit?gid=${JADWAL_BAC_GID}" target="_blank" rel="noreferrer">Jadwal</a> <a class="button" href="https://docs.google.com/spreadsheets/d/${JADWAL_BAC_SHEET_ID}/edit?gid=${HARGA_BAC_GID}" target="_blank" rel="noreferrer">Harga</a></div></div>
+          ${jadwalBacError || hargaBacError ? `<div class="error" style="display:block">${esc([jadwalBacError, hargaBacError].filter(Boolean).join(" | "))}</div>` : combinedJadwalHargaBacTable(rows)}
+        </section>`;
+    }
+    function combinedJadwalHargaBacRows() {
+      const scheduleByBranch = new Map(jadwalBacRows.map((row) => [String(row[0] || "").trim(), String(row[1] || "").trim()]));
+      return hargaBacRows.map((row) => ({
+        ...row,
+        branchName: row.branch,
+        link: scheduleByBranch.get(row.branch) || ""
+      }));
+    }
+    function combinedJadwalHargaBacTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Branch Name</th><th>Link Jadwal</th><th>Tier</th><th>Branch + Grade</th><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">Disc Lunas</th><th class="number">After Disc Lunas</th><th class="number">Cicilan 2x</th><th class="number">Cicilan 3x</th><th class="number">DP + Pelunasan</th></tr></thead><tbody>${rows.map((row) => {
+        const link = row.deeplink || (row.serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(row.serial)}&voucher_serial=` : "");
+        const cicilan2 = [row.cicilan2Price1, row.cicilan2Price2].filter(Boolean).map(rupiah).join(" + ");
+        const cicilan3 = [row.cicilan3Price1, row.cicilan3Price2, row.cicilan3Price3].filter(Boolean).map(rupiah).join(" + ");
+        const dpPelunasan = [row.dpPelunasanDp, row.dpPelunasan].filter(Boolean).map(rupiah).join(" + ");
+        return `<tr><td>${esc(row.branchName)}</td><td>${row.link ? `<a class="button" href="${esc(row.link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td>${esc(row.tier)}</td><td>${esc(row.branchGrade)}</td><td>${esc(row.serial)}</td><td>${esc(row.packageName)}</td><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(row.basePrice)}</td><td class="number">${esc(row.lunasDiscount)}</td><td class="number">${rupiah(row.lunasPrice)}</td><td class="number">${esc(cicilan2)}</td><td class="number">${esc(cicilan3)}</td><td class="number">${esc(dpPelunasan)}</td></tr>`;
+      }).join("") || `<tr><td colspan="13">Tidak ada data open.</td></tr>`}</tbody></table></div>`;
+    }
+    function summaryAgentTable(rows) {
+      rows.sort((a, b) => b.amount - a.amount);
+      return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Revenue</th><th class="number">Incentive</th><th class="number">TXN</th><th class="number">ARPU</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td class="number">${rupiah(r.txn ? r.amount / r.txn : 0)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function schemaWeeklyTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Week</th><th>Agent</th><th>Layer</th><th class="number">Target</th><th class="number">Achievement</th><th class="number">Revenue</th><th class="number">Schema Incentive</th><th class="number">TXN</th><th>Category Mix</th></tr></thead><tbody>${rows.map((r) => `<tr><td>Week ${esc(r.week)}</td><td>${esc(r.agent)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.targetRevenue)}</td><td class="number">${num(r.achievement * 100, 1)}%</td><td class="number">${rupiah(r.revenue)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td>${esc(Object.entries(r.categories).map(([k, v]) => `${k}: ${rupiah(v.incentive)}`).join(" | "))}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function summaryTable(rows) {
+      rows.sort((a, b) => b.amount - a.amount);
+      return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th class="number">Revenue</th><th class="number">Incentive</th><th class="number">TXN</th><th class="number">ARPU</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td class="number">${rupiah(r.txn ? r.amount / r.txn : 0)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function weeklyTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Week</th><th class="number">Revenue RAW</th><th class="number">Incentive</th><th class="number">TXN</th><th class="number">Agent</th><th class="number">Incentive / Revenue</th></tr></thead><tbody>${rows.map((r) => `<tr><td>Week ${esc(r.key)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.agents.size)}</td><td class="number">${num(r.amount ? (r.incentive / r.amount * 100) : 0, 2)}%</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function detailTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Date</th><th>Month</th><th>Week</th><th>Agent</th><th>Package</th><th>Product</th><th>Campaign</th><th class="number">Amount</th><th class="number">TXN</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.month)}</td><td>${esc(r.week)}</td><td>${esc(r.agent)}</td><td>${esc(r.package)}</td><td>${esc(r.product)}</td><td>${esc(r.campaign)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${num(r.txn)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    async function loadAll(force = false) {
+      try {
+        errorEl.style.display = "none";
+        statusEl.textContent = "Memuat RAW dan Incentive...";
+        if (!rawTable || !incentiveTable || force) {
+          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, baoExtendTableData, ruangbelajarTableData, earlybirdRubelTableData, flashSaleRgTableData, jadwalBacTableData, hargaBacTableData] = await Promise.all([
+            loadJsonp("RAW"),
+            loadJsonp("Incentive"),
+            loadJsonp("Kalkulator Incentive"),
+            loadJsonp("Link Harga BAO Early Bird", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
+            loadJsonp("Link Harga BAO Extend", { sheetId: BAO_EXTEND_SHEET_ID, gid: BAO_EXTEND_GID }),
+            loadJsonp("Ruangbelajar", { sheetId: RUANGBELAJAR_SHEET_ID, gid: RUANGBELAJAR_GID }),
+            loadJsonp("Earlybird Rubel", { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
+            loadJsonp("Flash Sale Festival RG", { sheetId: FLASHSALE_RG_SHEET_ID, gid: FLASHSALE_RG_GID }),
+            loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
+            loadOptionalJsonp("Harga BAC", { sheetId: JADWAL_BAC_SHEET_ID, gid: HARGA_BAC_GID })
+          ]);
+          rawRows = parseRaw(rawTable);
+          incentiveRows = parseIncentive(incentiveTable);
+          baoEarlRows = [
+            ...parseBaoEarl(baoEarlTableData, "Early Bird"),
+            ...parseBaoEarl(baoExtendTableData, "Extend")
+          ];
+          ruangbelajarRows = parseRuangbelajar(ruangbelajarTableData);
+          earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
+          flashSaleRgRows = parseFlashSaleRg(flashSaleRgTableData);
+          const jadwalBacParsed = parseJadwalBac(jadwalBacTableData.table);
+          jadwalBacHeaders = jadwalBacParsed.headers;
+          jadwalBacRows = jadwalBacParsed.rows;
+          jadwalBacError = jadwalBacTableData.error;
+          hargaBacRows = parseHargaBac(hargaBacTableData.table);
+          hargaBacError = hargaBacTableData.error;
+          calculatorSchema = parseCalculatorSchema(calculatorTable);
+          setupFilters();
+        }
+        render();
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = "block";
+        statusEl.textContent = "Gagal memuat data.";
+      }
+    }
+    tabs.forEach((tab) => tab.addEventListener("click", () => {
+      activeView = tab.dataset.view;
+      tabs.forEach((t) => t.classList.toggle("active", t === tab));
+      render();
+    }));
+    [monthFilter, weekFilter, coachFilter, spvFilter, teamFilter, agentFilter].forEach((el) => {
+      el.addEventListener("input", render);
+      el.addEventListener("change", render);
+    });
+    searchFilter.addEventListener("input", render);
+    document.getElementById("refresh").addEventListener("click", () => loadAll(true));
+    loadAll();
+  </script>
+</body>
+</html>
