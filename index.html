@@ -751,7 +751,15 @@
       const summaryIncentiveWeeks = selectedSummaryWeek === "all" ? JUNE_INCENTIVE_WEEKS : new Set([selectedSummaryWeek]);
       const juneWeekRowsForSchema = filteredRaw({ weekSet: summaryIncentiveWeeks })
         .filter(isAllIncentiveSchemaRow);
-      const juneWeekIncentives = calculateSchemaIncentives(juneWeekRowsForSchema).agents.map((r) => ({ agent: r.key, incentive: r.incentive }));
+      const summarySchemaResult = calculateSchemaIncentives(juneWeekRowsForSchema);
+      const juneWeekIncentives = summarySchemaResult.agents.map((r) => ({ agent: r.key, incentive: r.incentive }));
+      const agentTargetMap = new Map();
+      summarySchemaResult.weekly.forEach((r) => {
+        const item = agentTargetMap.get(r.agent) || { revenue: 0, target: 0 };
+        item.revenue += r.revenue;
+        item.target += r.targetRevenue;
+        agentTargetMap.set(r.agent, item);
+      });
       const byAgent = addIncentive(groupBy(sales, (r) => r.agent, (r) => ({ amount: r.amount, txn: r.txn })), juneWeekIncentives);
       const agentLayerMap = new Map();
       sales.forEach((r) => {
@@ -759,6 +767,8 @@
       });
       byAgent.forEach((r) => {
         r.teamCategory = agentLayerMap.get(r.key) || "-";
+        const targetInfo = agentTargetMap.get(r.key);
+        r.targetAchievement = targetInfo?.target ? targetInfo.revenue / targetInfo.target : null;
         if (!isSchemaTeam(r.teamCategory)) r.incentive = 0;
       });
       contentEl.innerHTML = `
@@ -1182,7 +1192,7 @@
     }
     function summaryAgentTable(rows) {
       rows.sort((a, b) => b.amount - a.amount);
-      return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Revenue</th><th class="number">Incentive</th><th class="number">TXN</th><th class="number">ARPU</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td class="number">${rupiah(r.txn ? r.amount / r.txn : 0)}</td></tr>`).join("")}</tbody></table></div>`;
+      return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Revenue</th><th class="number">% to Target</th><th class="number">Incentive</th><th class="number">TXN</th><th class="number">ARPU</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${r.targetAchievement === null || r.targetAchievement === undefined ? "-" : `${num(r.targetAchievement * 100, 1)}%`}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td class="number">${rupiah(r.txn ? r.amount / r.txn : 0)}</td></tr>`).join("")}</tbody></table></div>`;
     }
     function schemaWeeklyTable(rows) {
       return `<div class="table-wrap"><table><thead><tr><th>Week</th><th>Agent</th><th>Layer</th><th class="number">Target</th><th class="number">Achievement</th><th class="number">Revenue</th><th class="number">Schema Incentive</th><th class="number">TXN</th><th>Category Mix</th></tr></thead><tbody>${rows.map((r) => `<tr><td>Week ${esc(r.week)}</td><td>${esc(r.agent)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.targetRevenue)}</td><td class="number">${num(r.achievement * 100, 1)}%</td><td class="number">${rupiah(r.revenue)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${num(r.txn)}</td><td>${esc(Object.entries(r.categories).map(([k, v]) => `${k}: ${rupiah(v.incentive)}`).join(" | "))}</td></tr>`).join("")}</tbody></table></div>`;
