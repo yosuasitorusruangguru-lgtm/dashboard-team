@@ -876,12 +876,8 @@
       const productType = String(row.product || "").toLowerCase();
       return productType.trim() === "brain academy";
     }
-    function hasCityPackageName(row) {
-      const packageName = String(row.package || "").toLowerCase();
-      return /[a-z]+(?:\s+[a-z]+)*\s+-\s+[a-z0-9]/i.test(packageName) && /(regular|snbt|tka|\bsd\b|\bsmp\b|\bsma\b|\bsmk\b|\butbk\b|persiapan)/i.test(packageName);
-    }
     function isBacSchema(row) {
-      return isBrainAcademyProduct(row) || hasCityPackageName(row);
+      return week25ProductCategory(row) === "BAC & Mathchamps Offline";
     }
     function productCategory(row) {
       const text = `${row.productAdjust} ${row.product} ${row.package}`.toLowerCase();
@@ -896,17 +892,31 @@
       return "Others";
     }
     function week25ProductCategory(row) {
-      const text = `${row.productAdjust} ${row.product} ${row.package}`.toLowerCase();
-      if (isBacSchema(row)) return "BAC & Mathchamps Offline";
-      if (/skill\s*academy|skillacademy/.test(text)) return "Skill Academy";
-      if (/math\s*champs?.*online|mathchamps?.*online/.test(text)) return "Math Champs Online";
-      if (/(rgp|privat).*offline|offline.*(rgp|privat)/.test(text)) return "RGP Offline";
-      if (/(rgp|privat).*online|online.*(rgp|privat)/.test(text)) return "RGP Online";
-      if (/\brb\b|ruang\s*belajar|rubel/.test(text)) return "RB";
-      if (/baon.*elite|elite/.test(text)) return "BAON Elite";
-      if (/baon.*prem|premium|\bprem\b/.test(text)) return "BAON Prem";
-      if (/baon.*reg|regular|\breg\b/.test(text)) return "BAON Reg";
-      if (/\bbac\b|brain academy center|math\s*champs?.*offline|mathchamps?.*offline/.test(text)) return "BAC & Mathchamps Offline";
+      const productType = String(row.product || "").trim();
+      const productKey = productType.toLowerCase();
+      const packageName = String(row.package || "");
+      if (!productType) return "";
+      if (productKey === "ruang belajar" || productKey === "ruangbelajar") return "RB";
+      if (productKey === "english academy") return "EA";
+      if (productKey === "-") return "RB";
+      if (productKey === "ruanguji") return "Others";
+      if (productKey === "math champs online" || productKey === "mathchamps online") return "Math Champs Online";
+      if (productKey === "skill academy" || productKey === "skillacademy") return "Skill Academy";
+      if (productKey === "mathchamps offline" || productKey === "math champs offline") return "BAC & Mathchamps Offline";
+      if (productKey === "ruangguru privat") {
+        if (/\[?\s*offline\s*\]?/i.test(packageName)) return "RGP Offline";
+        return "RGP Online";
+      }
+      if (productKey === "brain academy" || productKey.startsWith("brain academy online")) {
+        const baonText = `${productType} ${packageName}`;
+        if (/Online Regular/i.test(baonText)) return "BAON Reg";
+        if (/Online Premium/i.test(baonText)) return "BAON Prem";
+        if (/Online Elite/i.test(baonText)) return "BAON Elite";
+        if (/Online Champions Regular/i.test(baonText)) return "BAON Reg";
+        if (/Online Champions Premium/i.test(baonText)) return "BAON Prem";
+        if (/Online Champions Elite/i.test(baonText)) return "BAON Elite";
+        return "BAC & Mathchamps Offline";
+      }
       return "Others";
     }
     function week25RateFor(category, achievement, teamCategory = "LAYER 1") {
