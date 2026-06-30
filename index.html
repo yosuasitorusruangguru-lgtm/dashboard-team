@@ -223,13 +223,15 @@
       "23": 10700000,
       "24": 13400000,
       "25": 9800000,
-      "26": 12300000
+      "26": 12300000,
+      "27": 23400000
     };
     const LAYER_2_WEEK_TARGETS = {
       "23": 7400000,
       "24": 9200000,
       "25": 7400000,
-      "26": 9200000
+      "26": 9200000,
+      "27": 19600000
     };
     const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_25_LAYER_1_RATES = {
@@ -304,12 +306,43 @@
       "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
     };
+    const WEEK_27_LAYER_1_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0215, 0.75: 0.0265, 1: 0.0475, 1.25: 0.055 },
+      "BAON Elite": { 0: 0, 0.5: 0.024, 0.75: 0.0265, 1: 0.0535, 1.25: 0.06 },
+      "BAON Prem": { 0: 0, 0.5: 0.0438, 0.75: 0.05, 1: 0.1135, 1.25: 0.135 },
+      "BAON Reg": { 0: 0, 0.5: 0.037, 0.75: 0.0433, 1: 0.097, 1.25: 0.12 },
+      "Others": { 0: 0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
+      "RB": { 0: 0, 0.5: 0.0383, 0.75: 0.045, 1: 0.1013, 1.25: 0.1275 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_27_LAYER_2_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0155, 0.75: 0.0185, 1: 0.0335, 1.25: 0.0385 },
+      "BAON Elite": { 0: 0, 0.5: 0.0168, 0.75: 0.0193, 1: 0.0383, 1.25: 0.045 },
+      "BAON Prem": { 0: 0, 0.5: 0.0305, 0.75: 0.0358, 1: 0.0775, 1.25: 0.0945 },
+      "BAON Reg": { 0: 0, 0.5: 0.0255, 0.75: 0.0305, 1: 0.0675, 1.25: 0.0848 },
+      "Others": { 0: 0, 0.5: 0.0108, 0.75: 0.0123, 1: 0.013, 1.25: 0.014 },
+      "RB": { 0: 0, 0.5: 0.046, 0.75: 0.054, 1: 0.1215, 1.25: 0.1525 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
     function isExcludedTopIncentiveAgent(name) {
       return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
     }
-    function isDwiAgustinTargetOverride(agent, week) {
-      return String(agent || "").trim().toLowerCase() === "dwi agustin setyaningrum" && ["23", "24"].includes(String(week));
+    function layer2AgentTargetOverride(agent, week) {
+      const normalizedAgent = String(agent || "").trim().toLowerCase();
+      const normalizedWeek = String(week);
+      if (normalizedAgent === "dwi agustin setyaningrum" && ["23", "24"].includes(normalizedWeek)) return 2800000;
+      if (normalizedAgent === "sintyia hot marito siagian" && normalizedWeek === "26") return 2800000;
+      return 0;
+    }
+    function hasLayer2AgentTargetOverride(agent, week) {
+      return layer2AgentTargetOverride(agent, week) > 0;
     }
     function normalizedTeamCategory(teamCategory) {
       return String(teamCategory || "").trim().toUpperCase();
@@ -319,13 +352,15 @@
     }
     function isAllIncentiveSchemaRow(row) {
       const team = normalizedTeamCategory(row.teamCategory);
+      if (hasLayer2AgentTargetOverride(row.agent, row.week)) return true;
       if (team === "LAYER 1") return true;
-      return team === "LAYER 2" && ["23", "24", "25", "26"].includes(String(row.week));
+      return team === "LAYER 2" && ["23", "24", "25", "26", "27"].includes(String(row.week));
     }
     function targetForWeek(week, teamCategory = "LAYER 1", agent = "") {
-      if (isDwiAgustinTargetOverride(agent, week)) return 2800000;
+      const overrideTarget = layer2AgentTargetOverride(agent, week);
+      if (overrideTarget) return overrideTarget;
       const normalizedTeam = normalizedTeamCategory(teamCategory);
-      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26"].includes(String(week))) {
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27"].includes(String(week))) {
         return LAYER_2_WEEK_TARGETS[String(week)] || 0;
       }
       return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
@@ -944,6 +979,10 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement);
       }
+      if (String(week) === "27") {
+        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
+        return layer1RateFor(rates, category, achievement);
+      }
       if (!calculatorSchema) return 0;
       let selected = null;
       calculatorSchema.tiers.forEach((tier) => {
@@ -964,13 +1003,13 @@
         grouped.set(key, current);
       });
       const weekly = [...grouped.values()].map((group) => {
-        const schemaTeamCategory = isDwiAgustinTargetOverride(group.agent, group.week) ? "LAYER 2" : group.teamCategory;
+        const schemaTeamCategory = hasLayer2AgentTargetOverride(group.agent, group.week) ? "LAYER 2" : group.teamCategory;
         const targetRevenue = targetForWeek(group.week, schemaTeamCategory, group.agent);
         const achievement = targetRevenue ? group.revenue / targetRevenue : 0;
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = ["23", "24", "25", "26", "27"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
@@ -1011,7 +1050,7 @@
       const juneAgents = calculateSchemaIncentives(juneRows).agents.filter((r) => !isExcludedTopIncentiveAgent(r.key));
       const juneSchemaIncentive = juneAgents.reduce((s, r) => s + r.incentive, 0);
       const selectedWeek = weekFilter.value || "all";
-      const targetNoteText = selectedWeek === "all" ? "L1 W23 Rp10.700.000 | L1 W24 Rp13.400.000 | L1 W25 Rp9.800.000 | L1 W26 Rp12.300.000 | L2 W23 Rp7.400.000 | L2 W24 Rp9.200.000 | L2 W25 Rp7.400.000 | L2 W26 Rp9.200.000" : `Week ${selectedWeek}: L1 ${rupiah(targetForWeek(selectedWeek, "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeek, "LAYER 2"))}`;
+      const targetNoteText = selectedWeek === "all" ? "L1 W23 Rp10.700.000 | L1 W24 Rp13.400.000 | L1 W25 Rp9.800.000 | L1 W26 Rp12.300.000 | L1 W27 Rp23.400.000 | L2 W23 Rp7.400.000 | L2 W24 Rp9.200.000 | L2 W25 Rp7.400.000 | L2 W26 Rp9.200.000 | L2 W27 Rp19.600.000" : `Week ${selectedWeek}: L1 ${rupiah(targetForWeek(selectedWeek, "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeek, "LAYER 2"))}`;
       contentEl.innerHTML = `
         <section class="kpis">
           ${kpi("Schema Incentive", rupiah(totalSchemaIncentive), "Schema incentive sesuai week")}
@@ -1034,7 +1073,7 @@
           ${schemaWeeklyTable(visibleWeekly)}
         </section>`;
     }
-    function schemaSimulationTable(rates, targetRevenue) {
+    function targetSimulationTable(rates, targetRevenue) {
       const products = [
         "BAC & Mathchamps Offline",
         "BAON Elite",
@@ -1056,21 +1095,69 @@
     function schemaRatesFor(week, layer) {
       if (String(week) === "25") return layer === "LAYER 2" ? WEEK_25_LAYER_2_RATES : WEEK_25_LAYER_1_RATES;
       if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
+      if (String(week) === "27") return layer === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
+    }
+    function priceTableIncentiveContext() {
+      const week = ["23", "24", "25", "26", "27"].includes(weekFilter.value) ? weekFilter.value : "26";
+      const selectedTeam = normalizedTeamCategory(teamFilter.value);
+      const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      return { week, layer, rates: schemaRatesFor(week, layer) };
+    }
+    function packageThLabel(row) {
+      const text = `${row.serial || ""} ${row.packageName || ""} ${row.group || ""}`.toLowerCase();
+      const numbers = [];
+      const patterns = [
+        /\b(?:th|tahun|kelas|class|grade|sd)\s*(3|4)(?:\s*[-/&]\s*(3|4))?\b/g,
+        /\b(3|4)\s*[-/&]\s*(3|4)\b/g
+      ];
+      patterns.forEach((pattern) => {
+        let match;
+        while ((match = pattern.exec(text)) !== null) {
+          numbers.push(match[1]);
+          if (match[2]) numbers.push(match[2]);
+        }
+      });
+      const unique = [...new Set(numbers)].sort();
+      if (unique.includes("3") && unique.includes("4")) return "TH 3-4";
+      if (unique.includes("3")) return "TH 3";
+      if (unique.includes("4")) return "TH 4";
+      return "";
+    }
+    function priceTableProductCategory(row) {
+      const text = `${row.source || ""} ${row.packageName || ""} ${row.group || ""}`.toLowerCase();
+      if (/elite/.test(text)) return "BAON Elite";
+      if (/premium|\bprem\b/.test(text)) return "BAON Prem";
+      if (/regular|\breg\b/.test(text)) return "BAON Reg";
+      if (/ruang\s*belajar|rubel|\brb\b/.test(text)) return "RB";
+      if (/math\s*champs.*offline|bac|brain academy center/.test(text)) return "BAC & Mathchamps Offline";
+      if (/baon|brain academy online|online champions/.test(text)) return "BAON Reg";
+      if (["Early Bird", "Extend"].includes(String(row.source || ""))) return "BAON Reg";
+      return "";
+    }
+    function priceTableIncentive(row) {
+      const th = packageThLabel(row);
+      if (!["TH 3", "TH 4", "TH 3-4"].includes(th)) return null;
+      const product = priceTableProductCategory(row);
+      const ctx = priceTableIncentiveContext();
+      const rate = ctx.rates[product]?.[1] || 0;
+      if (!product || !rate || !row.btlPriceAfter) return null;
+      return { th, product, rate, value: row.btlPriceAfter * rate };
     }
     function schemaInfoForWeek(week) {
       return selectedSchemaLayers().map((layer) => {
         const rates = schemaRatesFor(week, layer);
-        return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetForWeek(week, layer))}</span></div>${schemaRateTable(rates)}${schemaSimulationTable(rates, targetForWeek(week, layer))}`;
+        const targetRevenue = targetForWeek(week, layer);
+        return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetRevenue)}</span></div>${schemaRateTable(rates)}${targetSimulationTable(rates, targetRevenue)}`;
       }).join("");
     }
     function schemaInfoCard() {
-      if (["23", "24", "25", "26"].includes(weekFilter.value || "all")) {
+      if (["23", "24", "25", "26", "27"].includes(weekFilter.value || "all")) {
         const week = weekFilter.value;
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
       }
       if (selectedSchemaLayers().length < 2) {
-        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${["23", "24", "25", "26"].map((week) => schemaInfoForWeek(week)).join("")}</div>`;
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${["23", "24", "25", "26", "27"].map((week) => schemaInfoForWeek(week)).join("")}</div>`;
       }
       const rows = calculatorSchema?.tiers || [];
       return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Threshold achievement</span></div><div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${(calculatorSchema?.products || []).map((p) => `<th class="number">${esc(p.label)}</th>`).join("")}</tr></thead><tbody>${rows.map((tier) => `<tr><td>${num(tier.threshold * 100, 0)}%</td>${(calculatorSchema?.products || []).map((p) => `<td class="number">${num((tier.rates[p.label] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
@@ -1101,11 +1188,13 @@
         </section>`;
     }
     function baoEarlTable(rows) {
-      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After</th><th class="number">Cashback</th><th class="number">Max Sispres</th><th>Extra Gimmick</th><th>Bonus Tambahan</th></tr></thead><tbody>${rows.map((r) => {
-        if (!r.serial) return `<tr><td></td><td>${esc(r.packageName)}</td><td></td><td class="number"></td><td class="number"></td><td class="number"></td><td class="number"></td><td class="number"></td><td></td><td></td></tr>`;
+      const ctx = priceTableIncentiveContext();
+      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After</th><th class="number">Cashback</th><th class="number">Max Sispres</th><th>Extra Gimmick</th><th>Bonus Tambahan</th><th class="number">Incentive ${esc(ctx.week)} ${esc(ctx.layer)}</th></tr></thead><tbody>${rows.map((r) => {
+        if (!r.serial) return `<tr><td></td><td>${esc(r.packageName)}</td><td></td><td class="number"></td><td class="number"></td><td class="number"></td><td class="number"></td><td class="number"></td><td></td><td></td><td class="number"></td></tr>`;
         const link = r.deeplink || `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=`;
-        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.extraGimmick || "")}</td><td>${esc(r.bonus || "")}</td></tr>`;
-      }).join("") || `<tr><td colspan="10">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+        const incentive = priceTableIncentive(r);
+        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.extraGimmick || "")}</td><td>${esc(r.bonus || "")}</td><td class="number">${incentive ? `${rupiah(incentive.value)} (${num(incentive.rate * 100, 2)}%)` : ""}</td></tr>`;
+      }).join("") || `<tr><td colspan="11">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function renderRuangbelajar() {
       const q = searchFilter.value.trim().toLowerCase();
@@ -1163,10 +1252,12 @@
         </section>`;
     }
     function flashSaleRgTable(rows) {
-      return `<div class="table-wrap"><table><thead><tr><th>Group</th><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">ATL Discount After</th><th class="number">ATL Price After Disc</th><th class="number">BTL Discount After</th><th class="number">BTL Price After Disc</th><th class="number">Cashback E-Wallet</th><th class="number">Max Sispres</th><th>Bonus Tambahan</th></tr></thead><tbody>${rows.map((r) => {
+      const ctx = priceTableIncentiveContext();
+      return `<div class="table-wrap"><table><thead><tr><th>Group</th><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">ATL Discount After</th><th class="number">ATL Price After Disc</th><th class="number">BTL Discount After</th><th class="number">BTL Price After Disc</th><th class="number">Cashback E-Wallet</th><th class="number">Max Sispres</th><th>Bonus Tambahan</th><th class="number">Incentive ${esc(ctx.week)} ${esc(ctx.layer)}</th></tr></thead><tbody>${rows.map((r) => {
         const link = r.serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=` : "";
-        return `<tr><td>${esc(r.group)}</td><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscountAfter)}</td><td class="number">${rupiah(r.atlPriceAfter)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.bonus)}</td></tr>`;
-      }).join("") || `<tr><td colspan="12">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+        const incentive = priceTableIncentive(r);
+        return `<tr><td>${esc(r.group)}</td><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscountAfter)}</td><td class="number">${rupiah(r.atlPriceAfter)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.bonus)}</td><td class="number">${incentive ? `${rupiah(incentive.value)} (${num(incentive.rate * 100, 2)}%)` : ""}</td></tr>`;
+      }).join("") || `<tr><td colspan="13">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function renderJadwalBac() {
       const q = searchFilter.value.trim().toLowerCase();
