@@ -206,6 +206,7 @@
     let jadwalBacError = "";
     let hargaBacRows = [];
     let hargaBacError = "";
+    let baoExtendError = "";
     let calculatorSchema = null;
     let activeView = "summary";
 
@@ -1184,7 +1185,7 @@
         </section>
         <section class="card" style="margin-top:16px">
           <div class="section-title"><h2>Link Harga BAO Extend</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EXTEND_SHEET_ID}/edit?gid=${BAO_EXTEND_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
-          ${baoEarlTable(extendRows)}
+          ${baoExtendError ? `<div class="error" style="display:block">${esc(baoExtendError)}</div>` : baoEarlTable(extendRows)}
         </section>`;
     }
     function baoEarlTable(rows) {
@@ -1318,7 +1319,7 @@
             loadJsonp("Incentive"),
             loadJsonp("Kalkulator Incentive"),
             loadJsonp("Link Harga BAO Early Bird", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
-            loadJsonp("Link Harga BAO Extend", { sheetId: BAO_EXTEND_SHEET_ID, gid: BAO_EXTEND_GID }),
+            loadOptionalJsonp("Link Harga BAO Extend", { sheetId: BAO_EXTEND_SHEET_ID, gid: BAO_EXTEND_GID }),
             loadJsonp("Ruangbelajar", { sheetId: RUANGBELAJAR_SHEET_ID, gid: RUANGBELAJAR_GID }),
             loadJsonp("Earlybird Rubel", { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
             loadJsonp("Flash Sale Festival RG", { sheetId: FLASHSALE_RG_SHEET_ID, gid: FLASHSALE_RG_GID }),
@@ -1329,8 +1330,9 @@
           incentiveRows = parseIncentive(incentiveTable);
           baoEarlRows = [
             ...parseBaoEarl(baoEarlTableData, "Early Bird"),
-            ...parseBaoEarl(baoExtendTableData, "Extend")
+            ...parseBaoEarl(baoExtendTableData.table, "Extend")
           ];
+          baoExtendError = baoExtendTableData.error;
           ruangbelajarRows = parseRuangbelajar(ruangbelajarTableData);
           earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
           flashSaleRgRows = parseFlashSaleRg(flashSaleRgTableData);
