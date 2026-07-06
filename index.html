@@ -115,7 +115,7 @@
       <button class="tab" data-view="dodolan">Dodolan</button>
       <button class="tab" data-view="universe">UNIVERSE</button>
       <button class="tab" data-view="allIncentive">All Incentive Agent</button>
-      <button class="tab" data-view="baoEarl">Link Harga BAO Early Bird</button>
+      <button class="tab" data-view="baoEarl">Harga Brain Academy Online</button>
       <button class="tab" data-view="ruangbelajar">Ruangbelajar</button>
       <button class="tab" data-view="flashSaleRg">Flash Sale Festival RG</button>
       <button class="tab" data-view="jadwalBac">Jadwal & Deeplink BAC26/27</button>
@@ -161,7 +161,7 @@
   <script>
     const SHEET_ID = "1nI9uXMjZwSKTKHXcdLdqhKRWVBOi1eiBHTwjri8QxWo";
     const BAO_EARL_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
-    const BAO_EARL_GID = "514509076";
+    const BAO_EARL_GID = "1471356061";
     const RUANGBELAJAR_SHEET_ID = "1GFN0S7EVVXy42oU_EHwh1GE1b_MihzR-i-2aZG9jjeE";
     const RUANGBELAJAR_GID = "1529053994";
     const RUANGBELAJAR_HIDDEN_ROWS = new Set([3, 4, 100, 101, 102]);
@@ -1129,7 +1129,7 @@
       if (/ruang\s*belajar|rubel|\brb\b/.test(text)) return "RB";
       if (/math\s*champs.*offline|bac|brain academy center/.test(text)) return "BAC & Mathchamps Offline";
       if (/baon|brain academy online|online champions/.test(text)) return "BAON Reg";
-      if (String(row.source || "") === "Early Bird") return "BAON Reg";
+      if (["Early Bird", "NAY"].includes(String(row.source || ""))) return "BAON Reg";
       return "";
     }
     function priceTableIncentive(row) {
@@ -1165,16 +1165,16 @@
     function renderBaoEarl() {
       const q = searchFilter.value.trim().toLowerCase();
       const rows = baoEarlRows.filter((r) => !q || [r.source, r.serial, r.packageName, r.activeEndDate, r.extraGimmick, r.bonus].some((v) => String(v || "").toLowerCase().includes(q)));
-      const earlyRows = rows.filter((r) => r.source === "Early Bird");
+      const earlyRows = rows.filter((r) => r.source === "NAY");
       const lowestBtl = rows.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
       contentEl.innerHTML = `
         <section class="kpis">
-          ${kpi("Package", num(rows.length), "Data dari sheet Link Harga BAO Early Bird")}
+          ${kpi("Package", num(rows.length), "Data dari sheet Harga Brain Academy Online")}
           ${kpi("Harga BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Sesuai filter")}
-          ${kpi("Early Bird", num(earlyRows.length), "Package")}
+          ${kpi("NAY", num(earlyRows.length), "Package")}
         </section>
         <section class="card">
-          <div class="section-title"><h2>Link Harga BAO Early Bird</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          <div class="section-title"><h2>Harga Brain Academy Online</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
           ${baoEarlTable(earlyRows)}
         </section>`;
     }
@@ -1189,22 +1189,16 @@
     }
     function renderRuangbelajar() {
       const q = searchFilter.value.trim().toLowerCase();
-      const rows = ruangbelajarRows.filter((r) => !q || [r.packageGroup, r.variant, r.duration, r.grade, r.ruleSerial, r.category, r.packageName, r.serial, r.gimmick, r.cashback].some((v) => String(v || "").toLowerCase().includes(q)));
       const rubelRows = earlybirdRubelRows.filter((r) => !q || [r.group, r.packageType, r.serial, r.packageName].some((v) => String(v || "").toLowerCase().includes(q)));
-      const lowestFinal = rows.reduce((min, r) => r.level3Final ? Math.min(min, r.level3Final) : min, Infinity);
+      const lowestFinal = rubelRows.reduce((min, r) => r.flashSalePrice || r.lunas ? Math.min(min, r.flashSalePrice || r.lunas) : min, Infinity);
       contentEl.innerHTML = `
         <section class="kpis">
-          ${kpi("Package", num(rows.length), "Hidden row sheet tidak ditampilkan")}
-          ${kpi("Final Price Terendah", Number.isFinite(lowestFinal) ? rupiah(lowestFinal) : "-", "Level 3 sesuai filter")}
+          ${kpi("Package", num(rubelRows.length), "Hidden row sheet tidak ditampilkan")}
+          ${kpi("Final Price Terendah", Number.isFinite(lowestFinal) ? rupiah(lowestFinal) : "-", "Sesuai filter")}
           ${kpi("Sumber", "Ruangbelajar", "Spreadsheet harga")}
-          ${kpi("Earlybird Rubel", num(rubelRows.length), "Package")}
         </section>
         <section class="card">
-          <div class="section-title"><h2>Rubel Extend</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${RUANGBELAJAR_SHEET_ID}/edit?gid=${RUANGBELAJAR_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
-          ${ruangbelajarTable(rows)}
-        </section>
-        <section class="card" style="margin-top:16px">
-          <div class="section-title"><h2>Earlybird Rubel</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          <div class="section-title"><h2>Ruangbelajar</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
           ${earlybirdRubelTable(rubelRows)}
         </section>`;
     }
@@ -1304,13 +1298,12 @@
         errorEl.style.display = "none";
         statusEl.textContent = "Memuat RAW dan Incentive...";
         if (!rawTable || !incentiveTable || force) {
-          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, ruangbelajarTableData, earlybirdRubelTableData, flashSaleRgTableData, jadwalBacTableData, hargaBacTableData] = await Promise.all([
+          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, earlybirdRubelTableData, flashSaleRgTableData, jadwalBacTableData, hargaBacTableData] = await Promise.all([
             loadJsonp("RAW"),
             loadJsonp("Incentive"),
             loadJsonp("Kalkulator Incentive"),
-            loadJsonp("Link Harga BAO Early Bird", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
-            loadJsonp("Ruangbelajar", { sheetId: RUANGBELAJAR_SHEET_ID, gid: RUANGBELAJAR_GID }),
-            loadJsonp("Earlybird Rubel", { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
+            loadJsonp("Harga Brain Academy Online", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
+            loadJsonp("Ruangbelajar", { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
             loadJsonp("Flash Sale Festival RG", { sheetId: FLASHSALE_RG_SHEET_ID, gid: FLASHSALE_RG_GID }),
             loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
             loadOptionalJsonp("Harga BAC", { sheetId: JADWAL_BAC_SHEET_ID, gid: HARGA_BAC_GID })
@@ -1318,9 +1311,8 @@
           rawRows = parseRaw(rawTable);
           incentiveRows = parseIncentive(incentiveTable);
           baoEarlRows = [
-            ...parseBaoEarl(baoEarlTableData, "Early Bird")
+            ...parseBaoEarl(baoEarlTableData, "NAY")
           ];
-          ruangbelajarRows = parseRuangbelajar(ruangbelajarTableData);
           earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
           flashSaleRgRows = parseFlashSaleRg(flashSaleRgTableData);
           const jadwalBacParsed = parseJadwalBac(jadwalBacTableData.table);
