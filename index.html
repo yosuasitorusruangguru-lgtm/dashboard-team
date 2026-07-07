@@ -221,14 +221,16 @@
       "24": 13400000,
       "25": 9800000,
       "26": 12300000,
-      "27": 23400000
+      "27": 23400000,
+      "28": 23400000
     };
     const LAYER_2_WEEK_TARGETS = {
       "23": 7400000,
       "24": 9200000,
       "25": 7400000,
       "26": 9200000,
-      "27": 19600000
+      "27": 19600000,
+      "28": 19600000
     };
     const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_25_LAYER_1_RATES = {
@@ -327,6 +329,8 @@
       "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
     };
+    const WEEK_28_LAYER_1_RATES = WEEK_27_LAYER_1_RATES;
+    const WEEK_28_LAYER_2_RATES = WEEK_27_LAYER_2_RATES;
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
     function isExcludedTopIncentiveAgent(name) {
       return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
@@ -351,13 +355,13 @@
       const team = normalizedTeamCategory(row.teamCategory);
       if (hasLayer2AgentTargetOverride(row.agent, row.week)) return true;
       if (team === "LAYER 1") return true;
-      return team === "LAYER 2" && ["23", "24", "25", "26", "27"].includes(String(row.week));
+      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28"].includes(String(row.week));
     }
     function targetForWeek(week, teamCategory = "LAYER 1", agent = "") {
       const overrideTarget = layer2AgentTargetOverride(agent, week);
       if (overrideTarget) return overrideTarget;
       const normalizedTeam = normalizedTeamCategory(teamCategory);
-      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27"].includes(String(week))) {
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28"].includes(String(week))) {
         return LAYER_2_WEEK_TARGETS[String(week)] || 0;
       }
       return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
@@ -980,6 +984,10 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement);
       }
+      if (String(week) === "28") {
+        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
+        return layer1RateFor(rates, category, achievement);
+      }
       if (!calculatorSchema) return 0;
       let selected = null;
       calculatorSchema.tiers.forEach((tier) => {
@@ -1006,7 +1014,7 @@
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26", "27"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = ["23", "24", "25", "26", "27", "28"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
@@ -1047,7 +1055,7 @@
       const juneAgents = calculateSchemaIncentives(juneRows).agents.filter((r) => !isExcludedTopIncentiveAgent(r.key));
       const juneSchemaIncentive = juneAgents.reduce((s, r) => s + r.incentive, 0);
       const selectedWeek = weekFilter.value || "all";
-      const targetNoteText = selectedWeek === "all" ? "L1 W23 Rp10.700.000 | L1 W24 Rp13.400.000 | L1 W25 Rp9.800.000 | L1 W26 Rp12.300.000 | L1 W27 Rp23.400.000 | L2 W23 Rp7.400.000 | L2 W24 Rp9.200.000 | L2 W25 Rp7.400.000 | L2 W26 Rp9.200.000 | L2 W27 Rp19.600.000" : `Week ${selectedWeek}: L1 ${rupiah(targetForWeek(selectedWeek, "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeek, "LAYER 2"))}`;
+      const targetNoteText = selectedWeek === "all" ? "L1 W23 Rp10.700.000 | L1 W24 Rp13.400.000 | L1 W25 Rp9.800.000 | L1 W26 Rp12.300.000 | L1 W27 Rp23.400.000 | L1 W28 Rp23.400.000 | L2 W23 Rp7.400.000 | L2 W24 Rp9.200.000 | L2 W25 Rp7.400.000 | L2 W26 Rp9.200.000 | L2 W27 Rp19.600.000 | L2 W28 Rp19.600.000" : `Week ${selectedWeek}: L1 ${rupiah(targetForWeek(selectedWeek, "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeek, "LAYER 2"))}`;
       contentEl.innerHTML = `
         <section class="kpis">
           ${kpi("Schema Incentive", rupiah(totalSchemaIncentive), "Schema incentive sesuai week")}
@@ -1093,10 +1101,11 @@
       if (String(week) === "25") return layer === "LAYER 2" ? WEEK_25_LAYER_2_RATES : WEEK_25_LAYER_1_RATES;
       if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
       if (String(week) === "27") return layer === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
+      if (String(week) === "28") return layer === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
     function priceTableIncentiveContext() {
-      const week = ["23", "24", "25", "26", "27"].includes(weekFilter.value) ? weekFilter.value : "26";
+      const week = ["23", "24", "25", "26", "27", "28"].includes(weekFilter.value) ? weekFilter.value : "26";
       const selectedTeam = normalizedTeamCategory(teamFilter.value);
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
       return { week, layer, rates: schemaRatesFor(week, layer) };
@@ -1149,12 +1158,12 @@
       }).join("");
     }
     function schemaInfoCard() {
-      if (["23", "24", "25", "26", "27"].includes(weekFilter.value || "all")) {
+      if (["23", "24", "25", "26", "27", "28"].includes(weekFilter.value || "all")) {
         const week = weekFilter.value;
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
       }
       if (selectedSchemaLayers().length < 2) {
-        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${["23", "24", "25", "26", "27"].map((week) => schemaInfoForWeek(week)).join("")}</div>`;
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${["23", "24", "25", "26", "27", "28"].map((week) => schemaInfoForWeek(week)).join("")}</div>`;
       }
       const rows = calculatorSchema?.tiers || [];
       return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Threshold achievement</span></div><div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${(calculatorSchema?.products || []).map((p) => `<th class="number">${esc(p.label)}</th>`).join("")}</tr></thead><tbody>${rows.map((tier) => `<tr><td>${num(tier.threshold * 100, 0)}%</td>${(calculatorSchema?.products || []).map((p) => `<td class="number">${num((tier.rates[p.label] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
