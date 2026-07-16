@@ -753,15 +753,19 @@
         return monthMatch && weekMatch && coachMatch && spvMatch && teamMatch && agentMatch && searchMatch;
       });
     }
-    function filteredIncentive() {
+    function filteredIncentive(salesRows = filteredRaw()) {
       const week = weekFilter.value || "all";
       const agent = agentFilter.value || "all";
+      const visibleAgentWeeks = new Set(salesRows
+        .filter((r) => r.agent && r.week)
+        .map((r) => `${r.agent}||${r.week}`));
       const q = searchFilter.value.trim().toLowerCase();
       return incentiveRows.filter((r) => {
         const weekMatch = week === "all" || r.week === week;
         const agentMatch = agent === "all" || r.agent === agent;
+        const salesAgentWeekMatch = visibleAgentWeeks.has(`${r.agent}||${r.week}`);
         const searchMatch = !q || r.agent.toLowerCase().includes(q);
-        return weekMatch && agentMatch && searchMatch;
+        return weekMatch && agentMatch && salesAgentWeekMatch && searchMatch;
       });
     }
     function groupBy(rows, keyFn, valueFn) {
@@ -809,7 +813,7 @@
     function render() {
       const sales = filteredRaw();
       const salesAgents = new Set(sales.map((r) => r.agent).filter(Boolean));
-      let incentives = filteredIncentive();
+      let incentives = filteredIncentive(sales);
       incentives = incentives.filter((r) => salesAgents.has(r.agent));
       const totalAmount = sales.reduce((s, r) => s + r.amount, 0);
       const totalTxn = sales.reduce((s, r) => s + r.txn, 0);
