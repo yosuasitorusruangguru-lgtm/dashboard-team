@@ -218,6 +218,9 @@
       const n = Number(String(v ?? "").replace(",", "."));
       return Number.isFinite(n) ? String(Math.trunc(n)) : String(v ?? "").trim();
     };
+    const WEEK_MONTH_OVERRIDES = {
+      "27": "07-2026"
+    };
     const EXCLUDED_TOP_INCENTIVE_AGENTS = new Set(["satyadi ambia", "imam nugroho", "erna erviana purnamasari"]);
     const LAYER_1_WEEK_TARGETS = {
       "23": 10700000,
@@ -384,7 +387,7 @@
       return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28"].includes(String(row.week));
     }
     function isYosuaLeaderName(coach) {
-      return /yosua|josua/i.test(String(coach || ""));
+      return String(coach || "").trim().toLowerCase() === "yosua sitorus";
     }
     function isYosuaAgent(agent) {
       const normalizedAgent = String(agent || "").trim().toLowerCase();
@@ -734,7 +737,7 @@
       agentFilter.innerHTML = `<option value="all">All Agent</option>${agents.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}`;
     }
     function filteredRaw(options = {}) {
-      const month = monthFilter.value || "all";
+      const month = options.ignoreMonth ? "all" : (monthFilter.value || "all");
       const week = weekFilter.value || "all";
       const coach = options.ignoreCoach ? "all" : (coachFilter.value || "all");
       const spv = spvFilter.value || "all";
@@ -743,7 +746,8 @@
       const weekSet = options.weekSet || null;
       const q = searchFilter.value.trim().toLowerCase();
       return rawRows.filter((r) => {
-        const monthMatch = month === "all" || r.month === month;
+        const rowMonth = WEEK_MONTH_OVERRIDES[String(r.week)] || r.month;
+        const monthMatch = month === "all" || rowMonth === month;
         const weekMatch = weekSet ? weekSet.has(String(r.week)) : (week === "all" || r.week === week);
         const coachMatch = coach === "all" || r.coach === coach;
         const spvMatch = spv === "all" || r.spv === spv;
@@ -752,6 +756,25 @@
         const searchMatch = !q || [r.agent, r.package, r.product, r.campaign].some((v) => v.toLowerCase().includes(q));
         return monthMatch && weekMatch && coachMatch && spvMatch && teamMatch && agentMatch && searchMatch;
       });
+    }
+    function monthWeekSet() {
+      const week = weekFilter.value || "all";
+      const month = monthFilter.value || "all";
+      if (week !== "all") {
+        if (month === "all") return new Set([week]);
+        const weekBelongsToMonth = rawRows.some((r) => String(r.week) === week && (WEEK_MONTH_OVERRIDES[String(r.week)] || r.month) === month);
+        return weekBelongsToMonth ? new Set([week]) : new Set();
+      }
+      if (month === "all") return null;
+      const weeks = rawRows
+        .filter((r) => (WEEK_MONTH_OVERRIDES[String(r.week)] || r.month) === month && r.week)
+        .map((r) => String(r.week));
+      return new Set(weeks);
+    }
+    function filteredRawForFullWeeksInMonth() {
+      const weeks = monthWeekSet();
+      if (!weeks) return filteredRaw();
+      return filteredRaw({ ignoreMonth: true, weekSet: weeks });
     }
     function filteredIncentive(salesRows = filteredRaw()) {
       const week = weekFilter.value || "all";
@@ -811,7 +834,7 @@
       }).join("") || `<div class="note">Tidak ada data.</div>`}</div></div>`;
     }
     function render() {
-      const sales = filteredRaw();
+      const sales = filteredRawForFullWeeksInMonth();
       const salesAgents = new Set(sales.map((r) => r.agent).filter(Boolean));
       let incentives = filteredIncentive(sales);
       incentives = incentives.filter((r) => salesAgents.has(r.agent));
