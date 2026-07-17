@@ -1176,11 +1176,11 @@
       if (String(week) === "25") return layer === "LAYER 2" ? WEEK_25_LAYER_2_RATES : WEEK_25_LAYER_1_RATES;
       if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
       if (String(week) === "27") return layer === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
-      if (String(week) === "28") return layer === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
+      if (["28", "29"].includes(String(week))) return layer === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
     function priceTableIncentiveContext() {
-      const week = ["23", "24", "25", "26", "27", "28"].includes(weekFilter.value) ? weekFilter.value : "26";
+      const week = ["23", "24", "25", "26", "27", "28", "29"].includes(weekFilter.value) ? weekFilter.value : "26";
       const selectedTeam = normalizedTeamCategory(teamFilter.value);
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
       return { week, layer, rates: schemaRatesFor(week, layer) };
