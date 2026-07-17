@@ -1088,7 +1088,7 @@
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26", "27", "28"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = ["23", "24", "25", "26", "27", "28", "29"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
