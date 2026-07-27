@@ -118,6 +118,7 @@
       <button class="tab" data-view="dodolan">Dodolan</button>
       <button class="tab" data-view="universe">UNIVERSE</button>
       <button class="tab" data-view="allIncentive">All Incentive Agent</button>
+      <button class="tab" data-view="leaderIncentive">Incentive Leader</button>
       <button class="tab" data-view="baoEarl">Harga Brain Academy Online</button>
       <button class="tab" data-view="ruangbelajar">Ruangbelajar</button>
       <button class="tab" data-view="flashSaleRg">Flash Sale Festival RG</button>
@@ -165,6 +166,7 @@
     const SHEET_ID = "1nI9uXMjZwSKTKHXcdLdqhKRWVBOi1eiBHTwjri8QxWo";
     const BAO_EARL_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
     const BAO_EARL_GID = "1471356061";
+    const BAO_TOPUP_GID = "79664970";
     const RUANGBELAJAR_SHEET_ID = "1GFN0S7EVVXy42oU_EHwh1GE1b_MihzR-i-2aZG9jjeE";
     const RUANGBELAJAR_GID = "1529053994";
     const RUANGBELAJAR_HIDDEN_ROWS = new Set([3, 4, 100, 101, 102]);
@@ -190,6 +192,7 @@
     let incentiveTable = null;
     let calculatorTable = null;
     let baoEarlTableData = null;
+    let baoTopupTableData = null;
     let ruangbelajarTableData = null;
     let earlybirdRubelTableData = null;
     let flashSaleRgTableData = null;
@@ -198,6 +201,7 @@
     let rawRows = [];
     let incentiveRows = [];
     let baoEarlRows = [];
+    let baoTopupRows = [];
     let ruangbelajarRows = [];
     let earlybirdRubelRows = [];
     let flashSaleRgRows = [];
@@ -230,7 +234,8 @@
       "27": 23400000,
       "28": 23400000,
       "29": 23400000,
-      "30": 18200000
+      "30": 18200000,
+      "31": 18200000
     };
     const LAYER_2_WEEK_TARGETS = {
       "23": 7400000,
@@ -240,11 +245,18 @@
       "27": 19600000,
       "28": 19600000,
       "29": 19600000,
-      "30": 10400000
+      "30": 10400000,
+      "31": 10400000
     };
     const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_28_LAYER_1_TIERS = [0, 0.4, 0.5, 0.75, 1, 1.25];
     const WEEK_30_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25, 1.5, 2];
+    
+    const LEADER_INCENTIVE_TIERS = [0, 0.4, 0.5, 0.75, 1, 1.25];
+    const WEEK_30_LEADER_TIERS = [0, 0.5, 0.75, 1, 1.25, 1.5, 2];
+    const PROMPTER_INBOUND_AGENT_TARGET = 128800000;
+    const PROMPTER_INBOUND_WEEK_30_AGENT_TARGET = 110000000;
+    const PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS = new Set(["30", "31"]);
     const WEEK_25_LAYER_1_RATES = {
       "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0153, 0.75: 0.0185, 1: 0.0345, 1.25: 0.04 },
       "BAON Elite": { 0: 0, 0.5: 0.0188, 0.75: 0.0185, 1: 0.0333, 1.25: 0.0373 },
@@ -389,7 +401,165 @@
       "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01, 1.5: 0.01, 2: 0.01 },
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02, 1.5: 0.02, 2: 0.02 }
     };
-
+    const LEADER_INCENTIVE_RATES = {
+      "BAC & Mathchamps Offline": {
+        "LAYER 1": { 0: 0, 0.4: 0.01, 0.5: 0.0125, 0.75: 0.018, 1: 0.0245, 1.25: 0.028 },
+        "LAYER 2": { 0: 0, 0.4: 0.0062, 0.5: 0.0077, 0.75: 0.0125, 1: 0.0165, 1.25: 0.0202 }
+      },
+      "BAON Elite": {
+        "LAYER 1": { 0: 0, 0.4: 0.0112, 0.5: 0.014, 0.75: 0.0205, 1: 0.0315, 1.25: 0.0347 },
+        "LAYER 2": { 0: 0, 0.4: 0.0082, 0.5: 0.0102, 0.75: 0.014, 1: 0.022, 1.25: 0.0272 }
+      },
+      "BAON Prem": {
+        "LAYER 1": { 0: 0, 0.4: 0.0112, 0.5: 0.014, 0.75: 0.0205, 1: 0.0332, 1.25: 0.04 },
+        "LAYER 2": { 0: 0, 0.4: 0.0082, 0.5: 0.0102, 0.75: 0.014, 1: 0.0232, 1.25: 0.0277 }
+      },
+      "BAON Reg": {
+        "LAYER 1": { 0: 0, 0.4: 0.0085, 0.5: 0.0105, 0.75: 0.0152, 1: 0.0197, 1.25: 0.0232 },
+        "LAYER 2": { 0: 0, 0.4: 0.0057, 0.5: 0.0072, 0.75: 0.0105, 1: 0.015, 1.25: 0.0162 }
+      },
+      "Others": {
+        "LAYER 1": { 0: 0, 0.4: 0.0017, 0.5: 0.0022, 0.75: 0.003, 1: 0.0032, 1.25: 0.0035 },
+        "LAYER 2": { 0: 0, 0.4: 0.0012, 0.5: 0.0015, 0.75: 0.002, 1: 0.0023, 1.25: 0.0025 }
+      },
+      "RB": {
+        "LAYER 1": { 0: 0, 0.4: 0.0092, 0.5: 0.0115, 0.75: 0.0152, 1: 0.0192, 1.25: 0.021 },
+        "LAYER 2": { 0: 0, 0.4: 0.01, 0.5: 0.0127, 0.75: 0.0167, 1: 0.0212, 1.25: 0.0232 }
+      },
+      "RGP Online": {
+        "LAYER 1": { 0: 0, 0.4: 0.0065, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025 },
+        "LAYER 2": { 0: 0, 0.4: 0.0065, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025 }
+      },
+      "RGP Offline": {
+        "LAYER 1": { 0: 0, 0.4: 0.0008, 0.5: 0.001, 0.75: 0.0012, 1: 0.0017, 1.25: 0.002 },
+        "LAYER 2": { 0: 0, 0.4: 0.0008, 0.5: 0.001, 0.75: 0.0012, 1: 0.0017, 1.25: 0.002 }
+      },
+      "Math Champs Online": {
+        "LAYER 1": { 0: 0, 0.4: 0.0016, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002 },
+        "LAYER 2": { 0: 0, 0.4: 0.0016, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002 }
+      },
+      "Skill Academy": {
+        "LAYER 1": { 0: 0, 0.4: 0.004, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005 },
+        "LAYER 2": { 0: 0, 0.4: 0.004, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005 }
+      }
+    };
+    const WEEK_30_LEADER_RATES = {
+      "BAC & Mathchamps Offline": {
+        "LAYER 1": { 0: 0, 0.5: 0.01, 0.75: 0.014, 1: 0.019, 1.25: 0.022, 1.5: 0.026, 2: 0.038 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.0085, 1: 0.011, 1.25: 0.0135, 1.5: 0.0165, 2: 0.021 }
+      },
+      "BAON Elite": {
+        "LAYER 1": { 0: 0, 0.5: 0.011, 0.75: 0.016, 1: 0.0245, 1.25: 0.027, 1.5: 0.0325, 2: 0.0485 },
+        "LAYER 2": { 0: 0, 0.5: 0.0065, 0.75: 0.009, 1: 0.0145, 1.25: 0.018, 1.5: 0.022, 2: 0.0285 }
+      },
+      "BAON Prem": {
+        "LAYER 1": { 0: 0, 0.5: 0.011, 0.75: 0.016, 1: 0.026, 1.25: 0.031, 1.5: 0.037, 2: 0.0515 },
+        "LAYER 2": { 0: 0, 0.5: 0.0065, 0.75: 0.009, 1: 0.0155, 1.25: 0.0185, 1.5: 0.023, 2: 0.029 }
+      },
+      "BAON Reg": {
+        "LAYER 1": { 0: 0, 0.5: 0.017, 0.75: 0.02, 1: 0.0445, 1.25: 0.056, 1.5: 0.0675, 2: 0.0895 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.007, 1: 0.01, 1.25: 0.011, 1.5: 0.015, 2: 0.017 }
+      },
+      "Others": {
+        "LAYER 1": { 0: 0, 0.5: 0.002, 0.75: 0.003, 1: 0.003, 1.25: 0.0035, 1.5: 0.0035, 2: 0.0035 },
+        "LAYER 2": { 0: 0, 0.5: 0.0015, 0.75: 0.002, 1: 0.0025, 1.25: 0.0025, 1.5: 0.0025, 2: 0.0025 }
+      },
+      "RB": {
+        "LAYER 1": { 0: 0, 0.5: 0.009, 0.75: 0.012, 1: 0.015, 1.25: 0.0165, 1.5: 0.0195, 2: 0.0295 },
+        "LAYER 2": { 0: 0, 0.5: 0.01, 0.75: 0.013, 1: 0.0165, 1.25: 0.018, 1.5: 0.0215, 2: 0.032 }
+      },
+      "RGP Online": {
+        "LAYER 1": { 0: 0, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025, 1.5: 0.025, 2: 0.025 },
+        "LAYER 2": { 0: 0, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025, 1.5: 0.025, 2: 0.025 }
+      },
+      "RGP Offline": {
+        "LAYER 1": { 0: 0, 0.5: 0.001, 0.75: 0.0015, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 },
+        "LAYER 2": { 0: 0, 0.5: 0.001, 0.75: 0.0015, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 }
+      },
+      "Math Champs Online": {
+        "LAYER 1": { 0: 0, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 },
+        "LAYER 2": { 0: 0, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 }
+      },
+      "Skill Academy": {
+        "LAYER 1": { 0: 0, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005, 1.5: 0.005, 2: 0.005 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005, 1.5: 0.005, 2: 0.005 }
+      }
+    };
+    const PROMPTER_INBOUND_LEADER_RATES = {
+      "Online Product": { 0: 0, 0.4: 0.0042, 0.5: 0.0066, 0.75: 0.01, 1: 0.0135, 1.25: 0.0135 },
+      "Offline Product": { 0: 0, 0.4: 0.0015, 0.5: 0.0023, 0.75: 0.003, 1: 0.0038, 1.25: 0.0038 },
+      "RGP Online": { 0: 0, 0.4: 0.0031, 0.5: 0.0044, 0.75: 0.0075, 1: 0.0099, 1.25: 0.0099 },
+      "RGP Offline": { 0: 0, 0.4: 0.0004, 0.5: 0.0006, 0.75: 0.0006, 1: 0.0008, 1.25: 0.0008 }
+    };
+    const WEEK_30_PROMPTER_INBOUND_LEADER_RATES = {
+      "Online Product": { 0: 0, 0.5: 0.005, 0.75: 0.0085, 1: 0.0115, 1.25: 0.0145, 1.5: 0.017, 2: 0.0195 },
+      "Offline Product": { 0: 0, 0.5: 0.002, 0.75: 0.0025, 1: 0.003, 1.25: 0.004, 1.5: 0.0045, 2: 0.0055 },
+      "RGP Online": { 0: 0, 0.5: 0.0045, 0.75: 0.0075, 1: 0.01, 1.25: 0.012, 1.5: 0.012, 2: 0.012 },
+      "RGP Offline": { 0: 0, 0.5: 0.0005, 0.75: 0.0008, 1: 0.0008, 1.25: 0.001, 1.5: 0.001, 2: 0.001 }
+    };
+    const WEEK_27_LEADER_TARGETS = new Map([
+      ["faizal fahmi arridai||LAYER 1", 257400000],
+      ["yosua sitorus||LAYER 1", 280800000],
+      ["wahyu oktavia widiasari||LAYER 1", 280800000],
+      ["wildan adiwena||LAYER 2", 141400000],
+      ["yuliani musfikoh||LAYER 2", 141400000],
+      ["arif pambudi||LAYER 1", 280800000],
+      ["akhmad lutfi khoerudin||LAYER 1", 280800000],
+      ["rizha faturahman||LAYER 2", 158000000],
+      ["satyadi ambia||PROMPTER INBOUND", 1288000000],
+      ["erna erviana purnamasari||PROMPTER INBOUND", 1288000000],
+      ["imam nugroho||PROMPTER INBOUND", 1288000000],
+      ["muhammad bil fadli||LAYER 2", 157200000],
+      ["chintya ayu jayawijayanti||LAYER 2", 149700000],
+      ["sri wiwara||LAYER 2", 141400000],
+      ["amin rosidi||LAYER 1", 280800000],
+      ["aris riski fauzi||LAYER 2", 133100000],
+      ["danu arri pramudya||LAYER 2", 149700000],
+      ["yosua adhi surya wijaya||LAYER 2", 149700000]
+    ]);
+    const WEEK_28_LEADER_TARGETS = new Map([
+      ["faizal fahmi arridai||LAYER 1", 280800000],
+      ["yosua sitorus||LAYER 1", 280800000],
+      ["wahyu oktavia widiasari||LAYER 1", 280800000],
+      ["wildan adiwena||LAYER 2", 141400000],
+      ["yuliani musfikoh||LAYER 2", 149700000],
+      ["arif pambudi||LAYER 1", 280800000],
+      ["akhmad lutfi khoerudin||LAYER 1", 280800000],
+      ["rizha faturahman||LAYER 2", 158000000],
+      ["satyadi ambia||PROMPTER INBOUND", 1288000000],
+      ["erna erviana purnamasari||PROMPTER INBOUND", 1288000000],
+      ["imam nugroho||PROMPTER INBOUND", 1288000000],
+      ["muhammad bil fadli||LAYER 2", 157200000],
+      ["chintya ayu jayawijayanti||LAYER 2", 158000000],
+      ["sri wiwara||LAYER 2", 149700000],
+      ["amin rosidi||LAYER 1", 280800000],
+      ["aris riski fauzi||LAYER 2", 133100000],
+      ["danu arri pramudya||LAYER 2", 141400000],
+      ["yosua adhi surya wijaya||LAYER 2", 149700000]
+    ]);
+    const WEEK_30_LEADER_TARGETS = new Map([
+      ["faizal fahmi arridai||LAYER 1", 218400000],
+      ["yosua sitorus||LAYER 1", 218400000],
+      ["wahyu oktavia widiasari||LAYER 1", 218400000],
+      ["arif pambudi||LAYER 1", 218400000],
+      ["akhmad lutfi khoerudin||LAYER 1", 218400000],
+      ["amin rosidi||LAYER 1", 218400000],
+      ["rizha faturahman||LAYER 2", 104000000],
+      ["muhammad bil fadli||LAYER 2", 114400000],
+      ["yuliani musfikoh||LAYER 2", 104000000],
+      ["sri wiwara||LAYER 2", 93600000],
+      ["aris riski fauzi||LAYER 2", 104000000],
+      ["yosua adhi surya wijaya||LAYER 2", 114400000],
+      ["danu arri pramudya||LAYER 2", 93600000],
+      ["wildan adiwena||LAYER 2", 104000000]
+    ]);
+    const LEADER_TARGETS_BY_WEEK = {
+      "27": WEEK_27_LEADER_TARGETS,
+      "28": WEEK_28_LEADER_TARGETS,
+      "29": WEEK_28_LEADER_TARGETS,
+      "30": WEEK_30_LEADER_TARGETS,
+      "31": WEEK_30_LEADER_TARGETS
+    };
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
     function isExcludedTopIncentiveAgent(name) {
       return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
@@ -407,14 +577,23 @@
     function normalizedTeamCategory(teamCategory) {
       return String(teamCategory || "").trim().toUpperCase();
     }
+    function isPrompterInboundTeam(teamCategory) {
+      const team = normalizedTeamCategory(teamCategory);
+      return team === "PROMPTER INBOUND" || team === "PROMTER INBOUND";
+    }
     function isSchemaTeam(teamCategory) {
-      return ["LAYER 1", "LAYER 2"].includes(normalizedTeamCategory(teamCategory));
+      const team = normalizedTeamCategory(teamCategory);
+      return ["LAYER 1", "LAYER 2"].includes(team) || isPrompterInboundTeam(team);
     }
     function isAllIncentiveSchemaRow(row) {
       const team = normalizedTeamCategory(row.teamCategory);
       if (hasLayer2AgentTargetOverride(row.agent, row.week)) return true;
       if (team === "LAYER 1") return true;
-      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30"].includes(String(row.week));
+      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(String(row.week));
+    }
+    function isLeaderIncentiveSchemaRow(row) {
+      if (isAllIncentiveSchemaRow(row)) return true;
+      return isPrompterInboundTeam(row.teamCategory) && ["27", "28", "29", "30", "31"].includes(String(row.week));
     }
     function isYosuaLeaderName(coach) {
       return String(coach || "").trim().toLowerCase() === "yosua sitorus";
@@ -430,7 +609,7 @@
       const overrideTarget = layer2AgentTargetOverride(agent, week);
       if (overrideTarget) return overrideTarget;
       const normalizedTeam = normalizedTeamCategory(teamCategory);
-      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28"].includes(String(week))) {
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(String(week))) {
         return LAYER_2_WEEK_TARGETS[String(week)] || 0;
       }
       return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
@@ -565,6 +744,44 @@
         bonus: String(fmt(row, isExtend ? 15 : 13) || cell(row, isExtend ? 15 : 13) || "").trim(),
         sourceRow: index + 5
       })).filter((r) => r.serial || r.packageName);
+    }
+    const BAO_TOPUP_SECTIONS = [
+      { key: "rb1y", title: "BTL TOP UP/UPGRADE FROM RUANGBELAJAR TO BAO (DURASI RB 1 TAHUN)", start: 31, ru: false },
+      { key: "regular", title: "BTL TOP UP/UPGRADE FROM BA ONLINE REGULAR", start: 40, ru: true },
+      { key: "premium", title: "BTL TOP UP/UPGRADE FROM BA ONLINE PREMIUM", start: 50, ru: true },
+      { key: "elite", title: "BTL TOP UP/UPGRADE FROM BA ONLINE ELITE", start: 60, ru: true }
+    ];
+    function parseBaoTopup(table) {
+      const rows = [];
+      (table.rows || []).forEach((row, index) => {
+        const serial = String(fmt(row, 1) || cell(row, 1) || "").trim();
+        const packageName = String(fmt(row, 2) || cell(row, 2) || "").trim();
+        if (!serial && !packageName) return;
+        if (/^EARLY BIRD|^\[?NAY/i.test(packageName)) return;
+        const base = {
+          sourceRow: index + 1,
+          serial,
+          packageName,
+          basePrice: parseMoney(cell(row, 3) || fmt(row, 3)),
+          deeplink: serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(serial)}&voucher_serial=` : ""
+        };
+        BAO_TOPUP_SECTIONS.forEach((section) => {
+          const offset = section.ru ? 1 : 0;
+          const couponAmount = parseMoney(cell(row, section.start) || fmt(row, section.start));
+          const priceAfterDisc = parseMoney(cell(row, section.start + 1 + offset) || fmt(row, section.start + 1 + offset));
+          const cicilan2Price = parseMoney(cell(row, section.start + 2 + offset) || fmt(row, section.start + 2 + offset));
+          const cicilan2_1 = parseMoney(cell(row, section.start + 3 + offset) || fmt(row, section.start + 3 + offset));
+          const cicilan2_2 = parseMoney(cell(row, section.start + 4 + offset) || fmt(row, section.start + 4 + offset));
+          const cicilan3Price = parseMoney(cell(row, section.start + 5 + offset) || fmt(row, section.start + 5 + offset));
+          const cicilan3_1 = parseMoney(cell(row, section.start + 6 + offset) || fmt(row, section.start + 6 + offset));
+          const cicilan3_2 = parseMoney(cell(row, section.start + 7 + offset) || fmt(row, section.start + 7 + offset));
+          const cicilan3_3 = parseMoney(cell(row, section.start + 8 + offset) || fmt(row, section.start + 8 + offset));
+          const ru = section.ru ? String(fmt(row, section.start + 1) || cell(row, section.start + 1) || "").trim() : "";
+          if (!couponAmount && !priceAfterDisc && !cicilan2Price && !cicilan3Price) return;
+          rows.push({ ...base, section: section.key, sectionTitle: section.title, couponAmount, ru, priceAfterDisc, cicilan2Price, cicilan2_1, cicilan2_2, cicilan3Price, cicilan3_1, cicilan3_2, cicilan3_3 });
+        });
+      });
+      return rows;
     }
     function parseRuangbelajar(table) {
       let currentPackageGroup = "SINGLE SETARA";
@@ -877,6 +1094,7 @@
       else if (activeView === "dodolan") renderDodolan(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
       else if (activeView === "universe") renderUniverse();
       else if (activeView === "allIncentive") renderAllIncentiveAgent();
+      else if (activeView === "leaderIncentive") renderLeaderIncentive();
       else if (activeView === "baoEarl") renderBaoEarl();
       else if (activeView === "ruangbelajar") renderRuangbelajar();
       else if (activeView === "flashSaleRg") renderFlashSaleRg();
@@ -1090,7 +1308,7 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_28_LAYER_1_TIERS);
       }
-      if (String(week) === "30") {
+      if (["30", "31"].includes(String(week))) {
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_30_LAYER_TIERS);
       }
@@ -1149,6 +1367,100 @@
         agents: [...agents.values()].sort((a, b) => b.incentive - a.incentive)
       };
     }
+    function leaderRateFor(category, achievement, teamCategory, week = "") {
+      let selected = 0;
+      const tiers = ["30", "31"].includes(String(week)) ? WEEK_30_LEADER_TIERS : LEADER_INCENTIVE_TIERS;
+      tiers.forEach((tier) => {
+        if (achievement >= tier) selected = tier;
+      });
+      if (isPrompterInboundTeam(teamCategory)) {
+        const prompterCategory = prompterInboundProductCategory(category);
+        const rateTable = PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS.has(String(week)) ? WEEK_30_PROMPTER_INBOUND_LEADER_RATES : PROMPTER_INBOUND_LEADER_RATES;
+        return rateTable[prompterCategory]?.[selected] ?? 0;
+      }
+      const layer = normalizedTeamCategory(teamCategory) === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      const rateTable = ["30", "31"].includes(String(week)) ? WEEK_30_LEADER_RATES : LEADER_INCENTIVE_RATES;
+      return rateTable[category]?.[layer]?.[selected] ?? rateTable.Others[layer][selected] ?? 0;
+    }
+    function prompterInboundProductCategory(category) {
+      if (category === "RGP Online") return "RGP Online";
+      if (category === "RGP Offline") return "RGP Offline";
+      if (category === "BAC & Mathchamps Offline") return "Offline Product";
+      return "Online Product";
+    }
+    function leaderTargetForWeek(coach, week, teamCategory, fallbackTarget) {
+      const team = normalizedTeamCategory(teamCategory);
+      if (isPrompterInboundTeam(team)) return fallbackTarget;
+      const targetMap = LEADER_TARGETS_BY_WEEK[String(week)];
+      if (targetMap) {
+        const key = `${String(coach || "").trim().toLowerCase()}||${team}`;
+        const override = targetMap.get(key);
+        if (override) return override;
+      }
+      return fallbackTarget;
+    }
+    function calculateLeaderIncentives(rows) {
+      const grouped = new Map();
+      rows.forEach((row) => {
+        const rawTeamCategory = normalizedTeamCategory(row.teamCategory);
+        const teamCategory = hasLayer2AgentTargetOverride(row.agent, row.week) ? "LAYER 2" : (isPrompterInboundTeam(rawTeamCategory) ? "PROMPTER INBOUND" : rawTeamCategory);
+        if (!["LAYER 1", "LAYER 2", "PROMPTER INBOUND"].includes(teamCategory)) return;
+        const key = `${row.coach || "-"}||${row.week}||${teamCategory}`;
+        const current = grouped.get(key) || { coach: row.coach || "-", week: row.week, teamCategory, revenue: 0, txn: 0, rows: [], agents: new Map() };
+        current.revenue += row.amount;
+        current.txn += row.txn;
+        current.rows.push(row);
+        if (row.agent && !current.agents.has(row.agent)) {
+          const prompterTarget = PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS.has(String(row.week)) ? PROMPTER_INBOUND_WEEK_30_AGENT_TARGET : PROMPTER_INBOUND_AGENT_TARGET;
+          current.agents.set(row.agent, isPrompterInboundTeam(teamCategory) ? prompterTarget : targetForWeek(row.week, teamCategory, row.agent));
+        }
+        grouped.set(key, current);
+      });
+      const weekly = [...grouped.values()].map((group) => {
+        const fallbackTarget = [...group.agents.values()].reduce((sum, target) => sum + target, 0);
+        const targetRevenue = leaderTargetForWeek(group.coach, group.week, group.teamCategory, fallbackTarget);
+        const achievement = targetRevenue ? group.revenue / targetRevenue : 0;
+        const categories = {};
+        let incentive = 0;
+        group.rows.forEach((row) => {
+          const category = week25ProductCategory(row);
+          const rate = leaderRateFor(category, achievement, group.teamCategory, group.week);
+          const value = row.amount * rate;
+          incentive += value;
+          const displayCategory = isPrompterInboundTeam(group.teamCategory) ? prompterInboundProductCategory(category) : category;
+          const item = categories[displayCategory] || { amount: 0, incentive: 0, txn: 0 };
+          item.amount += row.amount;
+          item.incentive += value;
+          item.txn += row.txn;
+          categories[displayCategory] = item;
+        });
+        return { ...group, agentCount: group.agents.size, targetRevenue, achievement, incentive, categories };
+      });
+      const leaders = new Map();
+      weekly.forEach((row) => {
+        const key = `${row.coach}||${row.teamCategory}`;
+        const item = leaders.get(key) || { key: row.coach, teamCategory: row.teamCategory, amount: 0, targetRevenue: 0, txn: 0, incentive: 0, weeks: 0, agentWeekCount: 0, maxAchievement: 0, categories: {} };
+        item.amount += row.revenue;
+        item.targetRevenue += row.targetRevenue;
+        item.txn += row.txn;
+        item.incentive += row.incentive;
+        item.weeks += 1;
+        item.agentWeekCount += row.agentCount;
+        item.maxAchievement = Math.max(item.maxAchievement, row.achievement);
+        Object.entries(row.categories).forEach(([category, value]) => {
+          const current = item.categories[category] || { amount: 0, incentive: 0, txn: 0 };
+          current.amount += value.amount;
+          current.incentive += value.incentive;
+          current.txn += value.txn;
+          item.categories[category] = current;
+        });
+        leaders.set(key, item);
+      });
+      return {
+        weekly: weekly.sort((a, b) => Number(a.week) - Number(b.week) || b.incentive - a.incentive),
+        leaders: [...leaders.values()].sort((a, b) => b.incentive - a.incentive)
+      };
+    }
     function renderAllIncentiveAgent() {
       const sales = filteredRaw().filter(isAllIncentiveSchemaRow);
       const result = calculateSchemaIncentives(sales);
@@ -1185,6 +1497,35 @@
           ${schemaWeeklyTable(visibleWeekly)}
         </section>`;
     }
+    function renderLeaderIncentive() {
+      const sales = filteredRawForFullWeeksInMonth().filter(isLeaderIncentiveSchemaRow);
+      const result = calculateLeaderIncentives(sales);
+      const totalRevenue = result.leaders.reduce((s, r) => s + r.amount, 0);
+      const totalTarget = result.leaders.reduce((s, r) => s + r.targetRevenue, 0);
+      const totalIncentive = result.leaders.reduce((s, r) => s + r.incentive, 0);
+      const totalTxn = result.leaders.reduce((s, r) => s + r.txn, 0);
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Leader Incentive", rupiah(totalIncentive), "Rate sesuai tabel coach")}
+          ${kpi("Revenue RAW", rupiah(totalRevenue), "Sesuai filter")}
+          ${kpi("Target Coach", rupiah(totalTarget), "Week 27-28 mengikuti tabel target coach")}
+          ${kpi("% to Target", `${num(totalTarget ? totalRevenue / totalTarget * 100 : 0, 1)}%`, "Revenue / target")}
+          ${kpi("Total TXN", num(totalTxn), "RAW Txn")}
+          ${kpi("Leader", num(result.leaders.length), "Coach + Layer")}
+        </section>
+        <section class="grid">
+          ${metricCard("Top Leader Incentive", result.leaders.map((r) => ({ ...r, amount: r.incentive })), "amount")}
+          ${leaderSchemaInfoCard(result.weekly)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Incentive Leader</h2><span class="note">Template mengikuti All Incentive Agent</span></div>
+          ${leaderTable(result.leaders)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Detail Incentive Leader per Week</h2><span class="note">${num(result.weekly.length)} coach-week-layer</span></div>
+          ${leaderWeeklyTable(result.weekly)}
+        </section>`;
+    }
     function targetSimulationTable(rates, targetRevenue, note = "Target x TH x rate product", tiers = WEEK_25_LAYER_1_TIERS) {
       const products = [
         "BAC & Mathchamps Offline",
@@ -1202,6 +1543,7 @@
     function selectedSchemaLayers() {
       const selectedTeam = normalizedTeamCategory(teamFilter.value);
       if (selectedTeam === "LAYER 1" || selectedTeam === "LAYER 2") return [selectedTeam];
+      if (selectedTeam === "PROMPTER INBOUND") return [selectedTeam];
       return ["LAYER 1", "LAYER 2"];
     }
     function schemaRatesFor(week, layer) {
@@ -1281,12 +1623,95 @@
       const rows = calculatorSchema?.tiers || [];
       return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Threshold achievement</span></div><div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${(calculatorSchema?.products || []).map((p) => `<th class="number">${esc(p.label)}</th>`).join("")}</tr></thead><tbody>${rows.map((tier) => `<tr><td>${num(tier.threshold * 100, 0)}%</td>${(calculatorSchema?.products || []).map((p) => `<td class="number">${num((tier.rates[p.label] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
     }
+    function leaderRatesForLayer(layer) {
+      if (isPrompterInboundTeam(layer)) return PROMPTER_INBOUND_LEADER_RATES;
+      const selectedLayer = normalizedTeamCategory(layer) === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      return Object.fromEntries(Object.entries(LEADER_INCENTIVE_RATES).map(([product, layers]) => [product, layers[selectedLayer] || layers["LAYER 1"]]));
+    }
+    function leaderRatesForWeekLayer(week, layer) {
+      if (isPrompterInboundTeam(layer)) return PROMPTER_INBOUND_LEADER_RATES;
+      const selectedLayer = normalizedTeamCategory(layer) === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      const rateTable = String(week) === "30" ? WEEK_30_LEADER_RATES : LEADER_INCENTIVE_RATES;
+      return Object.fromEntries(Object.entries(rateTable).map(([product, layers]) => [product, layers[selectedLayer] || layers["LAYER 1"]]));
+    }
+    function leaderSimulationTarget(week, layer, weeklyRows) {
+      const selectedLayer = isPrompterInboundTeam(layer) ? "PROMPTER INBOUND" : (normalizedTeamCategory(layer) === "LAYER 2" ? "LAYER 2" : "LAYER 1");
+      const selectedCoach = coachFilter.value || "all";
+      const visibleTargets = weeklyRows
+        .filter((row) => String(row.week) === String(week) && normalizedTeamCategory(row.teamCategory) === selectedLayer)
+        .map((row) => row.targetRevenue)
+        .filter(Boolean);
+      if (visibleTargets.length) {
+        const total = visibleTargets.reduce((sum, target) => sum + target, 0);
+        return {
+          target: selectedCoach === "all" ? total / visibleTargets.length : total,
+          note: selectedCoach === "all" ? "Rata-rata target coach x TH x rate product" : "Target coach x TH x rate product"
+        };
+      }
+      const mappedTargets = LEADER_TARGETS_BY_WEEK[String(week)];
+      if (mappedTargets) {
+        const mappedValues = [...mappedTargets.entries()]
+          .filter(([key]) => key.endsWith(`||${selectedLayer}`) && (selectedCoach === "all" || key.startsWith(`${selectedCoach.trim().toLowerCase()}||`)))
+          .map(([, target]) => target)
+          .filter(Boolean);
+        if (mappedValues.length) {
+          const total = mappedValues.reduce((sum, target) => sum + target, 0);
+          return {
+            target: selectedCoach === "all" ? total / mappedValues.length : total,
+            note: selectedCoach === "all" ? "Rata-rata target coach x TH x rate product" : "Target coach x TH x rate product"
+          };
+        }
+      }
+      return { target: targetForWeek(week, selectedLayer), note: "Target default x TH x rate product" };
+    }
+    function leaderSchemaInfoForWeek(week, weeklyRows) {
+      return selectedSchemaLayers().map((layer) => {
+        const rates = leaderRatesForWeekLayer(week, layer);
+        const simulation = leaderSimulationTarget(week, layer, weeklyRows);
+        const tiers = String(week) === "30" && !isPrompterInboundTeam(layer) ? WEEK_30_LEADER_TIERS : LEADER_INCENTIVE_TIERS;
+        return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target Simulasi ${rupiah(simulation.target)}</span></div>${schemaRateTable(rates, tiers)}${targetSimulationTable(rates, simulation.target, simulation.note, tiers)}`;
+      }).join("");
+    }
+    function leaderSchemaInfoCard(weeklyRows) {
+      if (["23", "24", "25", "26", "27", "28", "29", "30"].includes(weekFilter.value || "all")) {
+        const week = weekFilter.value;
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Leader mengikuti filter Kategori Team</span></div>${leaderSchemaInfoForWeek(week, weeklyRows)}</div>`;
+      }
+      if (selectedSchemaLayers().length < 2) {
+        const weeks = [...new Set(weeklyRows.map((r) => String(r.week || "")).filter(Boolean))]
+          .sort((a, b) => Number(a) - Number(b));
+        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30"];
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${schemaWeeks.map((week) => leaderSchemaInfoForWeek(week, weeklyRows)).join("")}</div>`;
+      }
+      return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Leader incentive coach</span></div>${leaderRateTable()}</div>`;
+    }
     function schemaAgentTable(rows) {
       return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Schema Incentive</th><th class="number">Revenue</th><th class="number">TXN</th><th class="number">Weeks</th><th class="number">Max Achievement</th><th class="number">Incentive / Revenue</th></tr></thead><tbody>${rows.map((r) => `<tr${yosuaAgentRowClass(r.key)}><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.weeks)}</td><td class="number">${num(r.maxAchievement * 100, 1)}%</td><td class="number">${num(r.amount ? r.incentive / r.amount * 100 : 0, 2)}%</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function leaderMixText(categories) {
+      return Object.entries(categories)
+        .sort((a, b) => b[1].incentive - a[1].incentive)
+        .map(([category, value]) => `${category}: ${rupiah(value.incentive)}`)
+        .join(" | ");
+    }
+    function leaderTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Coach</th><th>Layer</th><th class="number">Leader Incentive</th><th class="number">Revenue</th><th class="number">Target Coach</th><th class="number">% to Target</th><th class="number">TXN</th><th class="number">Agent-Week</th><th class="number">Weeks</th><th>Product Mix</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td>${esc(r.teamCategory)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.targetRevenue)}</td><td class="number">${num(r.targetRevenue ? r.amount / r.targetRevenue * 100 : 0, 1)}%</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.agentWeekCount)}</td><td class="number">${num(r.weeks)}</td><td>${esc(leaderMixText(r.categories))}</td></tr>`).join("") || `<tr><td colspan="10">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function leaderWeeklyTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Week</th><th>Coach</th><th>Layer</th><th class="number">Leader Incentive</th><th class="number">Revenue</th><th class="number">Target Coach</th><th class="number">% to Target</th><th class="number">TXN</th><th class="number">Agent</th><th>Product Mix</th></tr></thead><tbody>${rows.map((r) => `<tr><td>Week ${esc(r.week)}</td><td>${esc(r.coach)}</td><td>${esc(r.teamCategory)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.revenue)}</td><td class="number">${rupiah(r.targetRevenue)}</td><td class="number">${num(r.achievement * 100, 1)}%</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.agentCount)}</td><td>${esc(leaderMixText(r.categories))}</td></tr>`).join("") || `<tr><td colspan="10">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function leaderRateTable() {
+      const products = Object.keys(LEADER_INCENTIVE_RATES);
+      return `<div class="table-wrap" style="max-height:340px"><table><thead><tr><th>Product</th><th>Team</th>${LEADER_INCENTIVE_TIERS.map((tier) => `<th class="number">${num(tier * 100, 0)}%</th>`).join("")}</tr></thead><tbody>${products.map((product) => {
+        const allTeam = ["RGP Online", "RGP Offline", "Math Champs Online", "Skill Academy"].includes(product);
+        const layers = allTeam ? ["LAYER 1"] : ["LAYER 1", "LAYER 2"];
+        return layers.map((layer) => `<tr><td>${esc(product)}</td><td>${allTeam ? "All Team" : esc(layer)}</td>${LEADER_INCENTIVE_TIERS.map((tier) => `<td class="number">${num((LEADER_INCENTIVE_RATES[product][layer][tier] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("");
+      }).join("")}</tbody></table></div>`;
     }
     function renderBaoEarl() {
       const q = searchFilter.value.trim().toLowerCase();
       const rows = baoEarlRows.filter((r) => !q || [r.source, r.serial, r.packageName, r.activeEndDate, r.extraGimmick, r.bonus].some((v) => String(v || "").toLowerCase().includes(q)));
+      const topupRows = baoTopupRows.filter((r) => !q || [r.sectionTitle, r.serial, r.packageName, r.ru].some((v) => String(v || "").toLowerCase().includes(q)));
       const earlyRows = rows.filter((r) => r.source === "NAY");
       const lowestBtl = rows.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
       contentEl.innerHTML = `
@@ -1294,10 +1719,15 @@
           ${kpi("Package", num(rows.length), "Data dari sheet Harga Brain Academy Online")}
           ${kpi("Harga BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Sesuai filter")}
           ${kpi("NAY", num(earlyRows.length), "Package")}
+          ${kpi("Top Up BAO", num(topupRows.length), "Lunas dan cicilan")}
         </section>
         <section class="card">
           <div class="section-title"><h2>Harga Brain Academy Online</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
           ${baoEarlTable(earlyRows)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Harga Top Up Brain Academy</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_TOPUP_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${baoTopupTables(topupRows)}
         </section>`;
     }
     function baoEarlTable(rows) {
@@ -1308,6 +1738,15 @@
         const incentive = priceTableIncentive(r);
         return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${r.cashback ? rupiah(r.cashback) : ""}</td><td class="number">${r.maxSispres ? rupiah(r.maxSispres) : ""}</td><td>${esc(r.extraGimmick || "")}</td><td>${esc(r.bonus || "")}</td><td class="number">${incentive ? `${rupiah(incentive.value)} (${num(incentive.rate * 100, 2)}%)` : ""}</td></tr>`;
       }).join("") || `<tr><td colspan="11">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function baoTopupTables(rows) {
+      return BAO_TOPUP_SECTIONS.map((section) => {
+        const sectionRows = rows.filter((r) => r.section === section.key);
+        return `<div class="section-title" style="margin-top:14px"><h2>${esc(section.title)}</h2><span class="note">${num(sectionRows.length)} package</span></div>${baoTopupTable(sectionRows, section.ru)}`;
+      }).join("");
+    }
+    function baoTopupTable(rows, showRu) {
+      return `<div class="table-wrap" style="max-height:420px"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">Coupon Amount</th>${showRu ? "<th>RU</th>" : ""}<th class="number">Price After Disc</th><th class="number">Cicilan 2x</th><th class="number">Cicilan 1</th><th class="number">Cicilan 2</th><th class="number">Cicilan 3x</th><th class="number">Cicilan 1</th><th class="number">Cicilan 2</th><th class="number">Cicilan 3</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${r.deeplink ? `<a class="button" href="${esc(r.deeplink)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${rupiah(r.couponAmount)}</td>${showRu ? `<td>${esc(r.ru)}</td>` : ""}<td class="number">${rupiah(r.priceAfterDisc)}</td><td class="number">${rupiah(r.cicilan2Price)}</td><td class="number">${rupiah(r.cicilan2_1)}</td><td class="number">${rupiah(r.cicilan2_2)}</td><td class="number">${rupiah(r.cicilan3Price)}</td><td class="number">${rupiah(r.cicilan3_1)}</td><td class="number">${rupiah(r.cicilan3_2)}</td><td class="number">${rupiah(r.cicilan3_3)}</td></tr>`).join("") || `<tr><td colspan="${showRu ? 14 : 13}">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function renderRuangbelajar() {
       const q = searchFilter.value.trim().toLowerCase();
@@ -1420,11 +1859,12 @@
         errorEl.style.display = "none";
         statusEl.textContent = "Memuat RAW dan Incentive...";
         if (!rawTable || !incentiveTable || force) {
-          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, earlybirdRubelTableData, flashSaleRgTableData, jadwalBacTableData, hargaBacTableData] = await Promise.all([
+          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, baoTopupTableData, earlybirdRubelTableData, flashSaleRgTableData, jadwalBacTableData, hargaBacTableData] = await Promise.all([
             loadJsonp("RAW"),
             loadJsonp("Incentive"),
             loadJsonp("Kalkulator Incentive"),
             loadJsonp("Harga Brain Academy Online", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
+            loadJsonp("NEW LUNAS DAN CICILAN TOP UP", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_TOPUP_GID }),
             loadJsonp("Ruangbelajar", { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
             loadJsonp("Flash Sale Festival RG", { sheetId: FLASHSALE_RG_SHEET_ID, gid: FLASHSALE_RG_GID }),
             loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
@@ -1435,6 +1875,7 @@
           baoEarlRows = [
             ...parseBaoEarl(baoEarlTableData, "NAY")
           ];
+          baoTopupRows = parseBaoTopup(baoTopupTableData);
           earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
           flashSaleRgRows = parseFlashSaleRg(flashSaleRgTableData);
           const jadwalBacParsed = parseJadwalBac(jadwalBacTableData.table);
@@ -1468,6 +1909,9 @@
   </script>
 </body>
 </html>
+
+
+
 
 
 
