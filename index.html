@@ -1122,7 +1122,7 @@
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26", "27", "28", "29", "30"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
@@ -1211,11 +1211,11 @@
       if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
       if (String(week) === "27") return layer === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
       if (["28", "29"].includes(String(week))) return layer === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
-      if (String(week) === "30") return layer === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
+      if (["30", "31"].includes(String(week))) return layer === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
     function priceTableIncentiveContext() {
-      const week = ["23", "24", "25", "26", "27", "28", "29", "30"].includes(weekFilter.value) ? weekFilter.value : "26";
+      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(weekFilter.value) ? weekFilter.value : "26";
       const selectedTeam = normalizedTeamCategory(teamFilter.value);
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
       return { week, layer, rates: schemaRatesFor(week, layer) };
@@ -1264,20 +1264,20 @@
       return selectedSchemaLayers().map((layer) => {
         const rates = schemaRatesFor(week, layer);
         const targetRevenue = targetForWeek(week, layer);
-        const tiers = String(week) === "30" ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS);
+        const tiers = ["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS);
         return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetRevenue)}</span></div>${schemaRateTable(rates, tiers)}${targetSimulationTable(rates, targetRevenue, "Target x TH x rate product", tiers)}`;
       }).join("");
     }
     function schemaInfoCard() {
-      if (["23", "24", "25", "26", "27", "28", "29", "30"].includes(weekFilter.value || "all")) {
+      if (["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(weekFilter.value || "all")) {
         const week = weekFilter.value;
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
       }
       if (selectedSchemaLayers().length < 2) {
         const weeks = [...visibleWeekSet(filteredRaw().filter(isAllIncentiveSchemaRow))]
-          .filter((week) => ["23", "24", "25", "26", "27", "28", "29", "30"].includes(week))
+          .filter((week) => ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(week))
           .sort((a, b) => Number(a) - Number(b));
-        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30"];
+        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30", "31"];
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${schemaWeeks.map((week) => schemaInfoForWeek(week)).join("")}</div>`;
       }
       const rows = calculatorSchema?.tiers || [];
