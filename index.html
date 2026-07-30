@@ -25,7 +25,14 @@
       font-family: Inter, Aptos, Segoe UI, Arial, sans-serif;
     }
     header {
-      background: var(--dark);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+        radial-gradient(circle at 74% 24%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+        radial-gradient(circle at 88% 76%, rgba(255,255,255,.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 48% 95%, rgba(132,70,255,.50), transparent 38%),
+        linear-gradient(105deg, #070812 0%, #1a1232 44%, #402083 100%);
       color: white;
       padding: 22px 28px 18px;
       display: flex;
@@ -33,9 +40,34 @@
       align-items: end;
       gap: 16px;
     }
-    h1 { margin: 0; font-size: clamp(24px, 3vw, 38px); letter-spacing: 0; }
+    header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 48% 36%, rgba(255,255,255,.18), transparent 27%);
+      pointer-events: none;
+    }
+    header > * { position: relative; z-index: 1; }
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4.5vw, 58px);
+      letter-spacing: .14em;
+      text-shadow: 0 0 8px rgba(255,255,255,.95), 0 0 18px rgba(255,255,255,.50), 0 0 32px rgba(143,99,255,.70);
+    }
     h2 { margin: 0; font-size: 18px; }
     .sub { color: #dce9e2; margin-top: 6px; font-size: 14px; }
+    .hero-tagline {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #f2eaff;
+      font-size: clamp(15px, 1.7vw, 21px);
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-shadow: 0 0 10px rgba(255,255,255,.55), 0 0 18px rgba(157,107,255,.75);
+    }
     main { max-width: 1540px; margin: 0 auto; padding: 20px; }
     button, a.button, select, input {
       border: 1px solid var(--line);
@@ -46,6 +78,49 @@
       font: inherit;
       font-weight: 750;
     }
+    select.native-multi { display: none; }
+    .multi-filter { position: relative; min-width: 220px; }
+    .multi-button {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+    }
+    .multi-button::after { content: "▾"; font-size: 12px; color: var(--muted); }
+    .multi-panel {
+      position: absolute;
+      z-index: 30;
+      top: calc(100% + 6px);
+      left: 0;
+      width: min(320px, 86vw);
+      max-height: 360px;
+      overflow: hidden;
+      display: none;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 40px rgba(23,33,31,.18);
+    }
+    .multi-filter.open .multi-panel { display: block; }
+    .multi-search { width: 100%; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+    .multi-options { max-height: 300px; overflow: auto; padding: 6px; }
+    .multi-option {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .multi-option:hover { background: #eef4ef; }
+    .multi-option input { width: 14px; height: 14px; }
+    .multi-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     button, a.button { cursor: pointer; text-decoration: none; }
     header button, header a.button { border-color: rgba(255,255,255,.25); }
     .actions, .filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -76,6 +151,42 @@
     .metric-list { display: grid; gap: 10px; }
     .metric-row { display: grid; grid-template-columns: minmax(160px,1fr) 130px 80px; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 9px; }
     .metric-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .block-metric-row {
+      display: grid;
+      grid-template-columns: minmax(140px, 220px) minmax(180px, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    .block-metric-name {
+      font-size: 12px;
+      font-weight: 780;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .block-metric-track {
+      height: 25px;
+      background: #edf3e8;
+      border-left: 1px solid #d7e5ce;
+      position: relative;
+      overflow: hidden;
+    }
+    .block-metric-fill {
+      height: 100%;
+      min-width: 44px;
+      background: #75b843;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 7px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.10);
+    }
+    .block-metric-meta { color: var(--muted); font-size: 11px; font-weight: 750; margin-left: 6px; }
     .name { font-weight: 780; overflow-wrap: anywhere; }
     .money, .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 780; }
     .bar { height: 12px; border-radius: 999px; background: #e8eee9; overflow: hidden; margin-top: 6px; }
@@ -104,8 +215,8 @@
 <body>
   <header>
     <div>
-      <h1>Summary All Month & Dodolan</h1>
-      <div class="sub">Sales dari sheet RAW, incentive dari sheet Incentive.</div>
+      <h1>CENTER UNIVERSE</h1>
+      <div class="hero-tagline">Stay Sharp. Stay Hungry. Stay #1</div>
     </div>
     <div class="actions">
       <button id="refresh">Refresh Data</button>
@@ -116,7 +227,6 @@
     <nav class="tabs">
       <button class="tab active" data-view="summary">Summary All Month</button>
       <button class="tab" data-view="dodolan">Dodolan</button>
-      <button class="tab" data-view="universe">UNIVERSE</button>
       <button class="tab" data-view="allIncentive">All Incentive Agent</button>
       <button class="tab" data-view="baoEarl">Harga Brain Academy Online</button>
       <button class="tab" data-view="ruangbelajar">Ruangbelajar</button>
@@ -127,27 +237,33 @@
       <div class="filters">
         <div>
           <div class="label">Month</div>
-          <select id="monthFilter"></select>
+          <select id="monthFilter" class="native-multi" multiple></select>
+          <div class="multi-filter" data-select="monthFilter"></div>
         </div>
         <div>
           <div class="label">Week</div>
-          <select id="weekFilter"></select>
+          <select id="weekFilter" class="native-multi" multiple></select>
+          <div class="multi-filter" data-select="weekFilter"></div>
         </div>
         <div>
           <div class="label">Coach</div>
-          <select id="coachFilter"></select>
+          <select id="coachFilter" class="native-multi" multiple></select>
+          <div class="multi-filter" data-select="coachFilter"></div>
         </div>
         <div>
           <div class="label">SPV</div>
-          <select id="spvFilter"></select>
+          <select id="spvFilter" class="native-multi" multiple></select>
+          <div class="multi-filter" data-select="spvFilter"></div>
         </div>
         <div>
           <div class="label">Kategori Team</div>
-          <select id="teamFilter"></select>
+          <select id="teamFilter" class="native-multi" multiple></select>
+          <div class="multi-filter" data-select="teamFilter"></div>
         </div>
         <div>
           <div class="label">Agent Name</div>
-          <select id="agentFilter"></select>
+          <select id="agentFilter" class="native-multi" multiple></select>
+          <div class="multi-filter" data-select="agentFilter"></div>
         </div>
         <div>
           <div class="label">Cari</div>
@@ -165,11 +281,13 @@
     const SHEET_ID = "1nI9uXMjZwSKTKHXcdLdqhKRWVBOi1eiBHTwjri8QxWo";
     const BAO_EARL_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
     const BAO_EARL_GID = "1471356061";
+    const BAO_EARL_SHEET_NAME = "SPPJULI 28 JULI - 9 AGS 2026";
     const RUANGBELAJAR_SHEET_ID = "1GFN0S7EVVXy42oU_EHwh1GE1b_MihzR-i-2aZG9jjeE";
     const RUANGBELAJAR_GID = "1529053994";
     const RUANGBELAJAR_HIDDEN_ROWS = new Set([3, 4, 100, 101, 102]);
     const EARLYBIRD_RUBEL_SHEET_ID = "1VRW9hVMTT9DQBkSz6SMJN_Kgb4p0EQnTF5FUCM-jxEk";
     const EARLYBIRD_RUBEL_GID = "123313084";
+    const EARLYBIRD_RUBEL_SHEET_NAME = "SPPJULI (28 Juli-9 Agustus)";
     const FLASHSALE_RG_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
     const FLASHSALE_RG_GID = "1252873967";
     const JADWAL_BAC_SHEET_ID = "1oChTs2KBk7GgjKXMfmbabE38ng4NQol86lMYR90ib-A";
@@ -548,24 +666,23 @@
         incentive: parseMoney(cell(row, incentiveIdx) || fmt(row, incentiveIdx))
       })).filter((r) => r.agent && r.week && Number(r.week) >= 1 && r.incentive >= 0);
     }
-    function parseBaoEarl(table, source = "Early Bird") {
-      const isExtend = source === "Extend";
+    function parseBaoEarl(table, source = BAO_EARL_SHEET_NAME) {
       return table.rows.map((row, index) => ({
         source,
-        deeplink: String(fmt(row, isExtend ? 0 : -1) || cell(row, isExtend ? 0 : -1) || "").trim(),
-        serial: String(fmt(row, isExtend ? 1 : 0) || cell(row, isExtend ? 1 : 0) || "").trim(),
-        packageName: String(fmt(row, isExtend ? 2 : 1) || cell(row, isExtend ? 2 : 1) || "").trim(),
-        activeEndDate: String(fmt(row, isExtend ? 3 : -1) || cell(row, isExtend ? 3 : -1) || "").trim(),
-        basePrice: parseMoney(cell(row, isExtend ? 4 : 2) || fmt(row, isExtend ? 4 : 2)),
-        btlDiscountBefore: fmt(row, isExtend ? 9 : 7) || cell(row, isExtend ? 9 : 7) || "",
-        btlPriceBefore: parseMoney(cell(row, isExtend ? 11 : 8) || fmt(row, isExtend ? 11 : 8)),
-        btlDiscountAfter: fmt(row, isExtend ? 10 : 9) || cell(row, isExtend ? 10 : 9) || "",
-        btlPriceAfter: parseMoney(cell(row, isExtend ? 12 : 10) || fmt(row, isExtend ? 12 : 10)),
-        cashback: parseMoney(cell(row, isExtend ? 14 : 11) || fmt(row, isExtend ? 14 : 11)),
-        maxSispres: parseMoney(cell(row, isExtend ? -1 : 12) || fmt(row, isExtend ? -1 : 12)),
-        extraGimmick: String(fmt(row, isExtend ? 13 : -1) || cell(row, isExtend ? 13 : -1) || "").trim(),
-        bonus: String(fmt(row, isExtend ? 15 : 13) || cell(row, isExtend ? 15 : 13) || "").trim(),
-        sourceRow: index + 5
+        deeplink: "",
+        serial: String(fmt(row, 0) || cell(row, 0) || "").trim(),
+        packageName: String(fmt(row, 1) || cell(row, 1) || "").trim(),
+        activeEndDate: "",
+        basePrice: parseMoney(cell(row, 2) || fmt(row, 2)),
+        btlDiscountBefore: fmt(row, 7) || cell(row, 7) || "",
+        btlPriceBefore: parseMoney(cell(row, 8) || fmt(row, 8)),
+        btlDiscountAfter: fmt(row, 9) || cell(row, 9) || "",
+        btlPriceAfter: parseMoney(cell(row, 10) || fmt(row, 10)),
+        cashback: 0,
+        maxSispres: 0,
+        extraGimmick: "",
+        bonus: String(fmt(row, 11) || cell(row, 11) || "").trim(),
+        sourceRow: index + 1
       })).filter((r) => r.serial || r.packageName);
     }
     function parseRuangbelajar(table) {
@@ -618,34 +735,34 @@
     function parseEarlybirdRubel(table) {
       let currentGroup = "";
       return table.rows.map((row) => {
-        const serial = String(fmt(row, 3) || cell(row, 3) || "").trim();
-        const packageName = String(fmt(row, 4) || cell(row, 4) || "").trim();
+        const serial = String(fmt(row, 2) || cell(row, 2) || "").trim();
+        const packageName = String(fmt(row, 3) || cell(row, 3) || "").trim();
         if (!serial && packageName) {
           currentGroup = packageName;
           return null;
         }
         return {
           group: currentGroup,
-          releaseDate: String(fmt(row, 0) || cell(row, 0) || "").trim(),
-          deeplink: String(fmt(row, 1) || cell(row, 1) || "").trim(),
-          packageType: String(fmt(row, 2) || cell(row, 2) || "").trim(),
+          releaseDate: "",
+          deeplink: String(fmt(row, 0) || cell(row, 0) || "").trim(),
+          packageType: String(fmt(row, 1) || cell(row, 1) || "").trim(),
           serial,
           packageName,
-          activeUntil: String(fmt(row, 5) || cell(row, 5) || "").trim(),
-          basePrice: priceCell(row, 6),
-          installment1Base: priceCell(row, 7),
-          installment2Base: priceCell(row, 8),
-          installment1: priceCell(row, 9),
-          installment2: priceCell(row, 10),
-          installment3: priceCell(row, 11),
-          atlDiscount: fmt(row, 12) || cell(row, 12) || "",
-          atlAfterPrice: priceCell(row, 13),
-          roundingAfterPrice: priceCell(row, 14),
-          btlDiscount: fmt(row, 15) || cell(row, 15) || "",
-          lunas: priceCell(row, 16),
-          cashback: priceCell(row, 17),
-          flashSaleDiscount: fmt(row, 18) || cell(row, 18) || "",
-          flashSalePrice: priceCell(row, 19)
+          activeUntil: String(fmt(row, 4) || cell(row, 4) || "").trim(),
+          basePrice: priceCell(row, 5),
+          installment1Base: 0,
+          installment2Base: 0,
+          installment1: 0,
+          installment2: 0,
+          installment3: 0,
+          atlDiscount: fmt(row, 6) || cell(row, 6) || "",
+          atlAfterPrice: priceCell(row, 7),
+          roundingAfterPrice: priceCell(row, 8),
+          btlDiscount: fmt(row, 9) || cell(row, 9) || "",
+          lunas: priceCell(row, 10),
+          cashback: priceCell(row, 11),
+          flashSaleDiscount: "",
+          flashSalePrice: 0
         };
       }).filter((r) => r && (r.serial || r.packageName));
     }
@@ -767,39 +884,96 @@
       spvFilter.innerHTML = `<option value="all">All SPV</option>${spvs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}`;
       teamFilter.innerHTML = `<option value="all">All Team</option>${teams.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join("")}`;
       agentFilter.innerHTML = `<option value="all">All Agent</option>${agents.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}`;
+      setupMultiFilters();
+    }
+    function multiFilterLabel(selectEl) {
+      const allText = selectEl.options[0]?.textContent || "All";
+      const values = selectedValues(selectEl).filter((value) => value !== "all");
+      if (!values.length) return allText;
+      if (values.length === 1) return values[0];
+      return `${values.length} dipilih`;
+    }
+    function syncMultiFilter(multiEl) {
+      const selectEl = document.getElementById(multiEl.dataset.select);
+      const q = (multiEl.querySelector(".multi-search")?.value || "").toLowerCase();
+      multiEl.querySelector(".multi-button").textContent = multiFilterLabel(selectEl);
+      const optionsEl = multiEl.querySelector(".multi-options");
+      optionsEl.innerHTML = [...selectEl.options]
+        .filter((option) => !q || option.textContent.toLowerCase().includes(q))
+        .map((option, index) => `<label class="multi-option"><input type="checkbox" data-value="${esc(option.value)}" ${option.selected || (!selectedValues(selectEl).length && index === 0) ? "checked" : ""}><span>${esc(option.textContent)}</span></label>`)
+        .join("");
+    }
+    function setupMultiFilters() {
+      document.querySelectorAll(".multi-filter").forEach((multiEl) => {
+        if (!multiEl.dataset.ready) {
+          multiEl.innerHTML = `<button type="button" class="multi-button"></button><div class="multi-panel"><input class="multi-search" placeholder="Type to search" autocomplete="off"><div class="multi-options"></div></div>`;
+          multiEl.dataset.ready = "1";
+          multiEl.querySelector(".multi-button").addEventListener("click", () => {
+            document.querySelectorAll(".multi-filter.open").forEach((el) => {
+              if (el !== multiEl) el.classList.remove("open");
+            });
+            multiEl.classList.toggle("open");
+            multiEl.querySelector(".multi-search").focus();
+          });
+          multiEl.querySelector(".multi-search").addEventListener("input", () => syncMultiFilter(multiEl));
+          multiEl.querySelector(".multi-options").addEventListener("change", (event) => {
+            const checkbox = event.target;
+            const selectEl = document.getElementById(multiEl.dataset.select);
+            const option = [...selectEl.options].find((item) => item.value === checkbox.dataset.value);
+            if (!option) return;
+            if (option.value === "all") {
+              [...selectEl.options].forEach((item) => { item.selected = false; });
+            } else {
+              selectEl.options[0].selected = false;
+              option.selected = checkbox.checked;
+            }
+            syncMultiFilter(multiEl);
+            render();
+          });
+        }
+        syncMultiFilter(multiEl);
+      });
+    }
+    function selectedValues(selectEl) {
+      return [...selectEl.selectedOptions].map((option) => option.value).filter(Boolean);
+    }
+    function selectedSet(selectEl) {
+      const values = selectedValues(selectEl);
+      return !values.length || values.includes("all") ? null : new Set(values);
+    }
+    function selectedSetMatch(set, value) {
+      return !set || set.has(value);
     }
     function filteredRaw(options = {}) {
-      const month = options.ignoreMonth ? "all" : (monthFilter.value || "all");
-      const week = weekFilter.value || "all";
-      const coach = options.ignoreCoach ? "all" : (coachFilter.value || "all");
-      const spv = spvFilter.value || "all";
-      const team = teamFilter.value || "all";
-      const agent = agentFilter.value || "all";
-      const weekSet = options.weekSet || null;
+      const monthSet = options.ignoreMonth ? null : selectedSet(monthFilter);
+      const weekSet = options.weekSet || selectedSet(weekFilter);
+      const coachSet = options.ignoreCoach ? null : selectedSet(coachFilter);
+      const spvSet = selectedSet(spvFilter);
+      const teamSet = selectedSet(teamFilter);
+      const agentSet = selectedSet(agentFilter);
       const q = searchFilter.value.trim().toLowerCase();
       return rawRows.filter((r) => {
         const rowMonth = WEEK_MONTH_OVERRIDES[String(r.week)] || r.month;
-        const monthMatch = month === "all" || rowMonth === month;
-        const weekMatch = weekSet ? weekSet.has(String(r.week)) : (week === "all" || r.week === week);
-        const coachMatch = coach === "all" || r.coach === coach;
-        const spvMatch = spv === "all" || r.spv === spv;
-        const teamMatch = team === "all" || r.teamCategory === team;
-        const agentMatch = agent === "all" || r.agent === agent;
-        const searchMatch = !q || [r.agent, r.package, r.product, r.campaign].some((v) => v.toLowerCase().includes(q));
+        const monthMatch = selectedSetMatch(monthSet, rowMonth);
+        const weekMatch = selectedSetMatch(weekSet, String(r.week));
+        const coachMatch = selectedSetMatch(coachSet, r.coach);
+        const spvMatch = selectedSetMatch(spvSet, r.spv);
+        const teamMatch = selectedSetMatch(teamSet, r.teamCategory);
+        const agentMatch = selectedSetMatch(agentSet, r.agent);
+        const searchMatch = !q || [r.agent, r.package, r.product, r.campaign].some((v) => String(v || "").toLowerCase().includes(q));
         return monthMatch && weekMatch && coachMatch && spvMatch && teamMatch && agentMatch && searchMatch;
       });
     }
     function monthWeekSet() {
-      const week = weekFilter.value || "all";
-      const month = monthFilter.value || "all";
-      if (week !== "all") {
-        if (month === "all") return new Set([week]);
-        const weekBelongsToMonth = rawRows.some((r) => String(r.week) === week && (WEEK_MONTH_OVERRIDES[String(r.week)] || r.month) === month);
-        return weekBelongsToMonth ? new Set([week]) : new Set();
+      const weeksSelected = selectedSet(weekFilter);
+      const monthsSelected = selectedSet(monthFilter);
+      if (weeksSelected) {
+        if (!monthsSelected) return weeksSelected;
+        return new Set([...weeksSelected].filter((week) => rawRows.some((r) => String(r.week) === week && monthsSelected.has(WEEK_MONTH_OVERRIDES[String(r.week)] || r.month))));
       }
-      if (month === "all") return null;
+      if (!monthsSelected) return null;
       const weeks = rawRows
-        .filter((r) => (WEEK_MONTH_OVERRIDES[String(r.week)] || r.month) === month && r.week)
+        .filter((r) => monthsSelected.has(WEEK_MONTH_OVERRIDES[String(r.week)] || r.month) && r.week)
         .map((r) => String(r.week));
       return new Set(weeks);
     }
@@ -809,15 +983,15 @@
       return filteredRaw({ ignoreMonth: true, weekSet: weeks });
     }
     function filteredIncentive(salesRows = filteredRaw()) {
-      const week = weekFilter.value || "all";
-      const agent = agentFilter.value || "all";
+      const weekSet = selectedSet(weekFilter);
+      const agentSet = selectedSet(agentFilter);
       const visibleAgentWeeks = new Set(salesRows
         .filter((r) => r.agent && r.week)
         .map((r) => `${r.agent}||${r.week}`));
       const q = searchFilter.value.trim().toLowerCase();
       return incentiveRows.filter((r) => {
-        const weekMatch = week === "all" || r.week === week;
-        const agentMatch = agent === "all" || r.agent === agent;
+        const weekMatch = selectedSetMatch(weekSet, r.week);
+        const agentMatch = selectedSetMatch(agentSet, r.agent);
         const salesAgentWeekMatch = visibleAgentWeeks.has(`${r.agent}||${r.week}`);
         const searchMatch = !q || r.agent.toLowerCase().includes(q);
         return weekMatch && agentMatch && salesAgentWeekMatch && searchMatch;
@@ -849,20 +1023,35 @@
     function visibleWeekSet(rows) {
       return new Set(rows.map((r) => String(r.week || "")).filter(Boolean));
     }
+    function selectedWeeks() {
+      return selectedValues(weekFilter).filter((value) => value !== "all");
+    }
+    function selectedSingleWeek() {
+      const weeks = selectedWeeks();
+      return weeks.length === 1 ? weeks[0] : "";
+    }
     function selectedWeekNote(rows) {
-      const selectedWeek = weekFilter.value || "all";
-      if (selectedWeek !== "all") return `Week ${selectedWeek}`;
+      const selectedWeeks = selectedValues(weekFilter).filter((value) => value !== "all");
+      if (selectedWeeks.length === 1) return `Week ${selectedWeeks[0]}`;
+      if (selectedWeeks.length > 1) return `Week ${selectedWeeks.join(" + ")}`;
       const weeks = [...visibleWeekSet(rows)].sort((a, b) => Number(a) - Number(b));
       return weeks.length ? `Week ${weeks.join(" + ")}` : "All Week";
     }
     function kpi(label, value, note) {
       return `<div class="card"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div><div class="note">${esc(note)}</div></div>`;
     }
+    function compactRupiah(value) {
+      const n = Number(value || 0);
+      if (Math.abs(n) >= 1000000000) return `${num(n / 1000000000, 1)} M`;
+      if (Math.abs(n) >= 1000000) return `${num(n / 1000000, 1)} jt`;
+      if (Math.abs(n) >= 1000) return `${num(n / 1000, 1)} rb`;
+      return num(n);
+    }
     function metricCard(title, rows, mode = "amount") {
       const max = Math.max(...rows.map((r) => mode === "incentive" ? r.incentive : r.amount), 1);
       return `<div class="card"><div class="section-title"><h2>${esc(title)}</h2><span class="note">Top 10</span></div><div class="metric-list">${rows.slice(0,10).map((r) => {
         const value = mode === "incentive" ? r.incentive : r.amount;
-        return `<div class="metric-row"><div><div class="name">${esc(r.key)}</div><div class="bar"><span style="width:${Math.min(100, value / max * 100)}%"></span></div></div><div class="money">${rupiah(value)}</div><div class="num">${num(r.txn || r.rows)}</div></div>`;
+        return `<div class="block-metric-row"><div class="block-metric-name" title="${esc(r.key)}">${esc(r.key)}</div><div class="block-metric-track"><div class="block-metric-fill" style="width:${Math.min(100, value / max * 100)}%">${esc(compactRupiah(value))}</div></div></div>`;
       }).join("") || `<div class="note">Tidak ada data.</div>`}</div></div>`;
     }
     function render() {
@@ -877,7 +1066,6 @@
       const arpu = totalTxn ? totalAmount / totalTxn : 0;
       if (activeView === "summary") renderSummary(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
       else if (activeView === "dodolan") renderDodolan(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
-      else if (activeView === "universe") renderUniverse();
       else if (activeView === "allIncentive") renderAllIncentiveAgent();
       else if (activeView === "baoEarl") renderBaoEarl();
       else if (activeView === "ruangbelajar") renderRuangbelajar();
@@ -887,8 +1075,8 @@
     }
     function renderSummary(sales, incentives, totals) {
       const byCoach = groupBy(sales, (r) => r.coach, (r) => ({ amount: r.amount, txn: r.txn }));
-      const selectedSummaryWeek = weekFilter.value || "all";
-      const summaryIncentiveWeeks = selectedSummaryWeek === "all" ? visibleWeekSet(sales) : new Set([selectedSummaryWeek]);
+      const selectedSummaryWeeks = selectedWeeks();
+      const summaryIncentiveWeeks = selectedSummaryWeeks.length ? new Set(selectedSummaryWeeks) : visibleWeekSet(sales);
       const juneWeekRowsForSchema = filteredRaw({ weekSet: summaryIncentiveWeeks })
         .filter(isAllIncentiveSchemaRow);
       const summarySchemaResult = calculateSchemaIncentives(juneWeekRowsForSchema);
@@ -1159,18 +1347,18 @@
       const totalRevenue = visibleAgents.reduce((s, r) => s + r.amount, 0);
       const totalTxn = visibleAgents.reduce((s, r) => s + r.txn, 0);
       const totalSchemaIncentive = visibleAgents.reduce((s, r) => s + r.incentive, 0);
-      const selectedWeek = weekFilter.value || "all";
-      const selectedRowsForIncentive = selectedWeek === "all" ? sales : filteredRaw({ weekSet: new Set([selectedWeek]) }).filter(isAllIncentiveSchemaRow);
+      const selectedWeekList = selectedWeeks();
+      const selectedRowsForIncentive = selectedWeekList.length ? filteredRaw({ weekSet: new Set(selectedWeekList) }).filter(isAllIncentiveSchemaRow) : sales;
       const juneRows = selectedRowsForIncentive;
       const juneAgents = calculateSchemaIncentives(juneRows).agents.filter((r) => !isExcludedTopIncentiveAgent(r.key));
       const juneSchemaIncentive = juneAgents.reduce((s, r) => s + r.incentive, 0);
-      const targetNoteText = selectedWeek === "all" ? "L1 W23 Rp10.700.000 | L1 W24 Rp13.400.000 | L1 W25 Rp9.800.000 | L1 W26 Rp12.300.000 | L1 W27-W29 Rp23.400.000 | L2 W23 Rp7.400.000 | L2 W24 Rp9.200.000 | L2 W25 Rp7.400.000 | L2 W26 Rp9.200.000 | L2 W27-W29 Rp19.600.000" : `Week ${selectedWeek}: L1 ${rupiah(targetForWeek(selectedWeek, "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeek, "LAYER 2"))}`;
+      const targetNoteText = selectedWeekList.length === 1 ? `Week ${selectedWeekList[0]}: L1 ${rupiah(targetForWeek(selectedWeekList[0], "LAYER 1"))} | L2 ${rupiah(targetForWeek(selectedWeekList[0], "LAYER 2"))}` : "Target mengikuti masing-masing week dan layer";
       contentEl.innerHTML = `
         <section class="kpis">
           ${kpi("Schema Incentive", rupiah(totalSchemaIncentive), "Schema incentive sesuai week")}
           ${kpi("Incentive Filter", rupiah(juneSchemaIncentive), `Layer 1 + Layer 2, ${selectedWeekNote(juneRows)}`)}
           ${kpi("Revenue RAW", rupiah(totalRevenue), "Sesuai filter")}
-          ${kpi("Target 100%", selectedWeek === "all" ? "By Week & Layer" : "By Layer", targetNoteText)}
+          ${kpi("Target 100%", selectedWeekList.length === 1 ? "By Layer" : "By Week & Layer", targetNoteText)}
           ${kpi("Total TXN", num(totalTxn), "RAW Txn")}
           ${kpi("Agent", num(visibleAgents.length), "LAYER 1 + LAYER 2, exclude Satyadi/Imam/Erna")}
         </section>
@@ -1202,8 +1390,8 @@
       return `<div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${products.map((p) => `<th class="number">${esc(p)}</th>`).join("")}</tr></thead><tbody>${tiers.map((tier) => `<tr><td>${num(tier * 100, 0)}%</td>${products.map((p) => `<td class="number">${num((rates[p][tier] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
     }
     function selectedSchemaLayers() {
-      const selectedTeam = normalizedTeamCategory(teamFilter.value);
-      if (selectedTeam === "LAYER 1" || selectedTeam === "LAYER 2") return [selectedTeam];
+      const selectedTeams = selectedValues(teamFilter).map(normalizedTeamCategory).filter((team) => team && team !== "ALL");
+      if (selectedTeams.length === 1 && (selectedTeams[0] === "LAYER 1" || selectedTeams[0] === "LAYER 2")) return [selectedTeams[0]];
       return ["LAYER 1", "LAYER 2"];
     }
     function schemaRatesFor(week, layer) {
@@ -1215,8 +1403,10 @@
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
     function priceTableIncentiveContext() {
-      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(weekFilter.value) ? weekFilter.value : "26";
-      const selectedTeam = normalizedTeamCategory(teamFilter.value);
+      const singleWeek = selectedSingleWeek();
+      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(singleWeek) ? singleWeek : "26";
+      const selectedTeams = selectedValues(teamFilter).map(normalizedTeamCategory).filter((team) => team && team !== "ALL");
+      const selectedTeam = selectedTeams.length === 1 ? selectedTeams[0] : "";
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
       return { week, layer, rates: schemaRatesFor(week, layer) };
     }
@@ -1269,8 +1459,9 @@
       }).join("");
     }
     function schemaInfoCard() {
-      if (["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(weekFilter.value || "all")) {
-        const week = weekFilter.value;
+      const singleWeek = selectedSingleWeek();
+      if (["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(singleWeek)) {
+        const week = singleWeek;
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
       }
       if (selectedSchemaLayers().length < 2) {
@@ -1289,13 +1480,13 @@
     function renderBaoEarl() {
       const q = searchFilter.value.trim().toLowerCase();
       const rows = baoEarlRows.filter((r) => !q || [r.source, r.serial, r.packageName, r.activeEndDate, r.extraGimmick, r.bonus].some((v) => String(v || "").toLowerCase().includes(q)));
-      const earlyRows = rows.filter((r) => r.source === "NAY");
+      const earlyRows = rows.filter((r) => r.source === BAO_EARL_SHEET_NAME);
       const lowestBtl = rows.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
       contentEl.innerHTML = `
         <section class="kpis">
           ${kpi("Package", num(rows.length), "Data dari sheet Harga Brain Academy Online")}
           ${kpi("Harga BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Sesuai filter")}
-          ${kpi("NAY", num(earlyRows.length), "Package")}
+          ${kpi("SPPJUL 28 Jul-9 Ags", num(earlyRows.length), "Package")}
         </section>
         <section class="card">
           <div class="section-title"><h2>Harga Brain Academy Online</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
@@ -1426,8 +1617,8 @@
             loadJsonp("RAW"),
             loadJsonp("Incentive"),
             loadJsonp("Kalkulator Incentive"),
-            loadJsonp("Harga Brain Academy Online", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
-            loadJsonp("Ruangbelajar", { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
+            loadJsonp(BAO_EARL_SHEET_NAME, { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
+            loadJsonp(EARLYBIRD_RUBEL_SHEET_NAME, { sheetId: EARLYBIRD_RUBEL_SHEET_ID }),
             loadJsonp("Flash Sale Festival RG", { sheetId: FLASHSALE_RG_SHEET_ID, gid: FLASHSALE_RG_GID }),
             loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
             loadOptionalJsonp("Harga BAC", { sheetId: JADWAL_BAC_SHEET_ID, gid: HARGA_BAC_GID })
@@ -1435,7 +1626,7 @@
           rawRows = parseRaw(rawTable);
           incentiveRows = parseIncentive(incentiveTable);
           baoEarlRows = [
-            ...parseBaoEarl(baoEarlTableData, "NAY")
+            ...parseBaoEarl(baoEarlTableData, BAO_EARL_SHEET_NAME)
           ];
           earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
           flashSaleRgRows = parseFlashSaleRg(flashSaleRgTableData);
@@ -1465,6 +1656,11 @@
       el.addEventListener("change", render);
     });
     searchFilter.addEventListener("input", render);
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".multi-filter")) {
+        document.querySelectorAll(".multi-filter.open").forEach((el) => el.classList.remove("open"));
+      }
+    });
     document.getElementById("refresh").addEventListener("click", () => loadAll(true));
     loadAll();
   </script>
