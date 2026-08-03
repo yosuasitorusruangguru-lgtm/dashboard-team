@@ -359,8 +359,32 @@
       return Number.isFinite(n) ? String(Math.trunc(n)) : String(v ?? "").trim();
     };
     const WEEK_MONTH_OVERRIDES = {
-      "27": "07-2026"
+      "27": "07-2026",
+      "31": "07-2026"
     };
+    function majorityMonthForWeek(year, week) {
+      const y = Number(year);
+      const w = Number(week);
+      if (!Number.isFinite(y) || !Number.isFinite(w) || w < 1 || w > 53) return "";
+      const jan4 = new Date(Date.UTC(y, 0, 4));
+      const jan4Day = jan4.getUTCDay() || 7;
+      const monday = new Date(jan4);
+      monday.setUTCDate(jan4.getUTCDate() - jan4Day + 1 + ((w - 1) * 7));
+      const counts = new Map();
+      for (let i = 0; i < 7; i += 1) {
+        const day = new Date(monday);
+        day.setUTCDate(monday.getUTCDate() + i);
+        const key = `${String(day.getUTCMonth() + 1).padStart(2, "0")}-${day.getUTCFullYear()}`;
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+      return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+    }
+    function effectiveRowMonth(row) {
+      const override = WEEK_MONTH_OVERRIDES[String(row.week)];
+      if (override) return override;
+      const year = String(row.month || "").match(/20\d{2}/)?.[0];
+      return majorityMonthForWeek(year, row.week) || row.month;
+    }
     const EXCLUDED_TOP_INCENTIVE_AGENTS = new Set(["satyadi ambia", "imam nugroho", "erna erviana purnamasari"]);
     const LAYER_1_WEEK_TARGETS = {
       "23": 10700000,
@@ -1021,7 +1045,7 @@
       const agentSet = selectedSet(agentFilter);
       const q = searchFilter.value.trim().toLowerCase();
       return rawRows.filter((r) => {
-        const rowMonth = WEEK_MONTH_OVERRIDES[String(r.week)] || r.month;
+        const rowMonth = effectiveRowMonth(r);
         const monthMatch = selectedSetMatch(monthSet, rowMonth);
         const weekMatch = selectedSetMatch(weekSet, String(r.week));
         const coachMatch = selectedSetMatch(coachSet, r.coach);
@@ -1037,11 +1061,11 @@
       const monthsSelected = selectedSet(monthFilter);
       if (weeksSelected) {
         if (!monthsSelected) return weeksSelected;
-        return new Set([...weeksSelected].filter((week) => rawRows.some((r) => String(r.week) === week && monthsSelected.has(WEEK_MONTH_OVERRIDES[String(r.week)] || r.month))));
+        return new Set([...weeksSelected].filter((week) => rawRows.some((r) => String(r.week) === week && monthsSelected.has(effectiveRowMonth(r)))));
       }
       if (!monthsSelected) return null;
       const weeks = rawRows
-        .filter((r) => monthsSelected.has(WEEK_MONTH_OVERRIDES[String(r.week)] || r.month) && r.week)
+        .filter((r) => monthsSelected.has(effectiveRowMonth(r)) && r.week)
         .map((r) => String(r.week));
       return new Set(weeks);
     }
