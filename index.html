@@ -447,7 +447,8 @@
       "29": 23400000,
       "30": 18200000,
       "31": 13000000,
-      "32": 13000000
+      "32": 13000000,
+      "33": 13000000
     };
     const LAYER_2_WEEK_TARGETS = {
       "23": 7400000,
@@ -459,11 +460,13 @@
       "29": 19600000,
       "30": 10400000,
       "31": 8400000,
-      "32": 8400000
+      "32": 8400000,
+      "33": 8400000
     };
     const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_28_LAYER_1_TIERS = [0, 0.4, 0.5, 0.75, 1, 1.25];
     const WEEK_30_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25, 1.5, 2];
+    const WEEK_32_33_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_25_LAYER_1_RATES = {
       "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0153, 0.75: 0.0185, 1: 0.0345, 1.25: 0.04 },
       "BAON Elite": { 0: 0, 0.5: 0.0188, 0.75: 0.0185, 1: 0.0333, 1.25: 0.0373 },
@@ -608,6 +611,30 @@
       "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01, 1.5: 0.01, 2: 0.01 },
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02, 1.5: 0.02, 2: 0.02 }
     };
+    const WEEK_32_33_LAYER_1_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0143, 0.75: 0.0175, 1: 0.0523, 1.25: 0.0605 },
+      "BAON Elite": { 0: 0, 0.5: 0.0158, 0.75: 0.0175, 1: 0.0503, 1.25: 0.0565 },
+      "BAON Prem": { 0: 0, 0.5: 0.029, 0.75: 0.0335, 1: 0.1065, 1.25: 0.127 },
+      "BAON Reg": { 0: 0, 0.5: 0.0243, 0.75: 0.0285, 1: 0.0915, 1.25: 0.1138 },
+      "Others": { 0: 0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
+      "RB": { 0: 0, 0.5: 0.0253, 0.75: 0.0295, 1: 0.0955, 1.25: 0.12 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_32_33_LAYER_2_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0095, 0.75: 0.0113, 1: 0.0345, 1.25: 0.04 },
+      "BAON Elite": { 0: 0, 0.5: 0.0105, 0.75: 0.012, 1: 0.0337, 1.25: 0.0395 },
+      "BAON Prem": { 0: 0, 0.5: 0.0192, 0.75: 0.022, 1: 0.0685, 1.25: 0.0835 },
+      "BAON Reg": { 0: 0, 0.5: 0.016, 0.75: 0.0185, 1: 0.0595, 1.25: 0.0795 },
+      "Others": { 0: 0, 0.5: 0.0108, 0.75: 0.012, 1: 0.013, 1.25: 0.014 },
+      "RB": { 0: 0, 0.5: 0.0285, 0.75: 0.0335, 1: 0.1075, 1.25: 0.135 },
+      "RGP Online": { 0: 0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
 
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
     function isExcludedTopIncentiveAgent(name) {
@@ -633,7 +660,7 @@
       const team = normalizedTeamCategory(row.teamCategory);
       if (hasLayer2AgentTargetOverride(row.agent, row.week)) return true;
       if (team === "LAYER 1") return true;
-      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"].includes(String(row.week));
+      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"].includes(String(row.week));
     }
     function isYosuaLeaderName(coach) {
       return String(coach || "").trim().toLowerCase() === "yosua sitorus";
@@ -649,7 +676,7 @@
       const overrideTarget = layer2AgentTargetOverride(agent, week);
       if (overrideTarget) return overrideTarget;
       const normalizedTeam = normalizedTeamCategory(teamCategory);
-      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(String(week))) {
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"].includes(String(week))) {
         return LAYER_2_WEEK_TARGETS[String(week)] || 0;
       }
       return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
@@ -1477,9 +1504,13 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_28_LAYER_1_TIERS);
       }
-      if (["30", "31", "32"].includes(String(week))) {
+      if (["30", "31"].includes(String(week))) {
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_30_LAYER_TIERS);
+      }
+      if (["32", "33"].includes(String(week))) {
+        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_32_33_LAYER_2_RATES : WEEK_32_33_LAYER_1_RATES;
+        return layer1RateFor(rates, category, achievement, WEEK_32_33_LAYER_TIERS);
       }
       if (!calculatorSchema) return 0;
       let selected = null;
@@ -1507,7 +1538,7 @@
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26", "27", "28", "29", "30", "31"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
@@ -1596,12 +1627,13 @@
       if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
       if (String(week) === "27") return layer === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
       if (["28", "29"].includes(String(week))) return layer === "LAYER 2" ? WEEK_28_LAYER_2_RATES : WEEK_28_LAYER_1_RATES;
-      if (["30", "31", "32"].includes(String(week))) return layer === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
+      if (["30", "31"].includes(String(week))) return layer === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
+      if (["32", "33"].includes(String(week))) return layer === "LAYER 2" ? WEEK_32_33_LAYER_2_RATES : WEEK_32_33_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
     function priceTableIncentiveContext() {
       const singleWeek = selectedSingleWeek();
-      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"].includes(singleWeek) ? singleWeek : "26";
+      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"].includes(singleWeek) ? singleWeek : "26";
       const selectedTeams = selectedValues(teamFilter).map(normalizedTeamCategory).filter((team) => team && team !== "ALL");
       const selectedTeam = selectedTeams.length === 1 ? selectedTeams[0] : "";
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
@@ -1651,21 +1683,21 @@
       return selectedSchemaLayers().map((layer) => {
         const rates = schemaRatesFor(week, layer);
         const targetRevenue = targetForWeek(week, layer);
-        const tiers = ["30", "31", "32"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS);
+        const tiers = ["32", "33"].includes(String(week)) ? WEEK_32_33_LAYER_TIERS : (["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS));
         return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetRevenue)}</span></div>${schemaRateTable(rates, tiers)}${targetSimulationTable(rates, targetRevenue, "Target x TH x rate product", tiers)}`;
       }).join("");
     }
     function schemaInfoCard() {
       const singleWeek = selectedSingleWeek();
-      if (["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"].includes(singleWeek)) {
+      if (["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"].includes(singleWeek)) {
         const week = singleWeek;
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
       }
       if (selectedSchemaLayers().length < 2) {
         const weeks = [...visibleWeekSet(filteredRaw().filter(isAllIncentiveSchemaRow))]
-          .filter((week) => ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"].includes(week))
+          .filter((week) => ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"].includes(week))
           .sort((a, b) => Number(a) - Number(b));
-        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"];
+        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33"];
         return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${schemaWeeks.map((week) => schemaInfoForWeek(week)).join("")}</div>`;
       }
       const rows = calculatorSchema?.tiers || [];
