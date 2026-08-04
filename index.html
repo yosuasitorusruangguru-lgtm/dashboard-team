@@ -1246,11 +1246,11 @@
     }
     function universeRevenueCard(rows) {
       const sorted = [...rows].sort((a, b) => b.amount - a.amount || b.txn - a.txn).slice(0, 12);
-      return `<div class="card"><div class="section-title"><h2>Top Revenue UNIVERSE</h2><span class="note">Top 12</span></div><div class="table-wrap universe-revenue-wrap" style="max-height:620px"><table class="universe-revenue-table"><colgroup><col style="width:58px"><col style="width:110px"><col style="width:160px"><col style="width:160px"><col style="width:120px"><col style="width:60px"></colgroup><thead><tr><th>Rank</th><th>Agent</th><th class="number">Revenue</th><th class="number">Target</th><th class="number">% Target</th><th class="number">TXN</th></tr></thead><tbody>${sorted.map((r, index) => {
+      return `<div class="card"><div class="section-title"><h2>Top Revenue UNIVERSE</h2><span class="note">Top 12</span></div><div class="table-wrap universe-revenue-wrap" style="max-height:620px"><table class="universe-revenue-table"><colgroup><col style="width:58px"><col style="width:110px"><col style="width:145px"><col style="width:145px"><col style="width:145px"><col style="width:110px"><col style="width:56px"></colgroup><thead><tr><th>Rank</th><th>Agent</th><th class="number">Total Incentive</th><th class="number">Revenue</th><th class="number">Target</th><th class="number">% Target</th><th class="number">TXN</th></tr></thead><tbody>${sorted.map((r, index) => {
         const photo = universeProfilePhoto(r.key);
         const agentHtml = photo ? `<div class="metric-avatar-name" style="justify-content:flex-start"><span class="metric-avatar-frame"><img src="${photo}" alt="${esc(r.key)}"></span></div>` : esc(r.key);
-        return `<tr><td>${num(index + 1)}</td><td>${agentHtml}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.targetAmount || 0)}</td><td class="number">${num(r.targetAmount ? (r.amount / r.targetAmount * 100) : 0, 2)}%</td><td class="number">${num(r.txn)}</td></tr>`;
-      }).join("") || `<tr><td colspan="6">Tidak ada data.</td></tr>`}</tbody></table></div></div>`;
+        return `<tr><td>${num(index + 1)}</td><td>${agentHtml}</td><td class="number">${rupiah(r.incentive || 0)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.targetAmount || 0)}</td><td class="number">${num(r.targetAmount ? (r.amount / r.targetAmount * 100) : 0, 2)}%</td><td class="number">${num(r.txn)}</td></tr>`;
+      }).join("") || `<tr><td colspan="7">Tidak ada data.</td></tr>`}</tbody></table></div></div>`;
     }
     function render() {
       const sales = filteredRawForFullWeeksInMonth();
@@ -1320,10 +1320,12 @@
       const totalTxn = teamRows.reduce((s, r) => s + r.txn, 0);
       const byAgent = groupBy(teamRows, (r) => r.agent, (r) => ({ amount: r.amount, txn: r.txn }));
       const byWeek = buildTeamWeekly(teamRows, []);
+      const universeIncentiveMap = new Map(calculateSchemaIncentives(teamRows.filter(isAllIncentiveSchemaRow)).agents.map((r) => [r.key, r.incentive]));
       byAgent.forEach((agent) => {
         const agentRows = teamRows.filter((row) => row.agent === agent.key);
         agent.productCount = new Set(agentRows.map((row) => row.product).filter(Boolean)).size;
         agent.campaignCount = new Set(agentRows.map((row) => row.campaign).filter(Boolean)).size;
+        agent.incentive = universeIncentiveMap.get(agent.key) || 0;
         agent.targetAmount = [...new Set(agentRows.map((row) => row.week).filter(Boolean))]
           .reduce((sum, week) => sum + targetForWeek(week, "LAYER 1"), 0);
       });
