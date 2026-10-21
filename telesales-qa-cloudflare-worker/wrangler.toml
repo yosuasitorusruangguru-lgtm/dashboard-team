@@ -1,0 +1,9 @@
+name = "telesales-qa-audio-api"
+main = "worker.js"
+compatibility_date = "2026-10-21"
+
+[ai]
+binding = "AI"
+
+[vars]
+FRONTEND_ORIGIN = "*"
