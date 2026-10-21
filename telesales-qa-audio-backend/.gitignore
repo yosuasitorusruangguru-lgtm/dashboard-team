@@ -1,0 +1,7 @@
+.env
+node_modules/
+*.mp3
+*.wav
+*.m4a
+*.ogg
+*.flac
