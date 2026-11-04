@@ -2,168 +2,474 @@
 <html lang="id">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f4f6fb"><meta name="description" content="CENTER UNIVERSE sales performance and incentive dashboard">
-  <title>CENTER UNIVERSE — Sales Performance</title>
-<style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UNIVERSE · OEC Performance Dashboard</title>
+  <style>
     :root {
-      color-scheme: light;
-      --bg: #f4f6fb;
-      --bg-soft: #eef1f8;
-      --panel: #ffffff;
-      --panel-strong: #ffffff;
-      --line: #e1e5ef;
-      --ink: #25233a;
-      --muted: #74768c;
-      --purple: #8b78d6;
-      --purple-strong: #6d5bd0;
-      --green: #269b68;
-      --green-deep: #168454;
-      --amber: #c58a19;
-      --red: #d94b68;
-      --blue: #3979c3;
-      --radius: 18px;
-      --shadow: 0 8px 24px rgba(38, 42, 70, .07);
+      --ink: #17211f;
+      --muted: #5f706a;
+      --line: #d9e1dc;
+      --paper: #f4f8f6;
+      --panel: #fff;
+      --dark: #203632;
+      --green: #1e9b66;
+      --red: #d64e47;
+      --amber: #d19a22;
+      --blue: #327aa8;
     }
     * { box-sizing: border-box; }
-    html { min-height: 100%; background: var(--bg); }
     body {
-      margin: 0; min-height: 100vh; color: var(--ink);
+      margin: 0;
       background:
-        radial-gradient(ellipse at 8% 0%, rgba(124,58,237,.22), transparent 36%),
-        radial-gradient(ellipse at 92% 10%, rgba(22,163,74,.12), transparent 32%),
-        linear-gradient(180deg, #0b0a14 0%, #100e1d 55%, #0b0a14 100%);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 14px; line-height: 1.5;
+        radial-gradient(circle at 12% 18%, rgba(50,122,168,.10), transparent 30%),
+        radial-gradient(circle at 88% 24%, rgba(30,155,102,.10), transparent 28%),
+        linear-gradient(180deg, #f7faf7 0%, #edf5f1 48%, #f8faf4 100%);
+      color: var(--ink);
+      font-family: Inter, Aptos, Segoe UI, Arial, sans-serif;
     }
     header {
-      position: relative; overflow: hidden; padding: 28px clamp(18px, 4vw, 54px) 26px;
-      display: flex; justify-content: space-between; align-items: center; gap: 18px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(115deg, #ffffff 0%, #f2efff 58%, #edf8f1 100%);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,.18) 0 1px, transparent 2px),
+        radial-gradient(circle at 74% 24%, rgba(255,255,255,.16) 0 1px, transparent 2px),
+        radial-gradient(circle at 88% 76%, rgba(255,255,255,.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 48% 95%, rgba(132,70,255,.50), transparent 38%),
+        linear-gradient(105deg, #070812 0%, #1a1232 44%, #402083 100%);
+      color: white;
+      padding: 22px 28px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
     }
-    header::before, header::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
-    header::before { width: 340px; height: 340px; right: 5%; top: -250px; background: rgba(167,139,250,.18); filter: blur(8px); }
-    header::after { width: 220px; height: 220px; right: 25%; bottom: -190px; background: rgba(74,222,128,.10); filter: blur(8px); }
+    header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 48% 36%, rgba(255,255,255,.18), transparent 27%);
+      pointer-events: none;
+    }
     header > * { position: relative; z-index: 1; }
-    h1 { margin: 0; font-size: clamp(27px, 4vw, 42px); line-height: 1.1; font-weight: 900; letter-spacing: .12em; color: #292343; }
-    h2 { margin: 0; font-size: 16px; line-height: 1.35; font-weight: 800; }
-    .sub { color: var(--muted); margin-top: 6px; font-size: 13px; }
-    .hero-tagline { display: inline-flex; margin-top: 10px; color: #6d5bd0; font-size: 12px; font-weight: 850; letter-spacing: .2em; text-transform: uppercase; }
-    main { width: min(1600px, 100%); margin: 0 auto; padding: 24px clamp(14px, 2.6vw, 34px) 48px; }
-    button, a.button, select, input {
-      border: 1px solid var(--line); background: #ffffff; color: var(--ink);
-      border-radius: 10px; padding: 10px 12px; font: inherit; font-weight: 650;
-      outline: none; transition: border-color .18s, background .18s, transform .18s;
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4.5vw, 58px);
+      letter-spacing: .14em;
+      text-shadow: 0 0 8px rgba(255,255,255,.95), 0 0 18px rgba(255,255,255,.50), 0 0 32px rgba(143,99,255,.70);
     }
-    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
+    h2 { margin: 0; font-size: 18px; }
+    .sub { color: #dce9e2; margin-top: 6px; font-size: 14px; }
+    .hero-tagline {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #f2eaff;
+      font-size: clamp(15px, 1.7vw, 21px);
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-shadow: 0 0 10px rgba(255,255,255,.55), 0 0 18px rgba(157,107,255,.75);
+    }
+    main { max-width: 1540px; margin: 0 auto; padding: 20px; }
+    button, a.button, select, input {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--dark);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 750;
+    }
     select.native-multi { display: none; }
-    .multi-filter { position: relative; min-width: 160px; }
-    .multi-filter.open { z-index: 999; }
-    .multi-button { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #ffffff; }
-    .multi-button::after { content: "⌄"; color: var(--purple); font-size: 15px; }
-    .multi-panel { position: absolute; z-index: 1000; top: calc(100% + 6px); left: 0; width: min(320px, 86vw); max-height: 360px; overflow: hidden; display: none; background: #ffffff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+    .multi-filter { position: relative; min-width: 220px; }
+    .multi-button {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+    }
+    .multi-button::after { content: "v"; font-size: 12px; color: var(--muted); }
+    .multi-panel {
+      position: absolute;
+      z-index: 30;
+      top: calc(100% + 6px);
+      left: 0;
+      width: min(320px, 86vw);
+      max-height: 360px;
+      overflow: hidden;
+      display: none;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 18px 40px rgba(23,33,31,.18);
+    }
     .multi-filter.open .multi-panel { display: block; }
-
     .multi-search { width: 100%; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
     .multi-options { max-height: 300px; overflow: auto; padding: 6px; }
-    .multi-option { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: center; padding: 8px 7px; border-radius: 8px; font-size: 12px; font-weight: 650; cursor: pointer; }
-    .multi-option:hover { background: #f0edfc; }
-    .multi-option input { width: 14px; height: 14px; accent-color: var(--green); }
+    .multi-option {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 7px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .multi-option:hover { background: #eef4ef; }
+    .multi-option input { width: 14px; height: 14px; }
     .multi-option span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     button, a.button { cursor: pointer; text-decoration: none; }
-    button:hover, a.button:hover { border-color: rgba(167,139,250,.55); transform: translateY(-1px); }
-    button.reset-filter { align-self: end; background: linear-gradient(135deg, #6d28d9, #4c1d95); color: #fff; border-color: rgba(196,181,253,.35); }
+    button.reset-filter { align-self: end; background: #24443c; color: #fff; border-color: #24443c; }
+    button.reset-filter:hover { background: #1b342e; }
     header button, header a.button { border-color: rgba(255,255,255,.25); }
-    .actions, .filters { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
-    .tabs { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 18px; scrollbar-width: thin; }
-    .tab { white-space: nowrap; background: #ffffff; color: #656780; border-color: var(--line); }
-    .tab.active { background: linear-gradient(135deg, #6d5bd0, #5143a4); color: #fff; border-color: rgba(109,91,208,.32); box-shadow: 0 6px 18px rgba(109,91,208,.15); }
-    .toolbar { position: relative; z-index: 50; isolation: isolate; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 14px; box-shadow: var(--shadow); backdrop-filter: blur(12px); }
-    .label { color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 6px 2px; }
-    .status { min-height: 20px; color: var(--muted); font-size: 12px; margin: 0 0 12px; }
-    .error { display: none; background: #fff0f2; border: 1px solid #f4b8c2; color: #9f1239; border-radius: 12px; padding: 14px; margin-bottom: 14px; overflow-wrap: anywhere; }
-    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
-    .card { min-width: 0; background: linear-gradient(145deg, #ffffff, #fbfcff); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
-    .kpis .card { position: relative; overflow: hidden; }
-    .kpis .card::after { content: ""; position: absolute; width: 100px; height: 100px; right: -35px; top: -42px; border-radius: 50%; background: rgba(139,120,214,.10); }
-    .value { margin-top: 8px; font-size: clamp(21px, 2.3vw, 31px); font-weight: 900; letter-spacing: -.03em; overflow-wrap: anywhere; }
-    .note { color: var(--muted); font-size: 11px; margin-top: 6px; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
-    .split { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .actions, .filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; }
+    .tab { white-space: nowrap; }
+    .tab.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+    .toolbar {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .label { color: var(--muted); font-size: 12px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .status { min-height: 20px; color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+    .error { display: none; background: #ffe1de; border: 1px solid #f0aaa5; color: #7d221f; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .kpis { display: grid; grid-template-columns: repeat(5, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 15px; box-shadow: 0 1px 0 rgba(20,30,28,.04); }
+    .value { margin-top: 7px; font-size: clamp(20px, 2.5vw, 30px); font-weight: 900; line-height: 1.12; overflow-wrap: anywhere; word-break: break-word; }
+    .note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .split { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
     .metric-list { display: grid; gap: 10px; }
-    .metric-row { display: grid; grid-template-columns: minmax(130px,1fr) minmax(80px,130px) 70px; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 9px; }
+    .metric-row { display: grid; grid-template-columns: minmax(160px,1fr) 130px 80px; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 9px; }
     .metric-row:last-child { border-bottom: 0; padding-bottom: 0; }
-    .block-metric-row { display: grid; grid-template-columns: minmax(120px, 220px) minmax(100px, 1fr); gap: 8px; align-items: center; }
-    .block-metric-name { font-size: 11px; font-weight: 750; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #5143a4; }
-    .block-metric-track { height: 25px; background: rgba(139,120,214,.10); border-left: 1px solid var(--line); position: relative; overflow: hidden; border-radius: 0 6px 6px 0; }
-    .block-metric-fill { height: 100%; min-width: 44px; background: linear-gradient(90deg, #7665d5, #269b68); display: flex; justify-content: flex-end; align-items: center; padding: 0 7px; color: #fff; font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; }
-    .block-metric-meta { color: var(--muted); font-size: 10px; font-weight: 700; margin-left: 6px; }
+    .block-metric-row {
+      display: grid;
+      grid-template-columns: minmax(140px, 220px) minmax(180px, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    .block-metric-name {
+      font-size: 12px;
+      font-weight: 780;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .block-metric-track {
+      height: 25px;
+      background: #edf3e8;
+      border-left: 1px solid #d7e5ce;
+      position: relative;
+      overflow: hidden;
+    }
+    .block-metric-fill {
+      height: 100%;
+      min-width: 44px;
+      background: #75b843;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 7px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,.10);
+    }
+    .block-metric-meta { color: var(--muted); font-size: 11px; font-weight: 750; margin-left: 6px; }
     .name { font-weight: 780; overflow-wrap: anywhere; }
     .money, .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 780; }
-    .bar { height: 8px; border-radius: 999px; background: #f0edfc; overflow: hidden; margin-top: 7px; }
-    .bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--purple-strong), var(--green)); min-width: 2px; }
-    .table-wrap { overflow: auto; max-height: 620px; border: 1px solid var(--line); border-radius: 12px; background: #ffffff; }
-    table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 760px; font-size: 12px; }
-    th, td { padding: 10px 12px; border-bottom: 1px solid rgba(190,178,255,.10); text-align: left; white-space: nowrap; vertical-align: top; }
-    th { position: sticky; top: 0; z-index: 1; background: #eeebfb; color: #5143a4; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
-    tbody tr:nth-child(even) td { background: #fafbfe; }
-    tbody tr:hover td { background: #f3f0ff; }
+    .bar { height: 12px; border-radius: 999px; background: #e8eee9; overflow: hidden; margin-top: 6px; }
+    .bar > span { display: block; height: 100%; border-radius: 999px; background: var(--blue); min-width: 2px; }
+    .table-wrap {
+      overflow: auto;
+      max-height: 620px;
+      border: 1px solid #d5e4dc;
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+    table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 13px; }
+    th, td { padding: 9px 11px; border-bottom: 1px solid #e2ebe6; text-align: left; white-space: nowrap; vertical-align: top; }
+    th { position: sticky; top: 0; z-index: 1; background: linear-gradient(180deg, #edf7f2 0%, #e5f0ea 100%); color: #24443c; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+    tbody tr:nth-child(even) td { background: #f8fbf8; }
+    tbody tr:hover td { background: #eef8f3; }
     td.number, th.number { text-align: right; font-variant-numeric: tabular-nums; }
-    tr.yosua-agent-row td { background: #fff8e6; }
-    tr.yosua-agent-row td:first-child { box-shadow: inset 3px 0 0 var(--amber); font-weight: 850; }
-    tr.yosua-agent-row:hover td { background: #fff1c7; }
-    .metric-avatar-name { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
-    .metric-avatar-frame { width: 60px; height: 60px; border-radius: 50%; background: #f1effb; box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; overflow: hidden; flex: 0 0 auto; }
-    .metric-avatar-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; object-position: 50% 44%; transform: scale(1.12); }
-    .metric-avatar-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .metric-row-featured { min-height: 72px; }
-    .universe-revenue-wrap { max-width: 100%; }
+    tr.yosua-agent-row td { background: #fff3cc; }
+    tr.yosua-agent-row td:first-child { box-shadow: inset 4px 0 0 #d19a22; font-weight: 850; }
+    tr.yosua-agent-row:hover td { background: #ffe9a6; }
+    .metric-avatar-name {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+    .metric-avatar-frame {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbf8 100%);
+      box-shadow: inset 0 0 0 1px rgba(36,68,60,.10), 0 8px 20px rgba(22,34,31,.13);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+    .metric-avatar-frame img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: 50% 44%;
+      transform: scale(1.12);
+    }
+    .metric-avatar-name span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .metric-row-featured { min-height: 86px; }
+    .universe-revenue-wrap { max-width: 820px; }
     .universe-revenue-table { width: auto; min-width: 760px; table-layout: fixed; }
     .universe-revenue-table th, .universe-revenue-table td { padding: 8px 10px; }
-    .universe-revenue-table .metric-avatar-frame { width: 44px; height: 44px; }
-    .universe-insight-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 16px; align-items: start; margin-top: 16px; }
+    .universe-revenue-table .metric-avatar-frame { width: 60px; height: 60px; }
+    .universe-insight-row { display: grid; grid-template-columns: minmax(760px, 820px) minmax(320px, 1fr); gap: 16px; align-items: start; margin-top: 16px; }
     .universe-side-metrics { display: grid; gap: 16px; }
-    .presentation-card { border-color: var(--line); }
+    .presentation-card { border-color: #111; }
     .presentation-table { min-width: 1160px; }
-    .presentation-table th { text-align: center; border-color: var(--line); }
-    .presentation-table td { text-align: center; border-color: var(--line); }
-    .presentation-table .agent-name { text-align: left; background: transparent; border-color: var(--line); font-weight: 750; }
-    .presentation-table .black-cell { background: #5143a4; color: #292343; font-weight: 900; }
-    .presentation-table .hour-head { background: #7c3aed; color: #292343; }
-    .presentation-table .total-head { background: #e9e6f7; color: #292343; }
-    .presentation-table .green-cell { background: #e5f7ed; }
-    .presentation-table .total-row td { background: #e9e6f7; color: #292343; font-weight: 900; border-color: var(--line); }
-    .presentation-table .total-row .agent-name { background: #e9e6f7; color: #292343; }
-    .music-player { position: fixed; right: 18px; bottom: 18px; z-index: 20; display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.95); box-shadow: var(--shadow); backdrop-filter: blur(10px); }
-    .music-player button { min-width: 38px; height: 36px; padding: 0 10px; border-color: rgba(167,139,250,.35); background: #5143a4; color: #292343; font-weight: 900; }
-    .music-player span { max-width: 145px; color: var(--ink); font-size: 11px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .presentation-table th { text-align: center; border-color: #111; }
+    .presentation-table td { text-align: center; border-color: #ff3030; }
+    .presentation-table .agent-name { text-align: left; background: #fff; border-color: #111; font-weight: 750; }
+    .presentation-table .black-cell { background: #030303; color: #fff; font-weight: 900; }
+    .presentation-table .hour-head { background: #ff1010; color: #fff; }
+    .presentation-table .total-head { background: #111; color: #fff; }
+    .presentation-table .green-cell { background: #d9f2d9; }
+    .presentation-table .total-row td { background: #050505; color: #fff; font-weight: 900; border-color: #ff3030; }
+    .presentation-table .total-row .agent-name { background: #050505; color: #fff; }
+    .music-player { position: fixed; right: 18px; top: 18px; z-index: 20; display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid rgba(36,68,60,.18); border-radius: 8px; background: rgba(255,255,255,.92); box-shadow: 0 10px 28px rgba(22,34,31,.16); backdrop-filter: blur(10px); }
+    .music-player button { min-width: 38px; height: 36px; padding: 0 10px; border-color: #24443c; background: #24443c; color: #fff; font-weight: 900; }
+    .music-player span { max-width: 145px; color: var(--dark); font-size: 12px; font-weight: 850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Analysis-first presentation overrides */
+    body {
+      background: #f4f7f8;
+      color: #172b4d;
+      line-height: 1.45;
+    }
+    header {
+      min-height: 118px;
+      padding: 26px 32px 24px;
+      background: linear-gradient(112deg, #0f2747 0%, #164b67 58%, #167b78 100%);
+      align-items: center;
+    }
+    header::before { background: linear-gradient(90deg, rgba(255,255,255,.06), transparent 58%); }
+    h1 {
+      font-size: clamp(28px, 3.4vw, 44px);
+      letter-spacing: .04em;
+      text-shadow: none;
+    }
+    .hero-tagline {
+      margin-top: 6px;
+      color: #c9e8e3;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-shadow: none;
+    }
+    main { max-width: 1680px; padding: 18px 24px 40px; }
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      margin: 0 -24px 14px;
+      padding: 10px 24px;
+      background: rgba(244,247,248,.96);
+      border-bottom: 1px solid #d8e1e6;
+      box-shadow: 0 4px 12px rgba(15,39,71,.06);
+    }
+    .tab {
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 13px;
+      color: #35516a;
+      background: #fff;
+    }
+    .tab.active { background: #0f2747; color: #fff; border-color: #0f2747; box-shadow: 0 3px 8px rgba(15,39,71,.18); }
+    .toolbar {
+      position: sticky;
+      top: 58px;
+      z-index: 12;
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 6px 18px rgba(15,39,71,.08);
+      align-items: end;
+    }
+    .filters { align-items: end; gap: 12px; }
+    .filters > div { min-width: 150px; }
+    .filters > div:last-of-type { min-width: 250px; }
+    .label { color: #5b6f82; font-size: 11px; letter-spacing: .08em; }
+    button, a.button, select, input { border-radius: 8px; border-color: #cbd7df; }
+    input, .multi-button { min-height: 40px; }
+    button.reset-filter { background: #0f2747; border-color: #0f2747; min-height: 40px; }
+    .card {
+      border-radius: 12px;
+      border-color: #d8e1e6;
+      box-shadow: 0 2px 10px rgba(15,39,71,.05);
+    }
+    .kpis { gap: 14px; margin-bottom: 20px; }
+    .kpis .card { min-height: 112px; }
+    .value { color: #0f2747; }
+    .section-title { padding-bottom: 10px; border-bottom: 1px solid #e4ebef; }
+    .section-title h2 { color: #0f2747; font-size: 19px; }
+    .grid, .split { gap: 20px; }
+    .table-wrap { border-radius: 10px; border-color: #d8e1e6; max-height: 680px; }
+    table:not(.presentation-table) td:not(.number), table:not(.presentation-table) th:not(.number) { white-space: normal; }
+    table:not(.presentation-table) th { background: #eaf2f5; color: #234b61; }
+    table:not(.presentation-table) tbody tr:hover td { background: #eef7f7; }
+    .status { margin: 12px 0; color: #526779; }
+    .error { border-radius: 10px; }
+    .music-player { display: none; }
     @media (max-width: 1100px) {
-      header, .toolbar { align-items: stretch; flex-direction: column; }
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .grid, .split, .universe-insight-row { grid-template-columns: 1fr; }
-      .filters > div { flex: 1 1 180px; }
-      .multi-filter { min-width: 0; }
+      header, .toolbar { align-items: start; flex-direction: column; }
+      .toolbar { position: static; }
+      .filters > div, .filters > div:last-of-type { min-width: 180px; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .grid, .split { grid-template-columns: 1fr; }
     }
     @media (max-width: 620px) {
-      main { padding: 14px 10px 32px; }
-      header { padding: 24px 18px; }
-      .kpis { grid-template-columns: 1fr 1fr; gap: 9px; }
-      .card { padding: 13px; border-radius: 14px; }
-      .value { font-size: 21px; }
+      main { padding: 14px; }
+      .tabs { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+      .kpis { grid-template-columns: 1fr; }
       .metric-row { grid-template-columns: 1fr; }
       .money, .num { text-align: left; }
-      .section-title { align-items: flex-start; flex-direction: column; }
-      .music-player { right: 10px; bottom: 10px; }
-      .music-player span { max-width: 90px; }
+    }
+
+    /* UNIVERSE visual system: inspired by the EL-TORO dashboard layout */
+    body {
+      background: linear-gradient(180deg, #eef7fb 0%, #f7fbfd 42%, #eef4f8 100%);
+      color: #173247;
+      font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
+    }
+    header {
+      min-height: 142px;
+      padding: 26px 30px 22px 92px;
+      align-items: center;
+      background: linear-gradient(115deg, #102d54 0%, #2367a5 48%, #8d39a5 100%);
+      box-shadow: 0 10px 28px rgba(17, 62, 96, .18);
+    }
+    header::before {
+      background: radial-gradient(circle at 84% 12%, rgba(255,255,255,.22), transparent 28%), radial-gradient(circle at 12% 90%, rgba(29, 207, 203, .32), transparent 34%);
+    }
+    header::after {
+      content: "UN";
+      position: absolute;
+      left: 22px;
+      top: 26px;
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 17px;
+      background: linear-gradient(145deg, #ff4f91, #ff9b35);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 950;
+      box-shadow: 0 9px 20px rgba(0,0,0,.2);
+      z-index: 2;
+    }
+    h1 {
+      font-size: clamp(30px, 4vw, 48px);
+      letter-spacing: .04em;
+      text-shadow: 0 3px 12px rgba(0,0,0,.22);
+    }
+    .hero-tagline {
+      margin-top: 2px;
+      color: #d5f3ff;
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-shadow: none;
+    }
+    main { max-width: 1480px; padding: 16px 18px 34px; }
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      margin: 0 -2px 14px;
+      padding: 10px 4px 12px;
+      gap: 9px;
+      background: rgba(247, 251, 253, .94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #d6e5ed;
+    }
+    .tab {
+      border: 0;
+      border-radius: 14px;
+      padding: 11px 15px;
+      color: #284b63;
+      background: #fff;
+      box-shadow: 0 3px 12px rgba(26, 76, 103, .10);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+    .tab::before { content: "• "; color: #ef7c21; }
+    .tab.active {
+      background: linear-gradient(135deg, #159cc2, #2674d8);
+      color: #fff;
+      box-shadow: 0 7px 16px rgba(31, 115, 190, .24);
+    }
+    .tab.active::before { color: #fff; }
+    .toolbar {
+      border: 0;
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 6px 22px rgba(39, 84, 110, .10);
+    }
+    .card {
+      border: 0;
+      border-radius: 18px;
+      box-shadow: 0 6px 22px rgba(39, 84, 110, .10);
+    }
+    .kpis { gap: 14px; }
+    .kpis .card:first-child { border-left: 5px solid #19a9c8; }
+    .kpis .card:nth-child(2) { border-left: 5px solid #ef4d92; }
+    .kpis .card:nth-child(3) { border-left: 5px solid #f2a62d; }
+    .kpis .card:nth-child(4) { border-left: 5px solid #5e72e4; }
+    .section-title h2 { color: #183c55; }
+    .table-wrap { border: 0; border-radius: 14px; box-shadow: 0 4px 18px rgba(39,84,110,.08); }
+    th { background: linear-gradient(180deg, #e9f7fb 0%, #d8edf5 100%); color: #24536b; }
+    @media (max-width: 620px) {
+      header { min-height: 112px; padding: 20px 18px 18px 82px; }
+      header::after { left: 18px; top: 20px; width: 48px; height: 48px; border-radius: 14px; }
+      h1 { font-size: 30px; }
+      .hero-tagline { font-size: 10px; letter-spacing: .08em; }
+      .tabs { margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
     }
   </style>
 </head>
 <body>
   <header>
     <div>
-      <h1>CENTER UNIVERSE</h1>
-      <div class="hero-tagline">Stay Sharp. Stay Hungry. Stay #1</div>
+      <h1>UNIVERSE</h1>
+      <div class="hero-tagline">OEC PERFORMANCE · TEAM DASHBOARD</div>
     </div>
   </header>
   <main>
@@ -172,6 +478,9 @@
       <button class="tab" data-view="universe">Universe</button>
       <button class="tab" data-view="dodolan">Dodolan</button>
       <button class="tab" data-view="allIncentive">All Incentive Agent</button>
+      <button class="tab" data-view="baoEarl">Harga Brain Academy Online</button>
+      <button class="tab" data-view="ruangbelajar">Ruangbelajar</button>
+      <button class="tab" data-view="jadwalBac">Jadwal & Deeplink BAC26/27</button>
     </nav>
     <section class="toolbar">
       <div class="filters">
@@ -277,9 +586,11 @@
     let earlybirdRubelTableData = null;
     let jadwalBacTableData = null;
     let hargaBacTableData = null;
+    let universeTableData = null;
     let presentationTableData = null;
     let rawRows = [];
     let incentiveRows = [];
+    let universeRows = [];
     let presentationRows = [];
     let baoEarlRows = [];
     let baoTopupRows = [];
@@ -343,11 +654,7 @@
       "32": 13000000,
       "33": 13000000,
       "34": 10400000,
-      "35": 10400000,
-      "40": 8800000,
-      "41": 8800000,
-      "42": 8800000,
-      "43": 8800000
+      "35": 10400000
     };
     const LAYER_2_WEEK_TARGETS = {
       "23": 7400000,
@@ -362,17 +669,22 @@
       "32": 8400000,
       "33": 8400000,
       "34": 6720000,
-      "35": 6720000,
-      "40": 5100000,
-      "41": 5100000,
-      "42": 5100000,
-      "43": 5100000
+      "35": 6720000
     };
     const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_28_LAYER_1_TIERS = [0, 0.4, 0.5, 0.75, 1, 1.25];
     const WEEK_30_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25, 1.5, 2];
     const WEEK_32_33_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_34_35_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
+    
+    const LEADER_INCENTIVE_TIERS = [0, 0.4, 0.5, 0.75, 1, 1.25];
+    const WEEK_30_LEADER_TIERS = [0, 0.5, 0.75, 1, 1.25, 1.5, 2];
+    const WEEK_32_33_LEADER_TIERS = [0, 0.5, 0.75, 1, 1.25];
+    const PROMPTER_INBOUND_AGENT_TARGET = 128800000;
+    const PROMPTER_INBOUND_WEEK_30_AGENT_TARGET = 110000000;
+    const PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS = new Set(["30", "31"]);
+    const PROMPTER_INBOUND_WEEK_34_AGENT_TARGET = 55000000;
+    const PROMPTER_INBOUND_WEEK_34_SCHEMA_WEEKS = new Set(["34", "35"]);
     const WEEK_25_LAYER_1_RATES = {
       "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.0153, 0.75: 0.0185, 1: 0.0345, 1.25: 0.04 },
       "BAON Elite": { 0: 0, 0.5: 0.0188, 0.75: 0.0185, 1: 0.0333, 1.25: 0.0373 },
@@ -565,31 +877,207 @@
       "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
     };
-
-    const WEEK_40_41_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
-    const WEEK_40_41_LAYER_1_RATES = {
-      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.014, 0.75: 0.017, 1: 0.032, 1.25: 0.037 },
-      "BAON Elite": { 0: 0, 0.5: 0.016, 0.75: 0.0175, 1: 0.03, 1.25: 0.034 },
-      "BAON Prem": { 0: 0, 0.5: 0.028, 0.75: 0.033, 1: 0.0645, 1.25: 0.0775 },
-      "BAON Reg": { 0: 0, 0.5: 0.0243, 0.75: 0.0285, 1: 0.0558, 1.25: 0.0693 },
-      "Others": { 0: 0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
-      "RB": { 0: 0, 0.5: 0.025, 0.75: 0.03, 1: 0.058, 1.25: 0.073 },
-      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
-      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
-      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    const LEADER_INCENTIVE_RATES = {
+      "BAC & Mathchamps Offline": {
+        "LAYER 1": { 0: 0, 0.4: 0.01, 0.5: 0.0125, 0.75: 0.018, 1: 0.0245, 1.25: 0.028 },
+        "LAYER 2": { 0: 0, 0.4: 0.0062, 0.5: 0.0077, 0.75: 0.0125, 1: 0.0165, 1.25: 0.0202 }
+      },
+      "BAON Elite": {
+        "LAYER 1": { 0: 0, 0.4: 0.0112, 0.5: 0.014, 0.75: 0.0205, 1: 0.0315, 1.25: 0.0347 },
+        "LAYER 2": { 0: 0, 0.4: 0.0082, 0.5: 0.0102, 0.75: 0.014, 1: 0.022, 1.25: 0.0272 }
+      },
+      "BAON Prem": {
+        "LAYER 1": { 0: 0, 0.4: 0.0112, 0.5: 0.014, 0.75: 0.0205, 1: 0.0332, 1.25: 0.04 },
+        "LAYER 2": { 0: 0, 0.4: 0.0082, 0.5: 0.0102, 0.75: 0.014, 1: 0.0232, 1.25: 0.0277 }
+      },
+      "BAON Reg": {
+        "LAYER 1": { 0: 0, 0.4: 0.0085, 0.5: 0.0105, 0.75: 0.0152, 1: 0.0197, 1.25: 0.0232 },
+        "LAYER 2": { 0: 0, 0.4: 0.0057, 0.5: 0.0072, 0.75: 0.0105, 1: 0.015, 1.25: 0.0162 }
+      },
+      "Others": {
+        "LAYER 1": { 0: 0, 0.4: 0.0017, 0.5: 0.0022, 0.75: 0.003, 1: 0.0032, 1.25: 0.0035 },
+        "LAYER 2": { 0: 0, 0.4: 0.0012, 0.5: 0.0015, 0.75: 0.002, 1: 0.0023, 1.25: 0.0025 }
+      },
+      "RB": {
+        "LAYER 1": { 0: 0, 0.4: 0.0092, 0.5: 0.0115, 0.75: 0.0152, 1: 0.0192, 1.25: 0.021 },
+        "LAYER 2": { 0: 0, 0.4: 0.01, 0.5: 0.0127, 0.75: 0.0167, 1: 0.0212, 1.25: 0.0232 }
+      },
+      "RGP Online": {
+        "LAYER 1": { 0: 0, 0.4: 0.0065, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025 },
+        "LAYER 2": { 0: 0, 0.4: 0.0065, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025 }
+      },
+      "RGP Offline": {
+        "LAYER 1": { 0: 0, 0.4: 0.0008, 0.5: 0.001, 0.75: 0.0012, 1: 0.0017, 1.25: 0.002 },
+        "LAYER 2": { 0: 0, 0.4: 0.0008, 0.5: 0.001, 0.75: 0.0012, 1: 0.0017, 1.25: 0.002 }
+      },
+      "Math Champs Online": {
+        "LAYER 1": { 0: 0, 0.4: 0.0016, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002 },
+        "LAYER 2": { 0: 0, 0.4: 0.0016, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002 }
+      },
+      "Skill Academy": {
+        "LAYER 1": { 0: 0, 0.4: 0.004, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005 },
+        "LAYER 2": { 0: 0, 0.4: 0.004, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005 }
+      }
     };
-    const WEEK_40_41_LAYER_2_RATES = {
-      "BAC & Mathchamps Offline": { 0: 0, 0.5: 0.01, 0.75: 0.012, 1: 0.022, 1.25: 0.026 },
-      "BAON Elite": { 0: 0, 0.5: 0.011, 0.75: 0.0125, 1: 0.022, 1.25: 0.026 },
-      "BAON Prem": { 0: 0, 0.5: 0.02, 0.75: 0.0235, 1: 0.044, 1.25: 0.055 },
-      "BAON Reg": { 0: 0, 0.5: 0.017, 0.75: 0.02, 1: 0.039, 1.25: 0.0485 },
-      "Others": { 0: 0, 0.5: 0.0108, 0.75: 0.0123, 1: 0.013, 1.25: 0.014 },
-      "RB": { 0: 0, 0.5: 0.03, 0.75: 0.036, 1: 0.07, 1.25: 0.087 },
-      "RGP Offline": { 0: 0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
-      "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
-      "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    const WEEK_30_LEADER_RATES = {
+      "BAC & Mathchamps Offline": {
+        "LAYER 1": { 0: 0, 0.5: 0.01, 0.75: 0.014, 1: 0.019, 1.25: 0.022, 1.5: 0.026, 2: 0.038 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.0085, 1: 0.011, 1.25: 0.0135, 1.5: 0.0165, 2: 0.021 }
+      },
+      "BAON Elite": {
+        "LAYER 1": { 0: 0, 0.5: 0.011, 0.75: 0.016, 1: 0.0245, 1.25: 0.027, 1.5: 0.0325, 2: 0.0485 },
+        "LAYER 2": { 0: 0, 0.5: 0.0065, 0.75: 0.009, 1: 0.0145, 1.25: 0.018, 1.5: 0.022, 2: 0.0285 }
+      },
+      "BAON Prem": {
+        "LAYER 1": { 0: 0, 0.5: 0.011, 0.75: 0.016, 1: 0.026, 1.25: 0.031, 1.5: 0.037, 2: 0.0515 },
+        "LAYER 2": { 0: 0, 0.5: 0.0065, 0.75: 0.009, 1: 0.0155, 1.25: 0.0185, 1.5: 0.023, 2: 0.029 }
+      },
+      "BAON Reg": {
+        "LAYER 1": { 0: 0, 0.5: 0.017, 0.75: 0.02, 1: 0.0445, 1.25: 0.056, 1.5: 0.0675, 2: 0.0895 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.007, 1: 0.01, 1.25: 0.011, 1.5: 0.015, 2: 0.017 }
+      },
+      "Others": {
+        "LAYER 1": { 0: 0, 0.5: 0.002, 0.75: 0.003, 1: 0.003, 1.25: 0.0035, 1.5: 0.0035, 2: 0.0035 },
+        "LAYER 2": { 0: 0, 0.5: 0.0015, 0.75: 0.002, 1: 0.0025, 1.25: 0.0025, 1.5: 0.0025, 2: 0.0025 }
+      },
+      "RB": {
+        "LAYER 1": { 0: 0, 0.5: 0.009, 0.75: 0.012, 1: 0.015, 1.25: 0.0165, 1.5: 0.0195, 2: 0.0295 },
+        "LAYER 2": { 0: 0, 0.5: 0.01, 0.75: 0.013, 1: 0.0165, 1.25: 0.018, 1.5: 0.0215, 2: 0.032 }
+      },
+      "RGP Online": {
+        "LAYER 1": { 0: 0, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025, 1.5: 0.025, 2: 0.025 },
+        "LAYER 2": { 0: 0, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025, 1.5: 0.025, 2: 0.025 }
+      },
+      "RGP Offline": {
+        "LAYER 1": { 0: 0, 0.5: 0.001, 0.75: 0.0015, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 },
+        "LAYER 2": { 0: 0, 0.5: 0.001, 0.75: 0.0015, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 }
+      },
+      "Math Champs Online": {
+        "LAYER 1": { 0: 0, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 },
+        "LAYER 2": { 0: 0, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002, 1.5: 0.002, 2: 0.002 }
+      },
+      "Skill Academy": {
+        "LAYER 1": { 0: 0, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005, 1.5: 0.005, 2: 0.005 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005, 1.5: 0.005, 2: 0.005 }
+      }
     };
-
+    const PROMPTER_INBOUND_LEADER_RATES = {
+      "Online Product": { 0: 0, 0.4: 0.0042, 0.5: 0.0066, 0.75: 0.01, 1: 0.0135, 1.25: 0.0135 },
+      "Offline Product": { 0: 0, 0.4: 0.0015, 0.5: 0.0023, 0.75: 0.003, 1: 0.0038, 1.25: 0.0038 },
+      "RGP Online": { 0: 0, 0.4: 0.0031, 0.5: 0.0044, 0.75: 0.0075, 1: 0.0099, 1.25: 0.0099 },
+      "RGP Offline": { 0: 0, 0.4: 0.0004, 0.5: 0.0006, 0.75: 0.0006, 1: 0.0008, 1.25: 0.0008 }
+    };
+    const WEEK_30_PROMPTER_INBOUND_LEADER_RATES = {
+      "Online Product": { 0: 0, 0.5: 0.005, 0.75: 0.0085, 1: 0.0115, 1.25: 0.0145, 1.5: 0.017, 2: 0.0195 },
+      "Offline Product": { 0: 0, 0.5: 0.002, 0.75: 0.0025, 1: 0.003, 1.25: 0.004, 1.5: 0.0045, 2: 0.0055 },
+      "RGP Online": { 0: 0, 0.5: 0.0045, 0.75: 0.0075, 1: 0.01, 1.25: 0.012, 1.5: 0.012, 2: 0.012 },
+      "RGP Offline": { 0: 0, 0.5: 0.0005, 0.75: 0.0008, 1: 0.0008, 1.25: 0.001, 1.5: 0.001, 2: 0.001 }
+    };
+    const WEEK_32_33_LEADER_RATES = {
+      "BAC & Mathchamps Offline": {
+        "LAYER 1": { 0: 0, 0.5: 0.008, 0.75: 0.012, 1: 0.024, 1.25: 0.0275 },
+        "LAYER 2": { 0: 0, 0.5: 0.0045, 0.75: 0.007, 1: 0.015, 1.25: 0.0185 }
+      },
+      "BAON Elite": {
+        "LAYER 1": { 0: 0, 0.5: 0.009, 0.75: 0.013, 1: 0.025, 1.25: 0.0295 },
+        "LAYER 2": { 0: 0, 0.5: 0.0062, 0.75: 0.0086, 1: 0.0176, 1.25: 0.0218 }
+      },
+      "BAON Prem": {
+        "LAYER 1": { 0: 0, 0.5: 0.0086, 0.75: 0.0125, 1: 0.0268, 1.25: 0.0321 },
+        "LAYER 2": { 0: 0, 0.5: 0.0062, 0.75: 0.0086, 1: 0.0186, 1.25: 0.022 }
+      },
+      "BAON Reg": {
+        "LAYER 1": { 0: 0, 0.5: 0.0065, 0.75: 0.0092, 1: 0.0158, 1.25: 0.0186 },
+        "LAYER 2": { 0: 0, 0.5: 0.0045, 0.75: 0.0065, 1: 0.011, 1.25: 0.0128 }
+      },
+      "Others": {
+        "LAYER 1": { 0: 0, 0.5: 0.0022, 0.75: 0.003, 1: 0.0188, 1.25: 0.0198 },
+        "LAYER 2": { 0: 0, 0.5: 0.0015, 0.75: 0.002, 1: 0.013, 1.25: 0.014 }
+      },
+      "RB": {
+        "LAYER 1": { 0: 0, 0.5: 0.0068, 0.75: 0.0094, 1: 0.0153, 1.25: 0.0166 },
+        "LAYER 2": { 0: 0, 0.5: 0.0075, 0.75: 0.01, 1: 0.017, 1.25: 0.0185 }
+      },
+      "RGP Online": {
+        "LAYER 1": { 0: 0, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025 },
+        "LAYER 2": { 0: 0, 0.5: 0.008, 0.75: 0.015, 1: 0.02, 1.25: 0.025 }
+      },
+      "RGP Offline": {
+        "LAYER 1": { 0: 0, 0.5: 0.001, 0.75: 0.0012, 1: 0.0017, 1.25: 0.002 },
+        "LAYER 2": { 0: 0, 0.5: 0.001, 0.75: 0.0012, 1: 0.0017, 1.25: 0.002 }
+      },
+      "Math Champs Online": {
+        "LAYER 1": { 0: 0, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002 },
+        "LAYER 2": { 0: 0, 0.5: 0.002, 0.75: 0.002, 1: 0.002, 1.25: 0.002 }
+      },
+      "Skill Academy": {
+        "LAYER 1": { 0: 0, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005 },
+        "LAYER 2": { 0: 0, 0.5: 0.005, 0.75: 0.005, 1: 0.005, 1.25: 0.005 }
+      }
+    };
+    const WEEK_27_LEADER_TARGETS = new Map([
+      ["faizal fahmi arridai||LAYER 1", 257400000],
+      ["yosua sitorus||LAYER 1", 280800000],
+      ["wahyu oktavia widiasari||LAYER 1", 280800000],
+      ["wildan adiwena||LAYER 2", 141400000],
+      ["yuliani musfikoh||LAYER 2", 141400000],
+      ["arif pambudi||LAYER 1", 280800000],
+      ["akhmad lutfi khoerudin||LAYER 1", 280800000],
+      ["rizha faturahman||LAYER 2", 158000000],
+      ["satyadi ambia||PROMPTER INBOUND", 1288000000],
+      ["erna erviana purnamasari||PROMPTER INBOUND", 1288000000],
+      ["imam nugroho||PROMPTER INBOUND", 1288000000],
+      ["muhammad bil fadli||LAYER 2", 157200000],
+      ["chintya ayu jayawijayanti||LAYER 2", 149700000],
+      ["sri wiwara||LAYER 2", 141400000],
+      ["amin rosidi||LAYER 1", 280800000],
+      ["aris riski fauzi||LAYER 2", 133100000],
+      ["danu arri pramudya||LAYER 2", 149700000],
+      ["yosua adhi surya wijaya||LAYER 2", 149700000]
+    ]);
+    const WEEK_28_LEADER_TARGETS = new Map([
+      ["faizal fahmi arridai||LAYER 1", 280800000],
+      ["yosua sitorus||LAYER 1", 280800000],
+      ["wahyu oktavia widiasari||LAYER 1", 280800000],
+      ["wildan adiwena||LAYER 2", 141400000],
+      ["yuliani musfikoh||LAYER 2", 149700000],
+      ["arif pambudi||LAYER 1", 280800000],
+      ["akhmad lutfi khoerudin||LAYER 1", 280800000],
+      ["rizha faturahman||LAYER 2", 158000000],
+      ["satyadi ambia||PROMPTER INBOUND", 1288000000],
+      ["erna erviana purnamasari||PROMPTER INBOUND", 1288000000],
+      ["imam nugroho||PROMPTER INBOUND", 1288000000],
+      ["muhammad bil fadli||LAYER 2", 157200000],
+      ["chintya ayu jayawijayanti||LAYER 2", 158000000],
+      ["sri wiwara||LAYER 2", 149700000],
+      ["amin rosidi||LAYER 1", 280800000],
+      ["aris riski fauzi||LAYER 2", 133100000],
+      ["danu arri pramudya||LAYER 2", 141400000],
+      ["yosua adhi surya wijaya||LAYER 2", 149700000]
+    ]);
+    const WEEK_30_LEADER_TARGETS = new Map([
+      ["faizal fahmi arridai||LAYER 1", 218400000],
+      ["yosua sitorus||LAYER 1", 218400000],
+      ["wahyu oktavia widiasari||LAYER 1", 218400000],
+      ["arif pambudi||LAYER 1", 218400000],
+      ["akhmad lutfi khoerudin||LAYER 1", 218400000],
+      ["amin rosidi||LAYER 1", 218400000],
+      ["rizha faturahman||LAYER 2", 104000000],
+      ["muhammad bil fadli||LAYER 2", 114400000],
+      ["yuliani musfikoh||LAYER 2", 104000000],
+      ["sri wiwara||LAYER 2", 93600000],
+      ["aris riski fauzi||LAYER 2", 104000000],
+      ["yosua adhi surya wijaya||LAYER 2", 114400000],
+      ["danu arri pramudya||LAYER 2", 93600000],
+      ["wildan adiwena||LAYER 2", 104000000]
+    ]);
+    const LEADER_TARGETS_BY_WEEK = {
+      "27": WEEK_27_LEADER_TARGETS,
+      "28": WEEK_28_LEADER_TARGETS,
+      "29": WEEK_28_LEADER_TARGETS,
+      "30": WEEK_30_LEADER_TARGETS,
+      "31": WEEK_30_LEADER_TARGETS
+    };
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
     function isExcludedTopIncentiveAgent(name) {
       return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
@@ -607,14 +1095,23 @@
     function normalizedTeamCategory(teamCategory) {
       return String(teamCategory || "").trim().toUpperCase();
     }
+    function isPrompterInboundTeam(teamCategory) {
+      const team = normalizedTeamCategory(teamCategory);
+      return team === "PROMPTER INBOUND" || team === "PROMTER INBOUND";
+    }
     function isSchemaTeam(teamCategory) {
-      return ["LAYER 1", "LAYER 2"].includes(normalizedTeamCategory(teamCategory));
+      const team = normalizedTeamCategory(teamCategory);
+      return ["LAYER 1", "LAYER 2"].includes(team) || isPrompterInboundTeam(team);
     }
     function isAllIncentiveSchemaRow(row) {
       const team = normalizedTeamCategory(row.teamCategory);
       if (hasLayer2AgentTargetOverride(row.agent, row.week)) return true;
       if (team === "LAYER 1") return true;
-      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "40", "41"].includes(String(row.week));
+      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35"].includes(String(row.week));
+    }
+    function isLeaderIncentiveSchemaRow(row) {
+      if (isAllIncentiveSchemaRow(row)) return true;
+      return isPrompterInboundTeam(row.teamCategory) && ["27", "28", "29", "30", "31", "34", "35"].includes(String(row.week));
     }
     function isYosuaLeaderName(coach) {
       return String(coach || "").trim().toLowerCase() === "yosua sitorus";
@@ -630,7 +1127,7 @@
       const overrideTarget = layer2AgentTargetOverride(agent, week);
       if (overrideTarget) return overrideTarget;
       const normalizedTeam = normalizedTeamCategory(teamCategory);
-      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "40", "41"].includes(String(week))) {
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35"].includes(String(week))) {
         return LAYER_2_WEEK_TARGETS[String(week)] || 0;
       }
       return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
@@ -747,6 +1244,43 @@
         incentive: parseMoney(cell(row, incentiveIdx) || fmt(row, incentiveIdx))
       })).filter((r) => r.agent && r.week && Number(r.week) >= 1 && r.incentive >= 0);
     }
+    function parseUniverseIncentive(table) {
+      const m = colMap(table);
+      const weekIdx = first(m, "Week");
+      const dateIdx = first(m, "Tanggal");
+      const agentIdx = first(m, "Nama Agent");
+      const userIdx = first(m, "Nama User");
+      const packageIdx = first(m, "Nama Paket");
+      const categoryIdx = first(m, "Kategori");
+      const amountIdx = last(m, "Amount");
+      const productIdx = first(m, "Product");
+      const thIdx = first(m, "TH");
+      const incentiveIdx = first(m, "Incentive");
+      return (table.rows || []).map((row) => {
+        const week = normalizeWeek(cell(row, weekIdx) || fmt(row, weekIdx));
+        const agent = String(fmt(row, agentIdx) || cell(row, agentIdx) || "").trim();
+        const amount = parseMoney(cell(row, amountIdx) || fmt(row, amountIdx));
+        const category = String(fmt(row, categoryIdx) || cell(row, categoryIdx) || "").trim();
+        return {
+          date: String(fmt(row, dateIdx) || cell(row, dateIdx) || "").trim(),
+          month: majorityMonthForWeek("2026", week) || "",
+          week,
+          agent,
+          coach: "Yosua Sitorus",
+          spv: "",
+          teamCategory: "LAYER 1",
+          package: String(fmt(row, packageIdx) || cell(row, packageIdx) || "").trim(),
+          product: String(fmt(row, productIdx) || cell(row, productIdx) || category).trim(),
+          campaign: category,
+          productAdjust: "",
+          amount,
+          txn: amount > 0 ? 1 : 0,
+          incentive: parseMoney(cell(row, incentiveIdx) || fmt(row, incentiveIdx)),
+          th: String(fmt(row, thIdx) || cell(row, thIdx) || "").trim(),
+          user: String(fmt(row, userIdx) || cell(row, userIdx) || "").trim()
+        };
+      }).filter((r) => r.agent && r.week && r.amount > 0);
+    }
     function parsePresentationRows(table) {
       const m = colMap(table);
       const idx = {
@@ -844,9 +1378,9 @@
           const cicilan3_1 = parseMoney(cell(row, section.start + 6 + offset) || fmt(row, section.start + 6 + offset));
           const cicilan3_2 = parseMoney(cell(row, section.start + 7 + offset) || fmt(row, section.start + 7 + offset));
           const cicilan3_3 = parseMoney(cell(row, section.start + 8 + offset) || fmt(row, section.start + 8 + offset));
-          if (couponAmount || priceAfterDisc || cicilan2Price || cicilan3Price) {
-            rows.push({ ...base, section: section.key, sectionTitle: section.title, ru: section.ru ? String(fmt(row, section.start + 1) || cell(row, section.start + 1) || "").trim() : "", couponAmount, priceAfterDisc, cicilan2Price, cicilan2_1, cicilan2_2, cicilan3Price, cicilan3_1, cicilan3_2, cicilan3_3 });
-          }
+          const ru = section.ru ? String(fmt(row, section.start + 1) || cell(row, section.start + 1) || "").trim() : "";
+          if (!couponAmount && !priceAfterDisc && !cicilan2Price && !cicilan3Price) return;
+          rows.push({ ...base, section: section.key, sectionTitle: section.title, couponAmount, ru, priceAfterDisc, cicilan2Price, cicilan2_1, cicilan2_2, cicilan3Price, cicilan3_1, cicilan3_2, cicilan3_3 });
         });
       });
       return rows;
@@ -1028,7 +1562,7 @@
       }
       return { products, tiers: tiers.sort((a, b) => a.threshold - b.threshold), targetRevenue };
     }
-    function setupFilters() {      const months = [...new Set(rawRows.map((r) => effectiveRowMonth(r)).filter(Boolean))].sort((a, b) => { const [am, ay] = String(a).split("-"); const [bm, by] = String(b).split("-"); return Number(ay) - Number(by) || Number(am) - Number(bm); });
+    function setupFilters() {      const months = [...new Set([...rawRows.map((r) => r.month), ...presentationRows.map((r) => r.month)].filter(Boolean))].sort();
       const weeks = [...new Set([
         ...rawRows.map((r) => r.week),
         ...presentationRows.map((r) => r.week),
@@ -1042,7 +1576,7 @@
         .sort((a, b) => a.localeCompare(b, "id"));
       const teams = [...new Set(rawRows.map((r) => r.teamCategory).filter((t) => t && t !== "Kategori Team"))]
         .sort((a, b) => a.localeCompare(b, "id"));
-      const agents = [...new Set(rawRows.map((r) => r.agent).filter((a) => a && a !== "Agent Name"))]
+      const agents = [...new Set([...rawRows.map((r) => r.agent), ...presentationRows.map((r) => r.agent)].filter((a) => a && a !== "Agent Name"))]
         .sort((a, b) => a.localeCompare(b, "id"));
       monthFilter.innerHTML = `<option value="all">All Month</option>${months.map((m) => `<option value="${esc(m)}">${esc(m)}</option>`).join("")}`;
       weekFilter.innerHTML = `<option value="all">All Week</option>${weeks.map((w) => `<option value="${esc(w)}">Week ${esc(w)}</option>`).join("")}`;
@@ -1119,6 +1653,9 @@
       render();
     }
     function filteredRaw(options = {}) {
+      return applyRawFilters(rawRows, options);
+    }
+    function applyRawFilters(rows, options = {}) {
       const monthSet = options.ignoreMonth ? null : selectedSet(monthFilter);
       const weekSet = options.weekSet || selectedSet(weekFilter);
       const coachSet = options.ignoreCoach ? null : selectedSet(coachFilter);
@@ -1126,7 +1663,7 @@
       const teamSet = selectedSet(teamFilter);
       const agentSet = selectedSet(agentFilter);
       const q = searchFilter.value.trim().toLowerCase();
-      return rawRows.filter((r) => {
+      return rows.filter((r) => {
         const rowMonth = effectiveRowMonth(r);
         const monthMatch = selectedSetMatch(monthSet, rowMonth);
         const weekMatch = selectedSetMatch(weekSet, String(r.week));
@@ -1295,7 +1832,9 @@
       else if (activeView === "universe") renderUniverse();
       else if (activeView === "dodolan") renderDodolan(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
       else if (activeView === "allIncentive") renderAllIncentiveAgent();
-      else { activeView = "summary"; renderSummary(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu }); }
+      else if (activeView === "baoEarl") renderBaoEarl();
+      else if (activeView === "ruangbelajar") renderRuangbelajar();
+      else renderJadwalBac();
       statusEl.textContent = `Terakhir dimuat: ${new Date().toLocaleString("id-ID")} · sumber sales: RAW · sumber incentive: Incentive/Kalkulator`;
     }
     function renderSummary(sales, incentives, totals) {
@@ -1336,18 +1875,21 @@
           ${metricCard("Top Revenue by Agent", byAgent)}
         </section>
         <section class="card" style="margin-top:16px">
-          <div class="section-title"><h2>Summary Agent All Month</h2><span class="note">${num(byAgent.length)} agent · incentive LAYER 1 + LAYER 2 · incentive ${selectedWeekNote(juneWeekRowsForSchema)}</span></div>
+          <div class="section-title"><h2>Summary Agent All Month</h2><span class="note">${num(byAgent.length)} agent Â· incentive LAYER 1 + LAYER 2 Â· incentive ${selectedWeekNote(juneWeekRowsForSchema)}</span></div>
           ${summaryAgentTable(byAgent)}
         </section>`;
     }
     function renderUniverse() {
-      const teamRows = filteredRaw().filter((r) => isYosuaLeaderName(r.coach));
+      const activeRows = universeRows.length ? universeRows : rawRows.filter((r) => isYosuaLeaderName(r.coach));
+      const teamRows = applyRawFilters(activeRows, { ignoreCoach: true });
       const teamAgents = new Set(teamRows.map((r) => r.agent).filter(Boolean));
       const totalAmount = teamRows.reduce((s, r) => s + r.amount, 0);
       const totalTxn = teamRows.reduce((s, r) => s + r.txn, 0);
       const byAgent = groupBy(teamRows, (r) => r.agent, (r) => ({ amount: r.amount, txn: r.txn }));
       const byWeek = buildTeamWeekly(teamRows, []);
-      const universeIncentiveMap = new Map(calculateSchemaIncentives(teamRows.filter(isAllIncentiveSchemaRow)).agents.map((r) => [r.key, r.incentive]));
+      const universeIncentiveMap = universeRows.length
+        ? new Map(groupBy(teamRows, (r) => r.agent, (r) => ({ incentive: r.incentive })).map((r) => [r.key, r.incentive]))
+        : new Map(calculateSchemaIncentives(teamRows.filter(isAllIncentiveSchemaRow)).agents.map((r) => [r.key, r.incentive]));
       byAgent.forEach((agent) => {
         const agentRows = teamRows.filter((row) => row.agent === agent.key);
         agent.productCount = new Set(agentRows.map((row) => row.product).filter(Boolean)).size;
@@ -1358,9 +1900,9 @@
       });
       contentEl.innerHTML = `
         <section class="kpis">
-          ${kpi("UNIVERSE Revenue", rupiah(totalAmount), "RAW · Leader Name Yosua Sitorus")}
-          ${kpi("Team TXN", num(totalTxn), "RAW Txn")}
-          ${kpi("Team Agent", num(teamAgents.size), "Agent aktif di RAW")}
+          ${kpi("UNIVERSE Revenue", rupiah(totalAmount), universeRows.length ? "Sheet incentive BK:CJ" : "RAW - Leader Name Yosua Sitorus")}
+          ${kpi("Team TXN", num(totalTxn), universeRows.length ? "Baris invoice BK:CJ" : "RAW Txn")}
+          ${kpi("Team Agent", num(teamAgents.size), universeRows.length ? "Agent dari sheet incentive" : "Agent aktif di RAW")}
           ${kpi("ARPU", rupiah(totalTxn ? totalAmount / totalTxn : 0), "Revenue / TXN")}
         </section>
         <section class="card" style="margin-top:16px">
@@ -1589,10 +2131,6 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_34_35_LAYER_2_RATES : WEEK_34_35_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_34_35_LAYER_TIERS);
       }
-      if (["40", "41"].includes(String(week))) {
-        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_40_41_LAYER_2_RATES : WEEK_40_41_LAYER_1_RATES;
-        return layer1RateFor(rates, category, achievement, WEEK_40_41_LAYER_TIERS);
-      }
       if (!calculatorSchema) return 0;
       let selected = null;
       calculatorSchema.tiers.forEach((tier) => {
@@ -1648,6 +2186,101 @@
         agents: [...agents.values()].sort((a, b) => b.incentive - a.incentive)
       };
     }
+    function leaderRateFor(category, achievement, teamCategory, week = "") {
+      let selected = 0;
+      const weekText = String(week);
+      const tiers = ["32", "33"].includes(weekText) ? WEEK_32_33_LEADER_TIERS : (["30", "31"].includes(weekText) ? WEEK_30_LEADER_TIERS : LEADER_INCENTIVE_TIERS);
+      tiers.forEach((tier) => {
+        if (achievement >= tier) selected = tier;
+      });
+      if (isPrompterInboundTeam(teamCategory)) {
+        const prompterCategory = prompterInboundProductCategory(category);
+        const rateTable = PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS.has(String(week)) ? WEEK_30_PROMPTER_INBOUND_LEADER_RATES : PROMPTER_INBOUND_LEADER_RATES;
+        return rateTable[prompterCategory]?.[selected] ?? 0;
+      }
+      const layer = normalizedTeamCategory(teamCategory) === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      const rateTable = ["32", "33"].includes(weekText) ? WEEK_32_33_LEADER_RATES : (["30", "31"].includes(weekText) ? WEEK_30_LEADER_RATES : LEADER_INCENTIVE_RATES);
+      return rateTable[category]?.[layer]?.[selected] ?? rateTable.Others[layer][selected] ?? 0;
+    }
+    function prompterInboundProductCategory(category) {
+      if (category === "RGP Online") return "RGP Online";
+      if (category === "RGP Offline") return "RGP Offline";
+      if (category === "BAC & Mathchamps Offline") return "Offline Product";
+      return "Online Product";
+    }
+    function leaderTargetForWeek(coach, week, teamCategory, fallbackTarget) {
+      const team = normalizedTeamCategory(teamCategory);
+      if (isPrompterInboundTeam(team)) return fallbackTarget;
+      const targetMap = LEADER_TARGETS_BY_WEEK[String(week)];
+      if (targetMap) {
+        const key = `${String(coach || "").trim().toLowerCase()}||${team}`;
+        const override = targetMap.get(key);
+        if (override) return override;
+      }
+      return fallbackTarget;
+    }
+    function calculateLeaderIncentives(rows) {
+      const grouped = new Map();
+      rows.forEach((row) => {
+        const rawTeamCategory = normalizedTeamCategory(row.teamCategory);
+        const teamCategory = hasLayer2AgentTargetOverride(row.agent, row.week) ? "LAYER 2" : (isPrompterInboundTeam(rawTeamCategory) ? "PROMPTER INBOUND" : rawTeamCategory);
+        if (!["LAYER 1", "LAYER 2", "PROMPTER INBOUND"].includes(teamCategory)) return;
+        const key = `${row.coach || "-"}||${row.week}||${teamCategory}`;
+        const current = grouped.get(key) || { coach: row.coach || "-", week: row.week, teamCategory, revenue: 0, txn: 0, rows: [], agents: new Map() };
+        current.revenue += row.amount;
+        current.txn += row.txn;
+        current.rows.push(row);
+        if (row.agent && !current.agents.has(row.agent)) {
+          const prompterTarget = PROMPTER_INBOUND_WEEK_34_SCHEMA_WEEKS.has(String(row.week)) ? PROMPTER_INBOUND_WEEK_34_AGENT_TARGET : (PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS.has(String(row.week)) ? PROMPTER_INBOUND_WEEK_30_AGENT_TARGET : PROMPTER_INBOUND_AGENT_TARGET);
+          current.agents.set(row.agent, isPrompterInboundTeam(teamCategory) ? prompterTarget : targetForWeek(row.week, teamCategory, row.agent));
+        }
+        grouped.set(key, current);
+      });
+      const weekly = [...grouped.values()].map((group) => {
+        const fallbackTarget = [...group.agents.values()].reduce((sum, target) => sum + target, 0);
+        const targetRevenue = leaderTargetForWeek(group.coach, group.week, group.teamCategory, fallbackTarget);
+        const achievement = targetRevenue ? group.revenue / targetRevenue : 0;
+        const categories = {};
+        let incentive = 0;
+        group.rows.forEach((row) => {
+          const category = week25ProductCategory(row);
+          const rate = leaderRateFor(category, achievement, group.teamCategory, group.week);
+          const value = row.amount * rate;
+          incentive += value;
+          const displayCategory = isPrompterInboundTeam(group.teamCategory) ? prompterInboundProductCategory(category) : category;
+          const item = categories[displayCategory] || { amount: 0, incentive: 0, txn: 0 };
+          item.amount += row.amount;
+          item.incentive += value;
+          item.txn += row.txn;
+          categories[displayCategory] = item;
+        });
+        return { ...group, agentCount: group.agents.size, targetRevenue, achievement, incentive, categories };
+      });
+      const leaders = new Map();
+      weekly.forEach((row) => {
+        const key = `${row.coach}||${row.teamCategory}`;
+        const item = leaders.get(key) || { key: row.coach, teamCategory: row.teamCategory, amount: 0, targetRevenue: 0, txn: 0, incentive: 0, weeks: 0, agentWeekCount: 0, maxAchievement: 0, categories: {} };
+        item.amount += row.revenue;
+        item.targetRevenue += row.targetRevenue;
+        item.txn += row.txn;
+        item.incentive += row.incentive;
+        item.weeks += 1;
+        item.agentWeekCount += row.agentCount;
+        item.maxAchievement = Math.max(item.maxAchievement, row.achievement);
+        Object.entries(row.categories).forEach(([category, value]) => {
+          const current = item.categories[category] || { amount: 0, incentive: 0, txn: 0 };
+          current.amount += value.amount;
+          current.incentive += value.incentive;
+          current.txn += value.txn;
+          item.categories[category] = current;
+        });
+        leaders.set(key, item);
+      });
+      return {
+        weekly: weekly.sort((a, b) => Number(a.week) - Number(b.week) || b.incentive - a.incentive),
+        leaders: [...leaders.values()].sort((a, b) => b.incentive - a.incentive)
+      };
+    }
     function renderAllIncentiveAgent() {
       const sales = filteredRaw().filter(isAllIncentiveSchemaRow);
       const result = calculateSchemaIncentives(sales);
@@ -1684,6 +2317,35 @@
           ${schemaWeeklyTable(visibleWeekly)}
         </section>`;
     }
+    function renderLeaderIncentive() {
+      const sales = filteredRawForFullWeeksInMonth().filter(isLeaderIncentiveSchemaRow);
+      const result = calculateLeaderIncentives(sales);
+      const totalRevenue = result.leaders.reduce((s, r) => s + r.amount, 0);
+      const totalTarget = result.leaders.reduce((s, r) => s + r.targetRevenue, 0);
+      const totalIncentive = result.leaders.reduce((s, r) => s + r.incentive, 0);
+      const totalTxn = result.leaders.reduce((s, r) => s + r.txn, 0);
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Leader Incentive", rupiah(totalIncentive), "Rate sesuai tabel coach")}
+          ${kpi("Revenue RAW", rupiah(totalRevenue), "Sesuai filter")}
+          ${kpi("Target Coach", rupiah(totalTarget), "Week 27-28 mengikuti tabel target coach")}
+          ${kpi("% to Target", `${num(totalTarget ? totalRevenue / totalTarget * 100 : 0, 1)}%`, "Revenue / target")}
+          ${kpi("Total TXN", num(totalTxn), "RAW Txn")}
+          ${kpi("Leader", num(result.leaders.length), "Coach + Layer")}
+        </section>
+        <section class="grid">
+          ${metricCard("Top Leader Incentive", result.leaders.map((r) => ({ ...r, amount: r.incentive })), "amount")}
+          ${leaderSchemaInfoCard(result.weekly)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Incentive Leader</h2><span class="note">Template mengikuti All Incentive Agent</span></div>
+          ${leaderTable(result.leaders)}
+        </section>
+        <section class="card" style="margin-top:16px">
+          <div class="section-title"><h2>Detail Incentive Leader per Week</h2><span class="note">${num(result.weekly.length)} coach-week-layer</span></div>
+          ${leaderWeeklyTable(result.weekly)}
+        </section>`;
+    }
     function targetSimulationTable(rates, targetRevenue, note = "Target x TH x rate product", tiers = WEEK_25_LAYER_1_TIERS) {
       const products = [
         "BAC & Mathchamps Offline",
@@ -1701,6 +2363,7 @@
     function selectedSchemaLayers() {
       const selectedTeams = selectedValues(teamFilter).map(normalizedTeamCategory).filter((team) => team && team !== "ALL");
       if (selectedTeams.length === 1 && (selectedTeams[0] === "LAYER 1" || selectedTeams[0] === "LAYER 2")) return [selectedTeams[0]];
+      if (selectedTeams.length === 1 && selectedTeams[0] === "PROMPTER INBOUND") return [selectedTeams[0]];
       return ["LAYER 1", "LAYER 2"];
     }
     function schemaRatesFor(week, layer) {
@@ -1711,12 +2374,11 @@
       if (["30", "31"].includes(String(week))) return layer === "LAYER 2" ? WEEK_30_LAYER_2_RATES : WEEK_30_LAYER_1_RATES;
       if (["32", "33"].includes(String(week))) return layer === "LAYER 2" ? WEEK_32_33_LAYER_2_RATES : WEEK_32_33_LAYER_1_RATES;
       if (["34", "35"].includes(String(week))) return layer === "LAYER 2" ? WEEK_34_35_LAYER_2_RATES : WEEK_34_35_LAYER_1_RATES;
-      if (["40", "41"].includes(String(week))) return layer === "LAYER 2" ? WEEK_40_41_LAYER_2_RATES : WEEK_40_41_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
     function priceTableIncentiveContext() {
       const singleWeek = selectedSingleWeek();
-      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "40", "41"].includes(singleWeek) ? singleWeek : "26";
+      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35"].includes(singleWeek) ? singleWeek : "26";
       const selectedTeams = selectedValues(teamFilter).map(normalizedTeamCategory).filter((team) => team && team !== "ALL");
       const selectedTeam = selectedTeams.length === 1 ? selectedTeams[0] : "";
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
@@ -1766,7 +2428,7 @@
       return selectedSchemaLayers().map((layer) => {
         const rates = schemaRatesFor(week, layer);
         const targetRevenue = targetForWeek(week, layer);
-        const tiers = ["40", "41"].includes(String(week)) ? WEEK_40_41_LAYER_TIERS : (["34", "35"].includes(String(week)) ? WEEK_34_35_LAYER_TIERS : (["32", "33"].includes(String(week)) ? WEEK_32_33_LAYER_TIERS : (["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS))));
+        const tiers = ["34", "35"].includes(String(week)) ? WEEK_34_35_LAYER_TIERS : (["32", "33"].includes(String(week)) ? WEEK_32_33_LAYER_TIERS : (["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS)));
         return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetRevenue)}</span></div>${schemaRateTable(rates, tiers)}${targetSimulationTable(rates, targetRevenue, "Target x TH x rate product", tiers)}`;
       }).join("");
     }
@@ -1786,8 +2448,92 @@
       const rows = calculatorSchema?.tiers || [];
       return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Threshold achievement</span></div><div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${(calculatorSchema?.products || []).map((p) => `<th class="number">${esc(p.label)}</th>`).join("")}</tr></thead><tbody>${rows.map((tier) => `<tr><td>${num(tier.threshold * 100, 0)}%</td>${(calculatorSchema?.products || []).map((p) => `<td class="number">${num((tier.rates[p.label] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
     }
+    function leaderRatesForLayer(layer) {
+      if (isPrompterInboundTeam(layer)) return PROMPTER_INBOUND_LEADER_RATES;
+      const selectedLayer = normalizedTeamCategory(layer) === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      return Object.fromEntries(Object.entries(LEADER_INCENTIVE_RATES).map(([product, layers]) => [product, layers[selectedLayer] || layers["LAYER 1"]]));
+    }
+    function leaderRatesForWeekLayer(week, layer) {
+      if (isPrompterInboundTeam(layer)) return PROMPTER_INBOUND_WEEK_30_SCHEMA_WEEKS.has(String(week)) ? WEEK_30_PROMPTER_INBOUND_LEADER_RATES : PROMPTER_INBOUND_LEADER_RATES;
+      const selectedLayer = normalizedTeamCategory(layer) === "LAYER 2" ? "LAYER 2" : "LAYER 1";
+      const rateTable = ["30", "31", "32"].includes(String(week)) ? WEEK_30_LEADER_RATES : LEADER_INCENTIVE_RATES;
+      return Object.fromEntries(Object.entries(rateTable).map(([product, layers]) => [product, layers[selectedLayer] || layers["LAYER 1"]]));
+    }
+    function leaderSimulationTarget(week, layer, weeklyRows) {
+      const selectedLayer = isPrompterInboundTeam(layer) ? "PROMPTER INBOUND" : (normalizedTeamCategory(layer) === "LAYER 2" ? "LAYER 2" : "LAYER 1");
+      const selectedCoaches = selectedValues(coachFilter).filter((value) => value !== "all");
+      const selectedCoach = selectedCoaches.length === 1 ? selectedCoaches[0] : "all";
+      const visibleTargets = weeklyRows
+        .filter((row) => String(row.week) === String(week) && normalizedTeamCategory(row.teamCategory) === selectedLayer)
+        .map((row) => row.targetRevenue)
+        .filter(Boolean);
+      if (visibleTargets.length) {
+        const total = visibleTargets.reduce((sum, target) => sum + target, 0);
+        return {
+          target: selectedCoach === "all" ? total / visibleTargets.length : total,
+          note: selectedCoach === "all" ? "Rata-rata target coach x TH x rate product" : "Target coach x TH x rate product"
+        };
+      }
+      const mappedTargets = LEADER_TARGETS_BY_WEEK[String(week)];
+      if (mappedTargets) {
+        const mappedValues = [...mappedTargets.entries()]
+          .filter(([key]) => key.endsWith(`||${selectedLayer}`) && (selectedCoach === "all" || key.startsWith(`${selectedCoach.trim().toLowerCase()}||`)))
+          .map(([, target]) => target)
+          .filter(Boolean);
+        if (mappedValues.length) {
+          const total = mappedValues.reduce((sum, target) => sum + target, 0);
+          return {
+            target: selectedCoach === "all" ? total / mappedValues.length : total,
+            note: selectedCoach === "all" ? "Rata-rata target coach x TH x rate product" : "Target coach x TH x rate product"
+          };
+        }
+      }
+      return { target: targetForWeek(week, selectedLayer), note: "Target default x TH x rate product" };
+    }
+    function leaderSchemaInfoForWeek(week, weeklyRows) {
+      return selectedSchemaLayers().map((layer) => {
+        const rates = leaderRatesForWeekLayer(week, layer);
+        const simulation = leaderSimulationTarget(week, layer, weeklyRows);
+        const tiers = ["30", "31", "32"].includes(String(week)) ? WEEK_30_LEADER_TIERS : LEADER_INCENTIVE_TIERS;
+        return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target Simulasi ${rupiah(simulation.target)}</span></div>${schemaRateTable(rates, tiers)}${targetSimulationTable(rates, simulation.target, simulation.note, tiers)}`;
+      }).join("");
+    }
+    function leaderSchemaInfoCard(weeklyRows) {
+      const singleWeek = selectedSingleWeek();
+      if (["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"].includes(singleWeek)) {
+        const week = singleWeek;
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Leader mengikuti filter Kategori Team</span></div>${leaderSchemaInfoForWeek(week, weeklyRows)}</div>`;
+      }
+      if (selectedSchemaLayers().length < 2) {
+        const weeks = [...new Set(weeklyRows.map((r) => String(r.week || "")).filter(Boolean))]
+          .sort((a, b) => Number(a) - Number(b));
+        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32"];
+        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${schemaWeeks.map((week) => leaderSchemaInfoForWeek(week, weeklyRows)).join("")}</div>`;
+      }
+      return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Leader incentive coach</span></div>${leaderRateTable()}</div>`;
+    }
     function schemaAgentTable(rows) {
       return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Schema Incentive</th><th class="number">Revenue</th><th class="number">TXN</th><th class="number">Weeks</th><th class="number">Max Achievement</th><th class="number">Incentive / Revenue</th></tr></thead><tbody>${rows.map((r) => `<tr${yosuaAgentRowClass(r.key)}><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.weeks)}</td><td class="number">${num(r.maxAchievement * 100, 1)}%</td><td class="number">${num(r.amount ? r.incentive / r.amount * 100 : 0, 2)}%</td></tr>`).join("")}</tbody></table></div>`;
+    }
+    function leaderMixText(categories) {
+      return Object.entries(categories)
+        .sort((a, b) => b[1].incentive - a[1].incentive)
+        .map(([category, value]) => `${category}: ${rupiah(value.incentive)}`)
+        .join(" | ");
+    }
+    function leaderTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Coach</th><th>Layer</th><th class="number">Leader Incentive</th><th class="number">Revenue</th><th class="number">Target Coach</th><th class="number">% to Target</th><th class="number">TXN</th><th class="number">Agent-Week</th><th class="number">Weeks</th><th>Product Mix</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.key)}</td><td>${esc(r.teamCategory)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${rupiah(r.targetRevenue)}</td><td class="number">${num(r.targetRevenue ? r.amount / r.targetRevenue * 100 : 0, 1)}%</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.agentWeekCount)}</td><td class="number">${num(r.weeks)}</td><td>${esc(leaderMixText(r.categories))}</td></tr>`).join("") || `<tr><td colspan="10">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function leaderWeeklyTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>Week</th><th>Coach</th><th>Layer</th><th class="number">Leader Incentive</th><th class="number">Revenue</th><th class="number">Target Coach</th><th class="number">% to Target</th><th class="number">TXN</th><th class="number">Agent</th><th>Product Mix</th></tr></thead><tbody>${rows.map((r) => `<tr><td>Week ${esc(r.week)}</td><td>${esc(r.coach)}</td><td>${esc(r.teamCategory)}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.revenue)}</td><td class="number">${rupiah(r.targetRevenue)}</td><td class="number">${num(r.achievement * 100, 1)}%</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.agentCount)}</td><td>${esc(leaderMixText(r.categories))}</td></tr>`).join("") || `<tr><td colspan="10">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
+    function leaderRateTable() {
+      const products = Object.keys(LEADER_INCENTIVE_RATES);
+      return `<div class="table-wrap" style="max-height:340px"><table><thead><tr><th>Product</th><th>Team</th>${LEADER_INCENTIVE_TIERS.map((tier) => `<th class="number">${num(tier * 100, 0)}%</th>`).join("")}</tr></thead><tbody>${products.map((product) => {
+        const allTeam = ["RGP Online", "RGP Offline", "Math Champs Online", "Skill Academy"].includes(product);
+        const layers = allTeam ? ["LAYER 1"] : ["LAYER 1", "LAYER 2"];
+        return layers.map((layer) => `<tr><td>${esc(product)}</td><td>${allTeam ? "All Team" : esc(layer)}</td>${LEADER_INCENTIVE_TIERS.map((tier) => `<td class="number">${num((LEADER_INCENTIVE_RATES[product][layer][tier] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("");
+      }).join("")}</tbody></table></div>`;
     }
     function renderBaoEarl() {
       const q = searchFilter.value.trim().toLowerCase();
@@ -1811,6 +2557,13 @@
           ${baoTopupTables(topupRows)}
         </section>`;
     }
+    function baoEarlTable(rows) {
+      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After Disc</th></tr></thead><tbody>${rows.map((r) => {
+        if (!r.serial) return `<tr><td></td><td>${esc(r.packageName)}</td><td></td><td class="number"></td><td class="number"></td><td class="number"></td></tr>`;
+        const link = r.deeplink || `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=`;
+        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td></tr>`;
+      }).join("") || `<tr><td colspan="6">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
     function baoTopupTables(rows) {
       return BAO_TOPUP_SECTIONS.map((section) => {
         const sectionRows = rows.filter((r) => r.section === section.key);
@@ -1819,13 +2572,6 @@
     }
     function baoTopupTable(rows, showRu) {
       return `<div class="table-wrap" style="max-height:420px"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">Coupon Amount</th>${showRu ? "<th>RU</th>" : ""}<th class="number">Price After Disc</th><th class="number">Cicilan 2x</th><th class="number">Cicilan 1</th><th class="number">Cicilan 2</th><th class="number">Cicilan 3x</th><th class="number">Cicilan 1</th><th class="number">Cicilan 2</th><th class="number">Cicilan 3</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${r.deeplink ? `<a class="button" href="${esc(r.deeplink)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${rupiah(r.couponAmount)}</td>${showRu ? `<td>${esc(r.ru)}</td>` : ""}<td class="number">${rupiah(r.priceAfterDisc)}</td><td class="number">${rupiah(r.cicilan2Price)}</td><td class="number">${rupiah(r.cicilan2_1)}</td><td class="number">${rupiah(r.cicilan2_2)}</td><td class="number">${rupiah(r.cicilan3Price)}</td><td class="number">${rupiah(r.cicilan3_1)}</td><td class="number">${rupiah(r.cicilan3_2)}</td><td class="number">${rupiah(r.cicilan3_3)}</td></tr>`).join("") || `<tr><td colspan="${showRu ? 14 : 13}">Tidak ada data.</td></tr>`}</tbody></table></div>`;
-    }
-    function baoEarlTable(rows) {
-      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After Disc</th></tr></thead><tbody>${rows.map((r) => {
-        if (!r.serial) return `<tr><td></td><td>${esc(r.packageName)}</td><td></td><td class="number"></td><td class="number"></td><td class="number"></td></tr>`;
-        const link = r.deeplink || `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=`;
-        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td></tr>`;
-      }).join("") || `<tr><td colspan="6">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function renderRuangbelajar() {
       const q = searchFilter.value.trim().toLowerCase();
@@ -1944,14 +2690,33 @@
         errorEl.style.display = "none";
         statusEl.textContent = "Memuat RAW dan Incentive...";
         if (!rawTable || !incentiveTable || force) {
-          [rawTable, incentiveTable, calculatorTable] = await Promise.all([
+          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, baoTopupTableData, earlybirdRubelTableData, jadwalBacTableData, hargaBacTableData, universeTableData, presentationTableData] = await Promise.all([
             loadJsonp("RAW"),
             loadJsonp("Incentive"),
-            loadJsonp("Kalkulator Incentive")
+            loadJsonp("Kalkulator Incentive"),
+            loadJsonp(BAO_EARL_SHEET_NAME, { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
+            loadJsonp("NEW LUNAS DAN CICILAN TOP UP", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_TOPUP_GID }),
+            loadJsonp(EARLYBIRD_RUBEL_SHEET_NAME, { sheetId: EARLYBIRD_RUBEL_SHEET_ID }),
+            loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
+            loadOptionalJsonp("Harga BAC", { sheetId: JADWAL_BAC_SHEET_ID, gid: HARGA_BAC_GID }),
+            loadJsonp("incentive", { sheetId: SHEET_ID, gid: "457299491", range: "BK:CJ" }),
+            loadJsonp("QUERY!", { sheetId: PRESENTATION_SHEET_ID, gid: PRESENTATION_GID })
           ]);
           rawRows = parseRaw(rawTable);
           incentiveRows = parseIncentive(incentiveTable);
-          presentationRows = [];
+          universeRows = parseUniverseIncentive(universeTableData);
+          presentationRows = parsePresentationRows(presentationTableData);
+          baoEarlRows = [
+            ...parseBaoEarl(baoEarlTableData, BAO_EARL_SHEET_NAME)
+          ];
+          baoTopupRows = parseBaoTopup(baoTopupTableData);
+          earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
+          const jadwalBacParsed = parseJadwalBac(jadwalBacTableData.table);
+          jadwalBacHeaders = jadwalBacParsed.headers;
+          jadwalBacRows = jadwalBacParsed.rows;
+          jadwalBacError = jadwalBacTableData.error;
+          hargaBacRows = parseHargaBac(hargaBacTableData.table);
+          hargaBacError = hargaBacTableData.error;
           calculatorSchema = parseCalculatorSchema(calculatorTable);
           setupFilters();
         }
@@ -1994,6 +2759,11 @@
   </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
