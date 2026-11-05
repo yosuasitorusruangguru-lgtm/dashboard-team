@@ -1882,6 +1882,13 @@
       const productKey = productType.toLowerCase();
       const packageName = String(row.package || "");
       if (!productType) return "";
+      const upgradeTarget = packageName.match(/\bke\s+(regular|reg|premium|prem|elite|privat|private)\b/i);
+      if (upgradeTarget) {
+        const target = upgradeTarget[1].toLowerCase();
+        if (target === "elite" || target === "privat" || target === "private") return "BAON Elite";
+        if (target === "premium" || target === "prem") return "BAON Prem";
+        return "BAON Reg";
+      }
       if (productKey === "ruang belajar" || productKey === "ruangbelajar") return "RB";
       if (productKey === "english academy") return "EA";
       if (productKey === "-") return "RB";
@@ -2139,20 +2146,14 @@
       }).join("");
     }
     function schemaInfoCard() {
-      const singleWeek = selectedSingleWeek();
-      if (["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45"].includes(singleWeek)) {
-        const week = singleWeek;
-        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Mengikuti filter Kategori Team</span></div>${schemaInfoForWeek(week)}</div>`;
+      const schemaWeekList = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45"];
+      const pickedWeeks = selectedValues(weekFilter)
+        .filter((value) => value !== "all" && schemaWeekList.includes(String(value)))
+        .sort((a, b) => Number(a) - Number(b));
+      if (!pickedWeeks.length) {
+        return `<div class="card"><div class="section-title"><h2>Schema Rate &amp; Simulasi Incentive</h2></div><div class="note">Pilih week di filter Week untuk melihat schema rate dan simulasi incentive sesuai target week tersebut.</div></div>`;
       }
-      if (selectedSchemaLayers().length < 2) {
-        const weeks = [...visibleWeekSet(filteredRaw().filter(isAllIncentiveSchemaRow))]
-          .filter((week) => ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45"].includes(week))
-          .sort((a, b) => Number(a) - Number(b));
-        const schemaWeeks = weeks.length ? weeks : ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45"];
-        return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">All Week mengikuti filter Kategori Team</span></div>${schemaWeeks.map((week) => schemaInfoForWeek(week)).join("")}</div>`;
-      }
-      const rows = calculatorSchema?.tiers || [];
-      return `<div class="card"><div class="section-title"><h2>Schema Rate</h2><span class="note">Threshold achievement</span></div><div class="table-wrap" style="max-height:260px"><table><thead><tr><th>Tier</th>${(calculatorSchema?.products || []).map((p) => `<th class="number">${esc(p.label)}</th>`).join("")}</tr></thead><tbody>${rows.map((tier) => `<tr><td>${num(tier.threshold * 100, 0)}%</td>${(calculatorSchema?.products || []).map((p) => `<td class="number">${num((tier.rates[p.label] || 0) * 100, 2)}%</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+      return `<div class="card"><div class="section-title"><h2>Schema Rate &amp; Simulasi Incentive</h2><span class="note">Week ${esc(pickedWeeks.join(" + "))} · mengikuti filter Kategori Team</span></div>${pickedWeeks.map((week) => schemaInfoForWeek(week)).join("")}</div>`;
     }
     function schemaAgentTable(rows) {
       return `<div class="table-wrap"><table><thead><tr><th>Agent</th><th>Layer</th><th class="number">Schema Incentive</th><th class="number">Revenue</th><th class="number">TXN</th><th class="number">Weeks</th><th class="number">Max Achievement</th><th class="number">Incentive / Revenue</th></tr></thead><tbody>${rows.map((r) => `<tr${yosuaAgentRowClass(r.key)}><td>${esc(r.key)}</td><td>${esc(r.teamCategory || "-")}</td><td class="number">${rupiah(r.incentive)}</td><td class="number">${rupiah(r.amount)}</td><td class="number">${num(r.txn)}</td><td class="number">${num(r.weeks)}</td><td class="number">${num(r.maxAchievement * 100, 1)}%</td><td class="number">${num(r.amount ? r.incentive / r.amount * 100 : 0, 2)}%</td></tr>`).join("")}</tbody></table></div>`;
