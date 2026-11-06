@@ -4,7 +4,7 @@ API untuk menilai **chat teks** agent telesales (WhatsApp / live chat) memakai m
 *How To Be A Good Telesales!* dan 5 gate Route of Telesales
 (Opening, Probing, Presentation, Handling Objection, Closing).
 
-Halaman untuk memakai API ini ada di folder `bedah-chat/` (`bedah-chat/index.html`).
+Halaman untuk agent: https://yosuasitorusruangguru-lgtm.github.io/dashboard-team/bedah-chat/ (file `bedah-chat/index.html`). Alamat worker diatur di konstanta `WORKER_URL` di file itu; `QA_ACCESS_TOKEN` dibagikan ke agent sebagai "kode akses".
 
 - Berjalan di **Cloudflare Workers Free** dengan Workers AI (default model `@cf/meta/llama-3.1-8b-instruct-fp8`).
 - Tidak butuh OpenAI API key dan tidak menyimpan chat.

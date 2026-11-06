@@ -1,180 +1,376 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bedah Chat Telesales</title>
-  <style>
-    :root {
-      --ink: #17211f; --muted: #5f706a; --line: #d9e1dc; --paper: #f4f8f6; --panel: #fff;
-      --navy: #0f2747; --green: #1e9b66; --amber: #c98a12; --red: #d64e47; --blue: #327aa8; --grey: #7d8a94;
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bedah Chat Telesales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: tool sederhana dua kolom (input kiri, hasil kanan) yang menumpuk jadi satu kolom di HP */
+  :root {
+    --bg: #eef3f1; --surface: #ffffff; --surface-2: #f6f9f8; --ink: #13201c; --muted: #5a6b65; --line: #d5dfdb;
+    --brand: #0d5c4a; --brand-ink: #ffffff; --accent: #e8a33d;
+    --vg: #17855a; --g: #2f6fa3; --ni: #b97a0f; --poor: #c4443c; --verify: #7b8791;
+    --font-display: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1715; --surface: #17211e; --surface-2: #1c2825; --ink: #e5eeea; --muted: #9db0a9; --line: #2b3a36;
+      --brand: #3fae8c; --brand-ink: #06120e; --accent: #f0b453;
+      --vg: #3fbf86; --g: #5b9fd4; --ni: #e0a43a; --poor: #e8675f; --verify: #94a1aa; color-scheme: dark;
     }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) { --ink: #e8efec; --muted: #9fb0aa; --line: #2c3a37; --paper: #121a19; --panel: #1a2422; --navy: #4f86c6; }
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    header { background: var(--navy); color: #fff; padding: 22px 16px; }
-    header h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
-    header p { margin: 4px 0 0; opacity: .85; font-size: 13px; }
-    main { max-width: 1100px; margin: 0 auto; padding: 18px 16px 48px; }
-    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-    h2 { font-size: 16px; margin: 0 0 12px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
-    input, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit; }
-    textarea { min-height: 260px; resize: vertical; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
-    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 12px; }
-    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
-    button { border: 1px solid var(--navy); background: var(--navy); color: #fff; padding: 10px 18px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
-    button.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
-    button:disabled { opacity: .55; cursor: wait; }
-    details summary { cursor: pointer; font-weight: 600; }
-    .note { font-size: 12px; color: var(--muted); }
-    .error { color: var(--red); font-weight: 600; }
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; background: var(--grey); white-space: nowrap; }
-    .b-very-good { background: var(--green); } .b-good { background: var(--blue); }
-    .b-need-improvement { background: var(--amber); } .b-poor { background: var(--red); }
-    .grade-big { font-size: 20px; padding: 6px 16px; }
-    .stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-    .stage { border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; }
-    .stage div { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--line); }
-    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
-    blockquote { margin: 6px 0 0; padding: 4px 10px; border-left: 3px solid var(--line); color: var(--muted); font-style: italic; }
-    .suggest { margin-top: 6px; color: var(--green); }
-    ul { margin: 0; padding-left: 20px; }
-    #result { display: none; }
-  </style>
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1715; --surface: #17211e; --surface-2: #1c2825; --ink: #e5eeea; --muted: #9db0a9; --line: #2b3a36;
+    --brand: #3fae8c; --brand-ink: #06120e; --accent: #f0b453;
+    --vg: #3fbf86; --g: #5b9fd4; --ni: #e0a43a; --poor: #e8675f; --verify: #94a1aa; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  .stage .pill { white-space: normal; line-height: 1.25; padding: 3px 8px; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
+  header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 4vw, 32px); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+  h1 span { color: var(--brand); }
+  .sub { margin: 4px 0 0; color: var(--muted); max-width: 62ch; }
+  .route { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .route span { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; background: var(--surface); }
+  .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0; }
+  .panel + .panel { margin-top: 16px; }
+  h2 { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin: 0 0 12px; }
+  .field { display: grid; gap: 6px; margin-bottom: 14px; }
+  label, .label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  input[type=text], input[type=password], textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--ink); font: inherit; padding: 10px 12px; }
+  textarea { min-height: 300px; resize: vertical; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .drop { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .filebtn { position: relative; overflow: hidden; }
+  .filebtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  button, .filebtn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 9px 14px; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  button.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); padding: 11px 20px; }
+  button:disabled { opacity: .55; cursor: progress; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .hint { font-size: 12.5px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 4px 3px 10px; display: inline-flex; align-items: center; gap: 4px; }
+  .chip button { border: 0; padding: 0 6px; background: transparent; font-size: 14px; }
+  .status { font-size: 13px; font-weight: 600; }
+  .status.err { color: var(--poor); }
+  .example-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); border: 1px dashed var(--accent); border-radius: 6px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+  .pill { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 700; color: #fff; background: var(--verify); white-space: nowrap; }
+  .pill.vg { background: var(--vg); } .pill.g { background: var(--g); } .pill.ni { background: var(--ni); } .pill.poor { background: var(--poor); }
+  .verdict { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+  .verdict .big { font-family: var(--font-display); font-size: 26px; font-weight: 800; }
+  .verdict .big.vg { color: var(--vg); } .verdict .big.g { color: var(--g); } .verdict .big.ni { color: var(--ni); } .verdict .big.poor { color: var(--poor); } .verdict .big.verify { color: var(--verify); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 14px; }
+  .fact { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+  .fact .label { display: block; margin-bottom: 2px; }
+  .stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .stage { padding: 10px 8px 12px; text-align: center; border-right: 1px solid var(--line); border-top: 4px solid var(--verify); min-width: 0; }
+  .stage:last-child { border-right: 0; }
+  .stage.vg { border-top-color: var(--vg); } .stage.g { border-top-color: var(--g); } .stage.ni { border-top-color: var(--ni); } .stage.poor { border-top-color: var(--poor); }
+  .stage .n { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .stage .t { font-size: 13px; font-weight: 700; margin: 2px 0 6px; }
+  @media (max-width: 560px) { .stages { grid-template-columns: minmax(0, 1fr); } .stage { border-right: 0; border-top-width: 0; border-left: 4px solid var(--verify); display: flex; justify-content: space-between; align-items: center; text-align: left; gap: 8px; border-bottom: 1px solid var(--line); } .stage:last-child { border-bottom: 0; } .stage.vg { border-left-color: var(--vg); } .stage.g { border-left-color: var(--g); } .stage.ni { border-left-color: var(--ni); } .stage.poor { border-left-color: var(--poor); } .stage .t { margin: 0; flex: 1; } }
+  .matrix { display: grid; gap: 8px; }
+  .mrow { display: grid; grid-template-columns: 150px auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .mrow:last-child { border-bottom: 0; }
+  @media (max-width: 560px) { .mrow { grid-template-columns: minmax(0, 1fr) auto; } .mrow p { grid-column: 1 / -1; } }
+  .mrow p { margin: 0; }
+  .finding { border: 1px solid var(--line); border-left: 4px solid var(--verify); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+  .finding.vg { border-left-color: var(--vg); } .finding.g { border-left-color: var(--g); } .finding.ni { border-left-color: var(--ni); } .finding.poor { border-left-color: var(--poor); }
+  .finding + .finding { margin-top: 10px; }
+  .fhead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .fhead strong { font-size: 14.5px; }
+  .fmeta { font-size: 12px; color: var(--muted); }
+  .quote { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-2); border-radius: 8px; padding: 6px 10px; color: var(--ink); overflow-wrap: anywhere; }
+  .suggest { font-size: 13.5px; color: var(--brand); }
+  .suggest b { font-weight: 700; }
+  ul.list { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .filters button { padding: 5px 12px; font-size: 13px; }
+  .filters button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+  .history button { width: 100%; justify-content: space-between; text-align: left; padding: 8px 10px; font-weight: 500; }
+  .history button + button { margin-top: 6px; }
+  .footnote { font-size: 12px; color: var(--muted); margin-top: 14px; }
+  .thinking { display: flex; gap: 10px; align-items: center; color: var(--muted); font-weight: 600; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; transform: scale(.7); } }
+  @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+</style>
 </head>
 <body>
-  <header>
-    <h1>Bedah Chat Telesales</h1>
-    <p>QA chat agent berdasarkan matriks How To Be A Good Telesales &amp; Route of Telesales</p>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Bedah <span>Chat</span> Telesales</h1>
+      <p class="sub">Paste chat WhatsApp agent dengan customer atau upload file export-nya. AI menilai chat itu dengan matriks How To Be A Good Telesales dan 5 tahap Route of Telesales.</p>
+    </div>
+    <div class="route" aria-label="Route of Telesales"><span>Opening</span><span>Probing</span><span>Presentation</span><span>Handling Objection</span><span>Closing</span></div>
   </header>
-  <main>
-    <section class="card">
-      <details id="settings">
-        <summary>Pengaturan koneksi</summary>
-        <div class="row" style="margin-top:12px">
-          <div><label for="endpoint">Endpoint Worker</label><input id="endpoint" placeholder="https://nama-worker.workers.dev/api/qa/analyze-chat"></div>
-          <div><label for="token">Token akses</label><input id="token" type="password" placeholder="QA_ACCESS_TOKEN"></div>
+
+  <div class="grid">
+    <div>
+      <section class="panel" aria-labelledby="in-title">
+        <h2 id="in-title">Chat yang dibedah</h2>
+        <div class="field">
+          <label for="agent">Nama agent</label>
+          <input id="agent" type="text" placeholder="contoh: Ratna Fitriyani" autocomplete="off">
         </div>
-        <p class="note">Disimpan hanya di browser ini. Jangan bagikan token ke orang lain.</p>
-      </details>
-    </section>
-
-    <section class="card">
-      <h2>Chat yang dibedah</h2>
-      <div class="row">
-        <div><label for="agent">Nama agent</label><input id="agent" placeholder="contoh: Ratna Fitriyani"></div>
-        <div><label for="file">Upload export chat WhatsApp (.txt)</label><input id="file" type="file" accept=".txt,text/plain"></div>
-      </div>
-      <label for="chat">Atau paste chat di sini</label>
-      <textarea id="chat" placeholder="06/11/26 09.12 - Agent: Selamat pagi Bunda, saya Ratna dari Ruangguru...&#10;06/11/26 09.15 - Customer: Pagi kak..."></textarea>
-      <div class="actions">
-        <button id="analyze">Bedah chat</button>
-        <button id="clear" class="secondary" type="button">Bersihkan</button>
-        <span id="status" class="note"></span>
-      </div>
-      <p class="note">Nomor telepon dan email di chat otomatis disamarkan sebelum dikirim. Pastikan chat boleh dipakai untuk QA/coaching.</p>
-    </section>
-
-    <section id="result"></section>
-  </main>
-
-  <script>
-    const $ = (id) => document.getElementById(id);
-    const store = {
-      get(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
-      set(k, v) { try { localStorage.setItem(k, v); } catch {} }
-    };
-    $("endpoint").value = store.get("bedahChat.endpoint");
-    $("token").value = store.get("bedahChat.token");
-    $("agent").value = store.get("bedahChat.agent");
-    if (!$("endpoint").value || !$("token").value) $("settings").open = true;
-    ["endpoint", "token", "agent"].forEach((id) => $(id).addEventListener("change", () => store.set("bedahChat." + id, $(id).value.trim())));
-
-    $("file").addEventListener("change", async (e) => {
-      const f = e.target.files[0];
-      if (f) $("chat").value = await f.text();
-    });
-    $("clear").addEventListener("click", () => { $("chat").value = ""; $("file").value = ""; $("result").style.display = "none"; $("status").textContent = ""; });
-
-    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    const badge = (label, extra = "") => {
-      const key = String(label || "Perlu verifikasi").toLowerCase().replace(/\s+/g, "-");
-      return `<span class="badge b-${esc(key)} ${extra}">${esc(label || "Perlu verifikasi")}</span>`;
-    };
-    function maskPersonalData(text) {
-      return text
-        .replace(/(\+?62|0)8[\d\s\-]{7,14}\d/g, "[nomor disamarkan]")
-        .replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "[email disamarkan]");
-    }
-
-    const STAGES = ["Opening", "Probing", "Presentation", "Handling Objection", "Closing"];
-    function render(a, agent) {
-      const findings = (a.findings || []).slice().sort((x, y) => (x.stage ?? 0) - (y.stage ?? 0));
-      const risks = (a.risks || []).filter((r) => r && r.label);
-      $("result").innerHTML = `
-        <div class="card">
-          <h2>Hasil bedah chat · ${esc(agent)}</h2>
-          <p>${badge(a.grade, "grade-big")}</p>
-          ${a.summary ? `<p>${esc(a.summary)}</p>` : ""}
-          ${a.customerNeed ? `<p><strong>Kebutuhan customer:</strong> ${esc(a.customerNeed)}</p>` : ""}
-          ${a.outcome ? `<p><strong>Hasil chat:</strong> ${esc(a.outcome)}</p>` : ""}
-          <p class="note">${esc(a.method || "")}</p>
+        <div class="field">
+          <label for="code">Kode akses</label>
+          <input id="code" type="password" placeholder="minta ke coach / SPV" autocomplete="off">
         </div>
-        <div class="card"><h2>Route of Telesales</h2><div class="stages">
-          ${STAGES.map((s, i) => `<div class="stage"><div>${s}</div>${badge((a.stageGrades || [])[i])}</div>`).join("")}
-        </div></div>
-        <div class="card"><h2>Matriks chat</h2><div class="table-wrap"><table><tbody>
-          ${(a.chatMatrix || []).map((m) => `<tr><td><strong>${esc(m.name)}</strong></td><td>${badge(m.ratingLabel)}</td><td>${esc(m.description)}</td></tr>`).join("")}
-        </tbody></table></div></div>
-        <div class="card"><h2>Temuan per poin</h2><div class="table-wrap"><table>
-          <thead><tr><th>Tahap</th><th>Poin</th><th>Nilai</th><th>Temuan &amp; saran wording</th></tr></thead><tbody>
-          ${findings.map((f) => `<tr>
-            <td>${esc(STAGES[f.stage] || "-")}</td>
-            <td><strong>${esc(f.title)}</strong><div class="note">${esc(f.category)}</div></td>
-            <td>${badge(f.ratingLabel)}</td>
-            <td>${esc(f.text)}${f.quote ? `<blockquote>"${esc(f.quote)}"</blockquote>` : ""}${f.wordingSuggestion ? `<div class="suggest">Saran: ${esc(f.wordingSuggestion)}</div>` : ""}</td>
-          </tr>`).join("")}
-          </tbody></table></div></div>
-        ${risks.length ? `<div class="card"><h2>Risiko</h2><ul>${risks.map((r) => `<li>${esc(r.label)}${r.quote ? `<blockquote>"${esc(r.quote)}"</blockquote>` : ""}</li>`).join("")}</ul></div>` : ""}
-        ${(a.tips || []).length ? `<div class="card"><h2>Prioritas coaching</h2><ul>${a.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
-        <p class="note">Hasil AI adalah bahan diskusi coaching. Validasi detail produk/harga dan temuan berisiko sebelum dipakai untuk penilaian kinerja.</p>`;
-      $("result").style.display = "block";
-      $("result").scrollIntoView({ behavior: "smooth" });
-    }
+        <div class="field">
+          <label for="chat">Isi chat <span id="exampleTag" class="example-tag">Contoh</span></label>
+          <textarea id="chat" spellcheck="false"></textarea>
+          <span class="hint">Bisa paste langsung, atau upload file export WhatsApp (.txt). Nomor HP dan email otomatis disamarkan sebelum dikirim.</span>
+        </div>
+        <div class="field">
+          <span class="label">Upload</span>
+          <div class="drop">
+            <span class="filebtn">Export chat (.txt)<input id="txtFile" type="file" accept=".txt,text/plain" aria-label="Upload export chat WhatsApp"></span>
+          </div>
+          
+        </div>
+        <div class="actions">
+          <button id="run" class="primary" type="button">Bedah chat</button>
+          <button id="stop" type="button" hidden>Stop</button>
+          <button id="clear" type="button">Kosongkan</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+      </section>
 
-    $("analyze").addEventListener("click", async () => {
-      const endpoint = $("endpoint").value.trim();
-      const token = $("token").value.trim();
-      const agent = $("agent").value.trim();
-      const chat = maskPersonalData($("chat").value.trim());
-      if (!endpoint || !token) { $("settings").open = true; $("status").innerHTML = `<span class="error">Isi endpoint dan token dulu.</span>`; return; }
-      if (!agent) { $("status").innerHTML = `<span class="error">Isi nama agent.</span>`; return; }
-      if (chat.length < 40) { $("status").innerHTML = `<span class="error">Paste atau upload chat dulu.</span>`; return; }
-      store.set("bedahChat.endpoint", endpoint); store.set("bedahChat.token", token); store.set("bedahChat.agent", agent);
-      $("analyze").disabled = true;
-      $("status").textContent = "Sedang membedah chat… (biasanya 10–40 detik)";
-      try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "content-type": "application/json", "authorization": "Bearer " + token },
-          body: JSON.stringify({ agentName: agent, chat })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok) throw new Error(data.error || `Gagal (HTTP ${res.status})`);
-        $("status").textContent = "Selesai.";
-        render(data.analysis, agent);
-      } catch (err) {
-        $("status").innerHTML = `<span class="error">${esc(err.message || "Analisis gagal.")}</span>`;
-      } finally {
-        $("analyze").disabled = false;
-      }
-    });
-  </script>
+      <section class="panel history" aria-labelledby="hist-title">
+        <h2 id="hist-title">Riwayat di browser ini</h2>
+        <div id="history"><p class="hint">Hasil bedah chat akan tersimpan di sini (hanya di browser Anda).</p></div>
+      </section>
+    </div>
+
+    <div id="result" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const STAGES = ["Opening", "Probing", "Presentation", "Handling Objection", "Closing"];
+  const EXAMPLE_CHAT = `06/11/26 09.12 - Ratna (Ruangguru): Selamat pagi Bunda Sari 😊 Saya Ratna dari Ruangguru. Terima kasih sudah daftar konsultasi Brain Academy ya Bun.
+06/11/26 09.20 - Bunda Sari: Pagi kak. Iya saya mau tanya2 dulu
+06/11/26 09.21 - Ratna (Ruangguru): Boleh Bun. Adiknya sekarang kelas berapa?
+06/11/26 09.25 - Bunda Sari: Kelas 4 SD kak. Matematikanya agak ketinggalan
+06/11/26 09.26 - Ratna (Ruangguru): Baik Bun. Brain Academy Online ada paket Regular, Premium dan Elite. Yang paling lengkap Elite, ada kelas live dan tutor.
+06/11/26 09.40 - Bunda Sari: Harganya berapa kak? Agak mahal ga?
+06/11/26 09.41 - Ratna (Ruangguru): Untuk Elite sekarang lagi promo Bun, nanti saya kirim link ya
+06/11/26 10.15 - Bunda Sari: Saya pikir2 dulu ya kak
+06/11/26 10.16 - Ratna (Ruangguru): Siap Bun, ditunggu kabarnya ya 🙏`;
+
+  const EXAMPLE_RESULT = {
+    grade: "Need Improvement",
+    summary: "Bunda Sari bertanya soal Brain Academy untuk anak kelas 4 SD yang tertinggal di Matematika. Agent menyapa dengan baik dan langsung menawarkan Elite, tetapi tidak menjawab harga dan tidak mengatasi keraguan customer.",
+    customerNeed: "Anak kelas 4 SD tertinggal di Matematika; Bunda sensitif soal harga.",
+    outcome: "Follow up",
+    stageGrades: ["Very Good", "Need Improvement", "Need Improvement", "Poor", "Poor"],
+    chatMatrix: [
+      { name: "Chat Courtesy", ratingLabel: "Good", description: "Sapaan hangat, menyebut nama customer, emoji wajar." },
+      { name: "Chat Accuracy", ratingLabel: "Perlu verifikasi", description: "Promo Elite disebut tanpa nominal; perlu dicek ke brief harga." },
+      { name: "Chat Management", ratingLabel: "Need Improvement", description: "Probing berhenti di kelas; keberatan harga tidak ditangani." }
+    ],
+    findings: [
+      { stage: 0, category: "Chat Courtesy", title: "Standar Greeting & Perkenalan", ratingLabel: "Very Good", text: "Menyapa dengan nama, memperkenalkan diri dan menyebut alasan menghubungi.", quote: "Selamat pagi Bunda Sari 😊 Saya Ratna dari Ruangguru.", wordingSuggestion: "Pertahankan." },
+      { stage: 1, category: "Chat Management", title: "Probing / Create Needs", ratingLabel: "Need Improvement", text: "Hanya menanyakan kelas. Tidak menggali materi yang sulit, cara belajar anak, atau target Bunda.", quote: "Adiknya sekarang kelas berapa?", wordingSuggestion: "Boleh tahu Bun, di Matematika adik paling kesulitan di materi apa? Biasanya belajar di rumah didampingi siapa?" },
+      { stage: 3, category: "Chat Management", title: "Offer Alternative / Handling Objections", ratingLabel: "Poor", text: "Pertanyaan harga tidak dijawab, dan saat Bunda ragu agent langsung menutup chat.", quote: "Siap Bun, ditunggu kabarnya ya 🙏", wordingSuggestion: "Boleh tahu Bun, yang membuat Bunda masih ragu dari sisi biaya atau jadwalnya? Kalau biaya, ada pilihan Premium yang tetap ada pembahasan materi." },
+      { stage: 4, category: "Chat Management", title: "Call to Action & Konfirmasi Pembayaran", ratingLabel: "Poor", text: "Tidak ada next step yang jelas: link tidak dikirim dan tidak ada janji follow up.", quote: "nanti saya kirim link ya", wordingSuggestion: "Saya kirim link promonya sekarang ya Bun. Besok jam 10 saya hubungi lagi untuk bantu pilih paket, boleh?" }
+    ],
+    risks: [{ label: "Agent menjanjikan link tetapi tidak mengirimnya", quote: "nanti saya kirim link ya" }],
+    tips: ["Gali kebutuhan (materi sulit, target Bunda) sebelum menyebut paket.", "Jawab pertanyaan harga langsung dengan angka dari brief resmi.", "Selalu tutup dengan next step yang jelas dan waktu follow up."]
+  };
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const cls = (label) => {
+    const k = String(label || "").toLowerCase();
+    if (k.startsWith("very good")) return "vg";
+    if (k.startsWith("good")) return "g";
+    if (k.startsWith("need")) return "ni";
+    if (k.startsWith("poor")) return "poor";
+    return "verify";
+  };
+  const pill = (label) => `<span class="pill ${cls(label)}">${esc(label || "Perlu verifikasi")}</span>`;
+  const mask = (t) => t.replace(/(\+?62|\b0)8[\d\s.\-]{7,14}\d/g, "[nomor disamarkan]").replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "[email disamarkan]");
+
+  // ---- state ----
+  let ctl = null;
+  let current = { data: EXAMPLE_RESULT, agent: "Ratna", example: true };
+  let filter = "all";
+  $("agent").value = store.get("bc.agent", "") || "";
+  $("chat").value = EXAMPLE_CHAT;
+  $("chat").addEventListener("input", () => { $("exampleTag").hidden = $("chat").value === EXAMPLE_CHAT; });
+  $("agent").addEventListener("change", () => store.set("bc.agent", $("agent").value.trim()));
+
+  $("txtFile").addEventListener("change", async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    $("chat").value = await f.text();
+    $("exampleTag").hidden = true;
+    e.target.value = "";
+  });
+  $("code").value = store.get("bc.code", "") || "";
+  $("code").addEventListener("change", () => store.set("bc.code", $("code").value.trim()));
+  $("clear").addEventListener("click", () => {
+    $("chat").value = ""; $("exampleTag").hidden = true; setStatus("");
+  });
+
+  function setStatus(text, err) {
+    $("status").textContent = text;
+    $("status").className = "status" + (err ? " err" : "");
+  }
+
+  // ---- render ----
+  function render() {
+    const { data: a, agent, example, when } = current;
+    const findings = (a.findings || []).slice().sort((x, y) => (Number(x.stage) || 0) - (Number(y.stage) || 0));
+    const shown = findings.filter((f) => filter === "all" || (filter === "fix" ? ["ni", "poor"].includes(cls(f.ratingLabel)) : cls(f.ratingLabel) === "verify"));
+    const risks = (a.risks || []).filter((r) => r && r.label);
+    $("result").innerHTML = `
+      <section class="panel">
+        <div class="verdict">
+          <div>
+            <span class="label">Hasil bedah chat · ${esc(agent)}${example ? '<span class="example-tag">Contoh hasil</span>' : ""}</span>
+            <div class="big ${cls(a.grade)}">${esc(a.grade || "Perlu verifikasi")}</div>
+          </div>
+          ${when ? `<span class="hint">${esc(when)}</span>` : ""}
+        </div>
+        ${a.summary ? `<p>${esc(a.summary)}</p>` : ""}
+        <div class="facts">
+          <div class="fact"><span class="label">Kebutuhan customer</span>${esc(a.customerNeed || "-")}</div>
+          <div class="fact"><span class="label">Hasil chat</span>${esc(a.outcome || "-")}</div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Route of Telesales</h2>
+        <div class="stages">${STAGES.map((s, i) => { const g = (a.stageGrades || [])[i]; return `<div class="stage ${cls(g)}"><div class="n">${i + 1}</div><div class="t">${s}</div>${pill(g)}</div>`; }).join("")}</div>
+      </section>
+      <section class="panel">
+        <h2>Matriks chat</h2>
+        <div class="matrix">${(a.chatMatrix || []).map((m) => `<div class="mrow"><strong>${esc(m.name)}</strong>${pill(m.ratingLabel)}<p>${esc(m.description)}</p></div>`).join("")}</div>
+      </section>
+      <section class="panel">
+        <h2>Temuan &amp; saran wording</h2>
+        <div class="filters" role="group" aria-label="Saring temuan">
+          <button type="button" data-f="all" aria-pressed="${filter === "all"}">Semua (${findings.length})</button>
+          <button type="button" data-f="fix" aria-pressed="${filter === "fix"}">Perlu diperbaiki (${findings.filter((f) => ["ni", "poor"].includes(cls(f.ratingLabel))).length})</button>
+          <button type="button" data-f="verify" aria-pressed="${filter === "verify"}">Perlu verifikasi (${findings.filter((f) => cls(f.ratingLabel) === "verify").length})</button>
+        </div>
+        ${shown.length ? shown.map((f) => `
+          <article class="finding ${cls(f.ratingLabel)}">
+            <div class="fhead"><strong>${esc(f.title)}</strong>${pill(f.ratingLabel)}</div>
+            <div class="fmeta">${esc(STAGES[Number(f.stage)] || "-")} · ${esc(f.category || "")}</div>
+            <div>${esc(f.text)}</div>
+            ${f.quote ? `<div class="quote">"${esc(f.quote)}"</div>` : ""}
+            ${f.wordingSuggestion ? `<div class="suggest"><b>Saran:</b> ${esc(f.wordingSuggestion)}</div>` : ""}
+          </article>`).join("") : `<p class="hint">Tidak ada temuan di kategori ini.</p>`}
+      </section>
+      ${risks.length ? `<section class="panel"><h2>Risiko</h2><ul class="list">${risks.map((r) => `<li>${esc(r.label)}${r.quote ? `<div class="quote">"${esc(r.quote)}"</div>` : ""}</li>`).join("")}</ul></section>` : ""}
+      ${(a.tips || []).length ? `<section class="panel"><h2>Prioritas coaching</h2><ul class="list">${a.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+        <div class="actions" style="margin-top:14px"><button type="button" id="copy">Salin ringkasan coaching</button></div></section>` : ""}
+      <p class="footnote">Hasil AI adalah bahan diskusi coaching. Cek detail produk/harga ke brief resmi dan validasi temuan berisiko sebelum dipakai untuk penilaian kinerja.</p>`;
+  }
+  $("result").addEventListener("click", async (e) => {
+    const f = e.target.closest("[data-f]");
+    if (f) { filter = f.dataset.f; render(); return; }
+    if (e.target.id === "copy") {
+      const a = current.data;
+      const text = [
+        `Bedah chat ${current.agent}: ${a.grade}`,
+        a.summary || "",
+        "Route: " + STAGES.map((s, i) => `${s} ${(a.stageGrades || [])[i] || "-"}`).join(" | "),
+        "", "Perlu diperbaiki:",
+        ...(a.findings || []).filter((x) => ["ni", "poor"].includes(cls(x.ratingLabel))).map((x) => `- ${x.title}: ${x.text}${x.wordingSuggestion ? ` Saran: ${x.wordingSuggestion}` : ""}`),
+        "", "Prioritas coaching:", ...(a.tips || []).map((t) => "- " + t)
+      ].join("\n");
+      try { await navigator.clipboard.writeText(text); e.target.textContent = "Tersalin"; }
+      catch { e.target.textContent = "Gagal menyalin"; }
+      setTimeout(() => { e.target.textContent = "Salin ringkasan coaching"; }, 1800);
+    }
+  });
+
+  function renderHistory() {
+    const h = store.get("bc.history", []);
+    if (!h.length) { $("history").innerHTML = `<p class="hint">Hasil bedah chat akan tersimpan di sini (hanya di browser Anda).</p>`; return; }
+    $("history").innerHTML = h.map((x, i) => `<button type="button" data-h="${i}"><span><b>${esc(x.agent)}</b> · ${esc(x.when)}</span>${pill(x.data.grade)}</button>`).join("");
+  }
+  $("history").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-h]");
+    if (!b) return;
+    const x = store.get("bc.history", [])[Number(b.dataset.h)];
+    if (x) { current = { ...x, example: false }; filter = "all"; render(); $("result").scrollIntoView({ behavior: "smooth", block: "start" }); }
+  });
+
+  // ---- analysis (Cloudflare Worker) ----
+  // Alamat API Bedah Chat. Ganti bila worker pindah.
+  const WORKER_URL = "WORKER_URL_PLACEHOLDER";
+  const ERR = {
+    401: "Kode akses salah. Minta kode yang benar ke coach / SPV.",
+    413: "Chat terlalu panjang. Potong menjadi satu percakapan saja.",
+    429: "Batas analisis tercapai. Coba lagi 10 menit lagi."
+  };
+  $("stop").addEventListener("click", () => ctl?.abort());
+  $("run").addEventListener("click", async () => {
+    const agent = $("agent").value.trim();
+    const code = $("code").value.trim();
+    const chat = mask($("chat").value.trim());
+    if (!agent) { setStatus("Isi nama agent dulu.", true); $("agent").focus(); return; }
+    if (!code) { setStatus("Isi kode akses dulu.", true); $("code").focus(); return; }
+    if (chat.length < 40) { setStatus("Paste chat atau upload file export dulu.", true); return; }
+    if (!/^https:\/\//.test(WORKER_URL)) { setStatus("Alamat API belum diatur. Hubungi admin dashboard.", true); return; }
+    store.set("bc.agent", agent); store.set("bc.code", code);
+    ctl = new AbortController();
+    $("run").disabled = true; $("stop").hidden = false;
+    setStatus("");
+    $("result").innerHTML = `<section class="panel"><div class="thinking"><span class="dot"></span>Sedang membedah chat ${esc(agent)}… biasanya 20–60 detik.</div></section>`;
+    try {
+      const res = await fetch(WORKER_URL, {
+        method: "POST", signal: ctl.signal,
+        headers: { "content-type": "application/json", "authorization": "Bearer " + code },
+        body: JSON.stringify({ agentName: agent, chat: chat.slice(0, 30000) })
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.ok) throw { status: res.status, message: body.error };
+      const data = body.analysis;
+      const when = new Date().toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+      current = { data, agent, when, example: false };
+      filter = "all";
+      render();
+      const h = store.get("bc.history", []);
+      h.unshift({ data, agent, when });
+      store.set("bc.history", h.slice(0, 15));
+      renderHistory();
+      setStatus("Selesai.");
+    } catch (e) {
+      if (e?.name === "AbortError") setStatus("Dibatalkan.");
+      else setStatus(ERR[e?.status] || e?.message || "Gagal terhubung ke server. Cek internet lalu coba lagi.", true);
+      render();
+    } finally {
+      $("run").disabled = false; $("stop").hidden = true; ctl = null;
+    }
+  });
+
+  render();
+  renderHistory();
+})();
+</script>
 </body>
 </html>
