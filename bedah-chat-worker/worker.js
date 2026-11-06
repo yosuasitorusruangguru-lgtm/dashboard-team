@@ -8,6 +8,8 @@ const JSON_HEADERS = {
 };
 const DEFAULT_MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8";
 const MAX_CHAT_CHARS = 30000;
+// Halaman Bedah Chat untuk agent. Permintaan dari halaman ini tidak perlu kode akses.
+const AGENT_PAGE_ORIGINS = ["https://yosuasitorusruangguru-lgtm.github.io"];
 
 function corsHeaders(origin) {
   return {
@@ -104,18 +106,20 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const origin = request.headers.get("Origin") || "";
-    const corsOrigin = originAllowed(request, env) ? (String(env.FRONTEND_ORIGIN || "*").trim() === "*" ? "*" : origin) : "null";
+    const corsOrigin = AGENT_PAGE_ORIGINS.includes(origin) ? origin : originAllowed(request, env) ? (String(env.FRONTEND_ORIGIN || "*").trim() === "*" ? "*" : origin) : "null";
     if (corsOrigin === "null") return json({ error: "Origin frontend tidak diizinkan. Atur FRONTEND_ORIGIN pada Worker." }, 403, "null");
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: { ...corsHeaders(corsOrigin), "access-control-max-age": "86400" } });
     }
     if (url.pathname === "/healthz" && request.method === "GET") {
-      return json({ ok: true, service: "bedah-chat-worker", aiBindingConfigured: Boolean(env.AI), accessTokenConfigured: Boolean(env.QA_ACCESS_TOKEN), model: String(env.CHAT_MODEL || DEFAULT_MODEL) }, 200, corsOrigin);
+      return json({ ok: true, service: "bedah-chat-worker", aiBindingConfigured: Boolean(env.AI), accessTokenConfigured: Boolean(env.QA_ACCESS_TOKEN), agentPages: AGENT_PAGE_ORIGINS, model: String(env.CHAT_MODEL || DEFAULT_MODEL) }, 200, corsOrigin);
     }
     if (url.pathname !== "/api/qa/analyze-chat" || request.method !== "POST") return json({ error: "Endpoint tidak ditemukan. Gunakan POST /api/qa/analyze-chat." }, 404, corsOrigin);
-    if (!env.QA_ACCESS_TOKEN) return json({ error: "QA_ACCESS_TOKEN belum diatur sebagai Worker secret." }, 503, corsOrigin);
+    // Akses: dari halaman agent resmi (tanpa kode), atau dengan token QA_ACCESS_TOKEN (opsional, untuk akses lain).
+    const fromAgentPage = AGENT_PAGE_ORIGINS.includes(origin);
     const auth = request.headers.get("Authorization") || "";
-    if (auth !== "Bearer " + env.QA_ACCESS_TOKEN) return json({ error: "Token akses tidak valid." }, 401, corsOrigin);
+    const tokenOk = Boolean(env.QA_ACCESS_TOKEN) && auth === "Bearer " + env.QA_ACCESS_TOKEN;
+    if (!fromAgentPage && !tokenOk) return json({ error: "Akses ditolak. Gunakan halaman Bedah Chat resmi." }, 401, corsOrigin);
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     if (!rateLimitOk(ip)) return json({ error: "Batas analisis tercapai. Coba lagi setelah 10 menit." }, 429, corsOrigin);
     if (!env.AI) return json({ error: "AI binding belum diaktifkan pada Worker." }, 503, corsOrigin);

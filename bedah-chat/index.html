@@ -126,10 +126,6 @@
           <input id="agent" type="text" placeholder="contoh: Ratna Fitriyani" autocomplete="off">
         </div>
         <div class="field">
-          <label for="code">Kode akses</label>
-          <input id="code" type="password" placeholder="minta ke coach / SPV" autocomplete="off">
-        </div>
-        <div class="field">
           <label for="chat">Isi chat <span id="exampleTag" class="example-tag">Contoh</span></label>
           <textarea id="chat" spellcheck="false"></textarea>
           <span class="hint">Bisa paste langsung, atau upload file export WhatsApp (.txt). Nomor HP dan email otomatis disamarkan sebelum dikirim.</span>
@@ -227,8 +223,6 @@
     $("exampleTag").hidden = true;
     e.target.value = "";
   });
-  $("code").value = store.get("bc.code", "") || "";
-  $("code").addEventListener("change", () => store.set("bc.code", $("code").value.trim()));
   $("clear").addEventListener("click", () => {
     $("chat").value = ""; $("exampleTag").hidden = true; setStatus("");
   });
@@ -323,20 +317,18 @@
   // Alamat API Bedah Chat. Ganti bila worker pindah.
   const WORKER_URL = "WORKER_URL_PLACEHOLDER";
   const ERR = {
-    401: "Kode akses salah. Minta kode yang benar ke coach / SPV.",
+    401: "Akses ditolak. Buka Bedah Chat dari link resmi.",
     413: "Chat terlalu panjang. Potong menjadi satu percakapan saja.",
     429: "Batas analisis tercapai. Coba lagi 10 menit lagi."
   };
   $("stop").addEventListener("click", () => ctl?.abort());
   $("run").addEventListener("click", async () => {
     const agent = $("agent").value.trim();
-    const code = $("code").value.trim();
     const chat = mask($("chat").value.trim());
     if (!agent) { setStatus("Isi nama agent dulu.", true); $("agent").focus(); return; }
-    if (!code) { setStatus("Isi kode akses dulu.", true); $("code").focus(); return; }
     if (chat.length < 40) { setStatus("Paste chat atau upload file export dulu.", true); return; }
     if (!/^https:\/\//.test(WORKER_URL)) { setStatus("Alamat API belum diatur. Hubungi admin dashboard.", true); return; }
-    store.set("bc.agent", agent); store.set("bc.code", code);
+    store.set("bc.agent", agent);
     ctl = new AbortController();
     $("run").disabled = true; $("stop").hidden = false;
     setStatus("");
@@ -344,7 +336,7 @@
     try {
       const res = await fetch(WORKER_URL, {
         method: "POST", signal: ctl.signal,
-        headers: { "content-type": "application/json", "authorization": "Bearer " + code },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({ agentName: agent, chat: chat.slice(0, 30000) })
       });
       const body = await res.json().catch(() => ({}));
