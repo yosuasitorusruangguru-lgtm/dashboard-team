@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bedah Chat Telesales</title>
+  <style>
+    :root {
+      --ink: #17211f; --muted: #5f706a; --line: #d9e1dc; --paper: #f4f8f6; --panel: #fff;
+      --navy: #0f2747; --green: #1e9b66; --amber: #c98a12; --red: #d64e47; --blue: #327aa8; --grey: #7d8a94;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { --ink: #e8efec; --muted: #9fb0aa; --line: #2c3a37; --paper: #121a19; --panel: #1a2422; --navy: #4f86c6; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    header { background: var(--navy); color: #fff; padding: 22px 16px; }
+    header h1 { margin: 0; font-size: 22px; letter-spacing: .02em; }
+    header p { margin: 4px 0 0; opacity: .85; font-size: 13px; }
+    main { max-width: 1100px; margin: 0 auto; padding: 18px 16px 48px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    h2 { font-size: 16px; margin: 0 0 12px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    input, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit; }
+    textarea { min-height: 260px; resize: vertical; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+    button { border: 1px solid var(--navy); background: var(--navy); color: #fff; padding: 10px 18px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+    button:disabled { opacity: .55; cursor: wait; }
+    details summary { cursor: pointer; font-weight: 600; }
+    .note { font-size: 12px; color: var(--muted); }
+    .error { color: var(--red); font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff; background: var(--grey); white-space: nowrap; }
+    .b-very-good { background: var(--green); } .b-good { background: var(--blue); }
+    .b-need-improvement { background: var(--amber); } .b-poor { background: var(--red); }
+    .grade-big { font-size: 20px; padding: 6px 16px; }
+    .stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .stage { border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; }
+    .stage div { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+    blockquote { margin: 6px 0 0; padding: 4px 10px; border-left: 3px solid var(--line); color: var(--muted); font-style: italic; }
+    .suggest { margin-top: 6px; color: var(--green); }
+    ul { margin: 0; padding-left: 20px; }
+    #result { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bedah Chat Telesales</h1>
+    <p>QA chat agent berdasarkan matriks How To Be A Good Telesales &amp; Route of Telesales</p>
+  </header>
+  <main>
+    <section class="card">
+      <details id="settings">
+        <summary>Pengaturan koneksi</summary>
+        <div class="row" style="margin-top:12px">
+          <div><label for="endpoint">Endpoint Worker</label><input id="endpoint" placeholder="https://nama-worker.workers.dev/api/qa/analyze-chat"></div>
+          <div><label for="token">Token akses</label><input id="token" type="password" placeholder="QA_ACCESS_TOKEN"></div>
+        </div>
+        <p class="note">Disimpan hanya di browser ini. Jangan bagikan token ke orang lain.</p>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Chat yang dibedah</h2>
+      <div class="row">
+        <div><label for="agent">Nama agent</label><input id="agent" placeholder="contoh: Ratna Fitriyani"></div>
+        <div><label for="file">Upload export chat WhatsApp (.txt)</label><input id="file" type="file" accept=".txt,text/plain"></div>
+      </div>
+      <label for="chat">Atau paste chat di sini</label>
+      <textarea id="chat" placeholder="06/11/26 09.12 - Agent: Selamat pagi Bunda, saya Ratna dari Ruangguru...&#10;06/11/26 09.15 - Customer: Pagi kak..."></textarea>
+      <div class="actions">
+        <button id="analyze">Bedah chat</button>
+        <button id="clear" class="secondary" type="button">Bersihkan</button>
+        <span id="status" class="note"></span>
+      </div>
+      <p class="note">Nomor telepon dan email di chat otomatis disamarkan sebelum dikirim. Pastikan chat boleh dipakai untuk QA/coaching.</p>
+    </section>
+
+    <section id="result"></section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const store = {
+      get(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+    };
+    $("endpoint").value = store.get("bedahChat.endpoint");
+    $("token").value = store.get("bedahChat.token");
+    $("agent").value = store.get("bedahChat.agent");
+    if (!$("endpoint").value || !$("token").value) $("settings").open = true;
+    ["endpoint", "token", "agent"].forEach((id) => $(id).addEventListener("change", () => store.set("bedahChat." + id, $(id).value.trim())));
+
+    $("file").addEventListener("change", async (e) => {
+      const f = e.target.files[0];
+      if (f) $("chat").value = await f.text();
+    });
+    $("clear").addEventListener("click", () => { $("chat").value = ""; $("file").value = ""; $("result").style.display = "none"; $("status").textContent = ""; });
+
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const badge = (label, extra = "") => {
+      const key = String(label || "Perlu verifikasi").toLowerCase().replace(/\s+/g, "-");
+      return `<span class="badge b-${esc(key)} ${extra}">${esc(label || "Perlu verifikasi")}</span>`;
+    };
+    function maskPersonalData(text) {
+      return text
+        .replace(/(\+?62|0)8[\d\s\-]{7,14}\d/g, "[nomor disamarkan]")
+        .replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "[email disamarkan]");
+    }
+
+    const STAGES = ["Opening", "Probing", "Presentation", "Handling Objection", "Closing"];
+    function render(a, agent) {
+      const findings = (a.findings || []).slice().sort((x, y) => (x.stage ?? 0) - (y.stage ?? 0));
+      const risks = (a.risks || []).filter((r) => r && r.label);
+      $("result").innerHTML = `
+        <div class="card">
+          <h2>Hasil bedah chat · ${esc(agent)}</h2>
+          <p>${badge(a.grade, "grade-big")}</p>
+          ${a.summary ? `<p>${esc(a.summary)}</p>` : ""}
+          ${a.customerNeed ? `<p><strong>Kebutuhan customer:</strong> ${esc(a.customerNeed)}</p>` : ""}
+          ${a.outcome ? `<p><strong>Hasil chat:</strong> ${esc(a.outcome)}</p>` : ""}
+          <p class="note">${esc(a.method || "")}</p>
+        </div>
+        <div class="card"><h2>Route of Telesales</h2><div class="stages">
+          ${STAGES.map((s, i) => `<div class="stage"><div>${s}</div>${badge((a.stageGrades || [])[i])}</div>`).join("")}
+        </div></div>
+        <div class="card"><h2>Matriks chat</h2><div class="table-wrap"><table><tbody>
+          ${(a.chatMatrix || []).map((m) => `<tr><td><strong>${esc(m.name)}</strong></td><td>${badge(m.ratingLabel)}</td><td>${esc(m.description)}</td></tr>`).join("")}
+        </tbody></table></div></div>
+        <div class="card"><h2>Temuan per poin</h2><div class="table-wrap"><table>
+          <thead><tr><th>Tahap</th><th>Poin</th><th>Nilai</th><th>Temuan &amp; saran wording</th></tr></thead><tbody>
+          ${findings.map((f) => `<tr>
+            <td>${esc(STAGES[f.stage] || "-")}</td>
+            <td><strong>${esc(f.title)}</strong><div class="note">${esc(f.category)}</div></td>
+            <td>${badge(f.ratingLabel)}</td>
+            <td>${esc(f.text)}${f.quote ? `<blockquote>"${esc(f.quote)}"</blockquote>` : ""}${f.wordingSuggestion ? `<div class="suggest">Saran: ${esc(f.wordingSuggestion)}</div>` : ""}</td>
+          </tr>`).join("")}
+          </tbody></table></div></div>
+        ${risks.length ? `<div class="card"><h2>Risiko</h2><ul>${risks.map((r) => `<li>${esc(r.label)}${r.quote ? `<blockquote>"${esc(r.quote)}"</blockquote>` : ""}</li>`).join("")}</ul></div>` : ""}
+        ${(a.tips || []).length ? `<div class="card"><h2>Prioritas coaching</h2><ul>${a.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></div>` : ""}
+        <p class="note">Hasil AI adalah bahan diskusi coaching. Validasi detail produk/harga dan temuan berisiko sebelum dipakai untuk penilaian kinerja.</p>`;
+      $("result").style.display = "block";
+      $("result").scrollIntoView({ behavior: "smooth" });
+    }
+
+    $("analyze").addEventListener("click", async () => {
+      const endpoint = $("endpoint").value.trim();
+      const token = $("token").value.trim();
+      const agent = $("agent").value.trim();
+      const chat = maskPersonalData($("chat").value.trim());
+      if (!endpoint || !token) { $("settings").open = true; $("status").innerHTML = `<span class="error">Isi endpoint dan token dulu.</span>`; return; }
+      if (!agent) { $("status").innerHTML = `<span class="error">Isi nama agent.</span>`; return; }
+      if (chat.length < 40) { $("status").innerHTML = `<span class="error">Paste atau upload chat dulu.</span>`; return; }
+      store.set("bedahChat.endpoint", endpoint); store.set("bedahChat.token", token); store.set("bedahChat.agent", agent);
+      $("analyze").disabled = true;
+      $("status").textContent = "Sedang membedah chat… (biasanya 10–40 detik)";
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json", "authorization": "Bearer " + token },
+          body: JSON.stringify({ agentName: agent, chat })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data.error || `Gagal (HTTP ${res.status})`);
+        $("status").textContent = "Selesai.";
+        render(data.analysis, agent);
+      } catch (err) {
+        $("status").innerHTML = `<span class="error">${esc(err.message || "Analisis gagal.")}</span>`;
+      } finally {
+        $("analyze").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

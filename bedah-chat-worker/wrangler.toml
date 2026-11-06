@@ -1,4 +1,4 @@
-name = "telesales-qa-audio-api"
+name = "bedah-chat-api"
 main = "worker.js"
 compatibility_date = "2026-10-21"
 
