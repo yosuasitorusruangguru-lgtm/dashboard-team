@@ -658,7 +658,8 @@
       "34": 10400000,
       "35": 10400000,
       "45": 9200000,
-      "46": 9200000
+      "46": 9200000,
+      "47": 9200000
     };
     const LAYER_2_WEEK_TARGETS = {
       "23": 7400000,
@@ -675,7 +676,8 @@
       "34": 6720000,
       "35": 6720000,
       "45": 4900000,
-      "46": 4900000
+      "46": 4900000,
+      "47": 4900000
     };
     const WEEK_25_LAYER_1_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_28_LAYER_1_TIERS = [0, 0.4, 0.5, 0.75, 1, 1.25];
@@ -931,6 +933,10 @@
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
     };
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
+    // Week dengan target sudah ada tetapi schema incentive masih to be confirmed (rate = 0 sampai schema masuk)
+    const TBC_SCHEMA_WEEKS = new Set(["47"]);
+    function isTbcSchemaWeek(week) { return TBC_SCHEMA_WEEKS.has(String(week)); }
+    function tbcSchemaNote(week) { return `<div class="note" style="margin-top:8px;padding:10px 12px;border:1px dashed #F2A33A;border-radius:8px;background:#FFF8EC">Schema incentive Week ${esc(week)} masih <b>to be confirmed</b>. Incentive Week ${esc(week)} sementara tampil Rp0 sampai schema resmi masuk.</div>`; }
     function isExcludedTopIncentiveAgent(name) {
       return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
     }
@@ -959,7 +965,7 @@
       const team = normalizedTeamCategory(row.teamCategory);
       if (hasLayer2AgentTargetOverride(row.agent, row.week)) return true;
       if (team === "LAYER 1") return true;
-      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46"].includes(String(row.week));
+      return team === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"].includes(String(row.week));
     }
     function isYosuaLeaderName(coach) {
       return String(coach || "").trim().toLowerCase() === "yosua sitorus";
@@ -975,7 +981,7 @@
       const overrideTarget = layer2AgentTargetOverride(agent, week);
       if (overrideTarget) return overrideTarget;
       const normalizedTeam = normalizedTeamCategory(teamCategory);
-      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46"].includes(String(week))) {
+      if (normalizedTeam === "LAYER 2" && ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"].includes(String(week))) {
         return LAYER_2_WEEK_TARGETS[String(week)] || 0;
       }
       return LAYER_1_WEEK_TARGETS[String(week)] || calculatorSchema?.targetRevenue || 0;
@@ -1994,6 +2000,7 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_46_LAYER_2_RATES : WEEK_46_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_46_LAYER_TIERS);
       }
+      if (isTbcSchemaWeek(week)) return 0;
       if (!calculatorSchema) return 0;
       let selected = null;
       calculatorSchema.tiers.forEach((tier) => {
@@ -2020,7 +2027,7 @@
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
@@ -2112,6 +2119,7 @@
       return ["LAYER 1", "LAYER 2"];
     }
     function schemaRatesFor(week, layer) {
+      if (isTbcSchemaWeek(week)) return {};
       if (String(week) === "25") return layer === "LAYER 2" ? WEEK_25_LAYER_2_RATES : WEEK_25_LAYER_1_RATES;
       if (String(week) === "26") return layer === "LAYER 2" ? WEEK_26_LAYER_2_RATES : WEEK_26_LAYER_1_RATES;
       if (String(week) === "27") return layer === "LAYER 2" ? WEEK_27_LAYER_2_RATES : WEEK_27_LAYER_1_RATES;
@@ -2125,7 +2133,7 @@
     }
     function priceTableIncentiveContext() {
       const singleWeek = selectedSingleWeek();
-      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46"].includes(singleWeek) ? singleWeek : "26";
+      const week = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"].includes(singleWeek) ? singleWeek : "26";
       const selectedTeams = selectedValues(teamFilter).map(normalizedTeamCategory).filter((team) => team && team !== "ALL");
       const selectedTeam = selectedTeams.length === 1 ? selectedTeams[0] : "";
       const layer = selectedTeam === "LAYER 2" ? "LAYER 2" : "LAYER 1";
@@ -2173,6 +2181,7 @@
     }
     function schemaInfoForWeek(week) {
       return selectedSchemaLayers().map((layer) => {
+        if (isTbcSchemaWeek(week)) return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetForWeek(week, layer))}</span></div>${tbcSchemaNote(week)}`;
         const rates = schemaRatesFor(week, layer);
         const targetRevenue = targetForWeek(week, layer);
         const tiers = String(week) === "46" ? WEEK_46_LAYER_TIERS : String(week) === "45" ? WEEK_45_LAYER_TIERS : (["34", "35"].includes(String(week)) ? WEEK_34_35_LAYER_TIERS : (["32", "33"].includes(String(week)) ? WEEK_32_33_LAYER_TIERS : (["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS))));
@@ -2180,7 +2189,7 @@
       }).join("");
     }
     function schemaInfoCard() {
-      const schemaWeekList = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46"];
+      const schemaWeekList = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"];
       const pickedWeeks = selectedValues(weekFilter)
         .filter((value) => value !== "all" && schemaWeekList.includes(String(value)))
         .sort((a, b) => Number(a) - Number(b));
