@@ -537,15 +537,16 @@
   <script>
     const SHEET_ID = "1nI9uXMjZwSKTKHXcdLdqhKRWVBOi1eiBHTwjri8QxWo";
     const BAO_EARL_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
-    const BAO_EARL_GID = "309685806";
-    const BAO_EARL_SHEET_NAME = "SPPJULI[28 JULI - 9 AGS 2026]";
+    const BAO_EARL_GID = "807982362";
+    const BAO_EARL_SHEET_NAME = "SPPOKT [26 OKT - 8 NOV 2026]";
+    const BAO_EARL_LABEL = "SPP OKT 26 Okt-8 Nov";
     const BAO_TOPUP_GID = "79664970";
     const RUANGBELAJAR_SHEET_ID = "1GFN0S7EVVXy42oU_EHwh1GE1b_MihzR-i-2aZG9jjeE";
     const RUANGBELAJAR_GID = "1529053994";
     const RUANGBELAJAR_HIDDEN_ROWS = new Set([3, 4, 100, 101, 102]);
     const EARLYBIRD_RUBEL_SHEET_ID = "1VRW9hVMTT9DQBkSz6SMJN_Kgb4p0EQnTF5FUCM-jxEk";
-    const EARLYBIRD_RUBEL_GID = "123313084";
-    const EARLYBIRD_RUBEL_SHEET_NAME = "SPPJULI (28 Juli-9 Agustus)";
+    const EARLYBIRD_RUBEL_GID = "1451316917";
+    const EARLYBIRD_RUBEL_SHEET_NAME = "SIAPUJIAN (9 - 23 Nov 2026)";
     const FLASHSALE_RG_SHEET_ID = "1QnnBYPk4jWDVpyGJ7ZDBL7MLSeO8lzmEsK1ps-fxfuI";
     const FLASHSALE_RG_GID = "1252873967";
     const JADWAL_BAC_SHEET_ID = "1oChTs2KBk7GgjKXMfmbabE38ng4NQol86lMYR90ib-A";
@@ -1182,30 +1183,48 @@
       const match = text.match(/(\d{1,2})/);
       return match ? `${match[1].padStart(2, "0")}.00` : "";
     }
+    // Sheet SPPOKT: A serial, B nama, C base, D-E ATL before (hidden), F-G ATL after, H-I BTL before (hidden), J-K BTL after, L cashback e-wallet.
+    // Baris yang di-hide tidak ikut dari gviz; kolom yang di-hide (D, E, H, I) tidak dipakai.
+    function sheetHeaderGroup(table, colIndex, labelPrefix) {
+      const label = String(table?.cols?.[colIndex]?.label || "").trim();
+      return label.replace(new RegExp(`^${labelPrefix}\\s*`, "i"), "").trim();
+    }
     function parseBaoEarl(table, source = BAO_EARL_SHEET_NAME) {
-      return table.rows.map((row, index) => ({
-        source,
-        deeplink: "",
-        serial: String(fmt(row, 0) || cell(row, 0) || "").trim(),
-        packageName: String(fmt(row, 1) || cell(row, 1) || "").trim(),
-        activeEndDate: "",
-        basePrice: parseMoney(cell(row, 2) || fmt(row, 2)),
-        btlDiscountBefore: fmt(row, 7) || cell(row, 7) || "",
-        btlPriceBefore: parseMoney(cell(row, 8) || fmt(row, 8)),
-        btlDiscountAfter: fmt(row, 9) || cell(row, 9) || "",
-        btlPriceAfter: parseMoney(cell(row, 10) || fmt(row, 10)),
-        cashback: parseMoney(cell(row, 11) || fmt(row, 11)),
-        maxSispres: parseMoney(cell(row, 12) || fmt(row, 12)),
-        extraGimmick: String(fmt(row, 13) || cell(row, 13) || "").trim(),
-        bonus: String(fmt(row, 14) || cell(row, 14) || "").trim(),
-        sourceRow: index + 1
-      })).filter((r) => r.serial || r.packageName);
+      const rows = [];
+      const firstGroup = sheetHeaderGroup(table, 1, "Package Name");
+      if (firstGroup) rows.push({ source, serial: "", packageName: firstGroup, isGroup: true, sourceRow: 0 });
+      (table.rows || []).forEach((row, index) => {
+        const colA = String(fmt(row, 0) || cell(row, 0) || "").trim();
+        const name = String(fmt(row, 1) || cell(row, 1) || "").trim();
+        const isSerial = /^PKG-/i.test(colA);
+        if (!isSerial) {
+          if (name && !/^package name$/i.test(name)) rows.push({ source, serial: "", packageName: colA ? `${colA} ${name}` : name, isGroup: true, sourceRow: index + 1 });
+          return;
+        }
+        rows.push({
+          source,
+          deeplink: `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(colA)}&voucher_serial=`,
+          serial: colA,
+          packageName: name,
+          activeEndDate: "",
+          basePrice: parseMoney(cell(row, 2) || fmt(row, 2)),
+          atlDiscountAfter: fmt(row, 5) || cell(row, 5) || "",
+          atlPriceAfter: parseMoney(cell(row, 6) || fmt(row, 6)),
+          btlDiscountAfter: fmt(row, 9) || cell(row, 9) || "",
+          btlPriceAfter: parseMoney(cell(row, 10) || fmt(row, 10)),
+          cashback: parseMoney(cell(row, 11) || fmt(row, 11)),
+          extraGimmick: "",
+          bonus: "",
+          sourceRow: index + 1
+        });
+      });
+      return rows;
     }
     const BAO_TOPUP_SECTIONS = [
       { key: "rb1y", title: "BTL TOP UP/UPGRADE FROM RUANGBELAJAR TO BAO (DURASI RB 1 TAHUN)", start: 31, ru: false },
-      { key: "regular", title: "BTL TOP UP/UPGRADE FROM BA ONLINE REGULAR", start: 40, ru: true },
-      { key: "premium", title: "BTL TOP UP/UPGRADE FROM BA ONLINE PREMIUM", start: 50, ru: true },
-      { key: "elite", title: "BTL TOP UP/UPGRADE FROM BA ONLINE ELITE", start: 60, ru: true }
+      { key: "regular", title: "BTL TOP UP/UPGRADE FROM BA ONLINE REGULAR", start: 40, ru: false, ruCol: true },
+      { key: "premium", title: "BTL TOP UP/UPGRADE FROM BA ONLINE PREMIUM", start: 50, ru: false, ruCol: true },
+      { key: "elite", title: "BTL TOP UP/UPGRADE FROM BA ONLINE ELITE", start: 60, ru: false, ruCol: true }
     ];
     function parseBaoTopup(table) {
       const rows = [];
@@ -1222,7 +1241,7 @@
           deeplink: serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(serial)}&voucher_serial=` : ""
         };
         BAO_TOPUP_SECTIONS.forEach((section) => {
-          const offset = section.ru ? 1 : 0;
+          const offset = section.ruCol ? 1 : 0;
           const couponAmount = parseMoney(cell(row, section.start) || fmt(row, section.start));
           const priceAfterDisc = parseMoney(cell(row, section.start + 1 + offset) || fmt(row, section.start + 1 + offset));
           const cicilan2Price = parseMoney(cell(row, section.start + 2 + offset) || fmt(row, section.start + 2 + offset));
@@ -1232,7 +1251,7 @@
           const cicilan3_1 = parseMoney(cell(row, section.start + 6 + offset) || fmt(row, section.start + 6 + offset));
           const cicilan3_2 = parseMoney(cell(row, section.start + 7 + offset) || fmt(row, section.start + 7 + offset));
           const cicilan3_3 = parseMoney(cell(row, section.start + 8 + offset) || fmt(row, section.start + 8 + offset));
-          const ru = section.ru ? String(fmt(row, section.start + 1) || cell(row, section.start + 1) || "").trim() : "";
+          const ru = ""; // kolom RU di-hide di sheet
           if (!couponAmount && !priceAfterDisc && !cicilan2Price && !cicilan3Price) return;
           rows.push({ ...base, section: section.key, sectionTitle: section.title, couponAmount, ru, priceAfterDisc, cicilan2Price, cicilan2_1, cicilan2_2, cicilan3Price, cicilan3_1, cicilan3_2, cicilan3_3 });
         });
@@ -1286,13 +1305,14 @@
       if (formatted) return Number(formatted) || 0;
       return parseMoney(cell(row, index));
     }
+    // Sheet SIAPUJIAN: A deeplink, B paket, C serial, D kategori (hidden), E nama, F masa aktif, G base, H ATL disc, I after lunas, J rounding, K BTL disc, L lunas, M cashback.
     function parseEarlybirdRubel(table) {
-      let currentGroup = "";
-      return table.rows.map((row) => {
+      let currentGroup = sheetHeaderGroup(table, 4, "PACKAGE NAME");
+      return (table.rows || []).map((row) => {
         const serial = String(fmt(row, 2) || cell(row, 2) || "").trim();
-        const packageName = String(fmt(row, 3) || cell(row, 3) || "").trim();
-        if (!serial && packageName) {
-          currentGroup = packageName;
+        const packageName = String(fmt(row, 4) || cell(row, 4) || "").trim();
+        if (!/^PKG-/i.test(serial)) {
+          if (packageName && !/^package name$/i.test(packageName)) currentGroup = packageName;
           return null;
         }
         return {
@@ -1302,19 +1322,19 @@
           packageType: String(fmt(row, 1) || cell(row, 1) || "").trim(),
           serial,
           packageName,
-          activeUntil: String(fmt(row, 4) || cell(row, 4) || "").trim(),
-          basePrice: priceCell(row, 5),
+          activeUntil: String(fmt(row, 5) || cell(row, 5) || "").trim(),
+          basePrice: priceCell(row, 6),
           installment1Base: 0,
           installment2Base: 0,
           installment1: 0,
           installment2: 0,
           installment3: 0,
-          atlDiscount: fmt(row, 6) || cell(row, 6) || "",
-          atlAfterPrice: priceCell(row, 7),
-          roundingAfterPrice: priceCell(row, 8),
-          btlDiscount: fmt(row, 9) || cell(row, 9) || "",
-          lunas: priceCell(row, 10),
-          cashback: priceCell(row, 11),
+          atlDiscount: fmt(row, 7) || cell(row, 7) || "",
+          atlAfterPrice: priceCell(row, 8),
+          roundingAfterPrice: priceCell(row, 9),
+          btlDiscount: fmt(row, 10) || cell(row, 10) || "",
+          lunas: priceCell(row, 11),
+          cashback: priceCell(row, 12),
           flashSaleDiscount: "",
           flashSalePrice: 0
         };
@@ -2206,16 +2226,17 @@
       const rows = baoEarlRows.filter((r) => !q || [r.source, r.serial, r.packageName, r.activeEndDate, r.extraGimmick, r.bonus].some((v) => String(v || "").toLowerCase().includes(q)));
       const topupRows = baoTopupRows.filter((r) => !q || [r.sectionTitle, r.serial, r.packageName, r.ru].some((v) => String(v || "").toLowerCase().includes(q)));
       const earlyRows = rows.filter((r) => r.source === BAO_EARL_SHEET_NAME);
+      const packageCount = rows.filter((r) => r.serial).length;
       const lowestBtl = rows.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
       contentEl.innerHTML = `
         <section class="kpis">
-          ${kpi("Package", num(rows.length), "Data dari sheet Harga Brain Academy Online")}
+          ${kpi("Package", num(packageCount), "Hidden row/column sheet tidak ditampilkan")}
           ${kpi("Harga BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Sesuai filter")}
-          ${kpi("SPPJUL 28 Jul-9 Ags", num(earlyRows.length), "Package")}
+          ${kpi(BAO_EARL_LABEL, num(packageCount), "Package")}
           ${kpi("Top Up BAO", num(topupRows.length), "Lunas dan cicilan")}
         </section>
         <section class="card">
-          <div class="section-title"><h2>Harga Brain Academy Online</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          <div class="section-title"><h2>Harga Brain Academy Online · ${esc(BAO_EARL_LABEL)}</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${BAO_EARL_SHEET_ID}/edit?gid=${BAO_EARL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
           ${baoEarlTable(earlyRows)}
         </section>
         <section class="card" style="margin-top:16px">
@@ -2224,11 +2245,12 @@
         </section>`;
     }
     function baoEarlTable(rows) {
-      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After Disc</th></tr></thead><tbody>${rows.map((r) => {
-        if (!r.serial) return `<tr><td></td><td>${esc(r.packageName)}</td><td></td><td class="number"></td><td class="number"></td><td class="number"></td></tr>`;
+      const money = (v) => v ? rupiah(v) : "-";
+      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">ATL Disc After</th><th class="number">ATL Price After Disc</th><th class="number">BTL Disc After</th><th class="number">BTL Price After Disc</th><th class="number">Cashback E-Wallet</th></tr></thead><tbody>${rows.map((r) => {
+        if (!r.serial) return `<tr><td colspan="9" style="font-weight:700;background:var(--soft, #f3f7f7)">${esc(r.packageName)}</td></tr>`;
         const link = r.deeplink || `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=`;
-        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td></tr>`;
-      }).join("") || `<tr><td colspan="6">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a></td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscountAfter || "-")}</td><td class="number">${money(r.atlPriceAfter)}</td><td class="number">${esc(r.btlDiscountAfter)}</td><td class="number">${rupiah(r.btlPriceAfter)}</td><td class="number">${money(r.cashback)}</td></tr>`;
+      }).join("") || `<tr><td colspan="9">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function baoTopupTables(rows) {
       return BAO_TOPUP_SECTIONS.map((section) => {
@@ -2250,7 +2272,7 @@
           ${kpi("Sumber", "Ruangbelajar", "Spreadsheet harga")}
         </section>
         <section class="card">
-          <div class="section-title"><h2>Ruangbelajar</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          <div class="section-title"><h2>Ruangbelajar · ${esc(EARLYBIRD_RUBEL_SHEET_NAME)}</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
           ${earlybirdRubelTable(rubelRows)}
         </section>`;
     }
@@ -2261,10 +2283,14 @@
       }).join("") || `<tr><td colspan="13">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function earlybirdRubelTable(rows) {
-      return `<div class="table-wrap"><table><thead><tr><th>Deeplink</th><th>Paket</th><th>PKG Serial</th><th>Package Name</th><th>Masa Aktif</th><th class="number">Base Price</th><th class="number">ATL Disc</th><th class="number">After Price Lunas</th><th class="number">Rounding After Price</th><th class="number">BTL Disc</th><th class="number">Lunas</th></tr></thead><tbody>${rows.map((r) => {
+      const money = (v) => v ? rupiah(v) : "-";
+      let lastGroup = null;
+      return `<div class="table-wrap"><table><thead><tr><th>Deeplink</th><th>Paket</th><th>PKG Serial</th><th>Package Name</th><th>Masa Aktif</th><th class="number">Base Price</th><th class="number">ATL Disc</th><th class="number">After Price Lunas</th><th class="number">Rounding After Price</th><th class="number">BTL Disc</th><th class="number">Lunas</th><th class="number">Cashback</th></tr></thead><tbody>${rows.map((r) => {
         const link = r.deeplink || (r.serial ? `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(r.serial)}&voucher_serial=` : "");
-        return `<tr><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td>${esc(r.packageType)}</td><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${esc(r.activeUntil)}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscount)}</td><td class="number">${rupiah(r.atlAfterPrice)}</td><td class="number">${rupiah(r.roundingAfterPrice)}</td><td class="number">${esc(r.btlDiscount)}</td><td class="number">${rupiah(r.lunas)}</td></tr>`;
-      }).join("") || `<tr><td colspan="11">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+        const groupRow = r.group && r.group !== lastGroup ? `<tr><td colspan="12" style="font-weight:700;background:var(--soft, #f3f7f7)">${esc(r.group)}</td></tr>` : "";
+        lastGroup = r.group;
+        return `${groupRow}<tr><td>${link ? `<a class="button" href="${esc(link)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td>${esc(r.packageType)}</td><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${esc(r.activeUntil)}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.atlDiscount)}</td><td class="number">${money(r.atlAfterPrice)}</td><td class="number">${money(r.roundingAfterPrice)}</td><td class="number">${esc(r.btlDiscount)}</td><td class="number">${money(r.lunas)}</td><td class="number">${money(r.cashback)}</td></tr>`;
+      }).join("") || `<tr><td colspan="12">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
     function renderFlashSaleRg() {
       const q = searchFilter.value.trim().toLowerCase();
@@ -2284,7 +2310,7 @@
           ${flashSaleRgTable(rows)}
         </section>
         <section class="card" style="margin-top:16px">
-          <div class="section-title"><h2>Ruangbelajar</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          <div class="section-title"><h2>Ruangbelajar · ${esc(EARLYBIRD_RUBEL_SHEET_NAME)}</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EARLYBIRD_RUBEL_SHEET_ID}/edit?gid=${EARLYBIRD_RUBEL_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
           ${earlybirdRubelTable(rubelRows)}
         </section>`;
     }
@@ -2362,7 +2388,7 @@
             loadJsonp("Kalkulator Incentive"),
             loadJsonp(BAO_EARL_SHEET_NAME, { sheetId: BAO_EARL_SHEET_ID, gid: BAO_EARL_GID }),
             loadJsonp("NEW LUNAS DAN CICILAN TOP UP", { sheetId: BAO_EARL_SHEET_ID, gid: BAO_TOPUP_GID }),
-            loadJsonp(EARLYBIRD_RUBEL_SHEET_NAME, { sheetId: EARLYBIRD_RUBEL_SHEET_ID }),
+            loadJsonp(EARLYBIRD_RUBEL_SHEET_NAME, { sheetId: EARLYBIRD_RUBEL_SHEET_ID, gid: EARLYBIRD_RUBEL_GID }),
             loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
             loadOptionalJsonp("Harga BAC", { sheetId: JADWAL_BAC_SHEET_ID, gid: HARGA_BAC_GID }),
             loadJsonp("incentive", { sheetId: SHEET_ID, gid: "457299491", range: "BK:CJ" }),
