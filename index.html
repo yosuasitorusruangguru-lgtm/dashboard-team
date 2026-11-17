@@ -481,6 +481,7 @@
       <button class="tab" data-view="dodolan">Dodolan</button>
       <button class="tab" data-view="allIncentive">All Incentive Agent</button>
       <button class="tab" data-view="baoEarl">Harga Brain Academy Online</button>
+      <button class="tab" data-view="extendBao">Extend BAO</button>
       <button class="tab" data-view="ruangbelajar">Ruangbelajar</button>
       <button class="tab" data-view="jadwalBac">Jadwal & Deeplink BAC26/27</button>
     </nav>
@@ -544,6 +545,9 @@
     const RUANGBELAJAR_SHEET_ID = "1GFN0S7EVVXy42oU_EHwh1GE1b_MihzR-i-2aZG9jjeE";
     const RUANGBELAJAR_GID = "1529053994";
     const RUANGBELAJAR_HIDDEN_ROWS = new Set([3, 4, 100, 101, 102]);
+    const EXTEND_BAO_SHEET_ID = "1D38Se_F6fKwpg6oF-sE43F5NGdQ11XX0TK5n7mK5HZM";
+    const EXTEND_BAO_GID = "1376922334";
+    const EXTEND_BAO_SHEET_NAME = "EXTEND NOV";
     const EARLYBIRD_RUBEL_SHEET_ID = "1VRW9hVMTT9DQBkSz6SMJN_Kgb4p0EQnTF5FUCM-jxEk";
     const EARLYBIRD_RUBEL_GID = "1451316917";
     const EARLYBIRD_RUBEL_SHEET_NAME = "SIAPUJIAN (9 - 23 Nov 2026)";
@@ -584,6 +588,10 @@
     let incentiveTable = null;
     let calculatorTable = null;
     let baoEarlTableData = null;
+    let extendBaoTableData = null;
+    let extendBaoRows = [];
+    let extendBaoNote = "";
+    let extendBaoError = "";
     let baoTopupTableData = null;
     let ruangbelajarTableData = null;
     let earlybirdRubelTableData = null;
@@ -1226,6 +1234,35 @@
       { key: "premium", title: "BTL TOP UP/UPGRADE FROM BA ONLINE PREMIUM", start: 50, ru: false, ruCol: true },
       { key: "elite", title: "BTL TOP UP/UPGRADE FROM BA ONLINE ELITE", start: 60, ru: false, ruCol: true }
     ];
+    // Sheet EXTEND NOV: A deeplink, B serial, C nama, D active end date, E base, F-J hidden (ATL & BTL disc before), K BTL disc after, L hidden, M BTL price after, N extra gimmick, O cashback e-wallet.
+    function parseExtendBao(table) {
+      const rows = [];
+      const label = String(table?.cols?.[2]?.label || "").replace(/^Package Name\s*/i, "").trim();
+      const noteMatch = label.match(/^(PILIH KELAS[\s\S]*?langsung aktif)\s*([\s\S]*)$/i);
+      extendBaoNote = noteMatch ? noteMatch[1].replace(/\s+/g, " ").trim() : "";
+      const firstGroup = (noteMatch ? noteMatch[2] : label).trim();
+      if (firstGroup) rows.push({ serial: "", packageName: firstGroup, isGroup: true });
+      (table?.rows || []).forEach((row) => {
+        const serial = String(fmt(row, 1) || cell(row, 1) || "").trim();
+        const name = String(fmt(row, 2) || cell(row, 2) || "").trim();
+        if (!/^PKG-/i.test(serial)) {
+          if (name && !/^package name$/i.test(name) && !/^PILIH KELAS/i.test(name)) rows.push({ serial: "", packageName: name, isGroup: true });
+          return;
+        }
+        rows.push({
+          deeplink: String(fmt(row, 0) || cell(row, 0) || "").trim() || `https://bayar.ruangguru.com/packages-list?package_serial=${encodeURIComponent(serial)}&voucher_serial=`,
+          serial,
+          packageName: name,
+          activeEndDate: String(fmt(row, 3) || cell(row, 3) || "").trim(),
+          basePrice: priceCell(row, 4),
+          btlDiscountAfter: String(fmt(row, 10) || cell(row, 10) || "").trim(),
+          btlPriceAfter: priceCell(row, 12),
+          extraGimmick: String(fmt(row, 13) || cell(row, 13) || "").trim(),
+          cashback: priceCell(row, 14)
+        });
+      });
+      return rows;
+    }
     function parseBaoTopup(table) {
       const rows = [];
       (table.rows || []).forEach((row, index) => {
@@ -1707,6 +1744,7 @@
       else if (activeView === "dodolan") renderDodolan(sales, incentives, { totalAmount, totalTxn, totalIncentive, uniqueAgents, arpu });
       else if (activeView === "allIncentive") renderAllIncentiveAgent();
       else if (activeView === "baoEarl") renderBaoEarl();
+      else if (activeView === "extendBao") renderExtendBao();
       else if (activeView === "ruangbelajar") renderRuangbelajar();
       else renderJadwalBac();
       statusEl.textContent = `Terakhir dimuat: ${new Date().toLocaleString("id-ID")} · sumber sales: RAW · sumber incentive: Incentive/Kalkulator`;
@@ -2261,6 +2299,35 @@
     function baoTopupTable(rows, showRu) {
       return `<div class="table-wrap" style="max-height:420px"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th class="number">Base Price</th><th class="number">Coupon Amount</th>${showRu ? "<th>RU</th>" : ""}<th class="number">Price After Disc</th><th class="number">Cicilan 2x</th><th class="number">Cicilan 1</th><th class="number">Cicilan 2</th><th class="number">Cicilan 3x</th><th class="number">Cicilan 1</th><th class="number">Cicilan 2</th><th class="number">Cicilan 3</th></tr></thead><tbody>${rows.map((r) => `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td>${r.deeplink ? `<a class="button" href="${esc(r.deeplink)}" target="_blank" rel="noreferrer">Buka</a>` : ""}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${rupiah(r.couponAmount)}</td>${showRu ? `<td>${esc(r.ru)}</td>` : ""}<td class="number">${rupiah(r.priceAfterDisc)}</td><td class="number">${rupiah(r.cicilan2Price)}</td><td class="number">${rupiah(r.cicilan2_1)}</td><td class="number">${rupiah(r.cicilan2_2)}</td><td class="number">${rupiah(r.cicilan3Price)}</td><td class="number">${rupiah(r.cicilan3_1)}</td><td class="number">${rupiah(r.cicilan3_2)}</td><td class="number">${rupiah(r.cicilan3_3)}</td></tr>`).join("") || `<tr><td colspan="${showRu ? 14 : 13}">Tidak ada data.</td></tr>`}</tbody></table></div>`;
     }
+    function renderExtendBao() {
+      const q = searchFilter.value.trim().toLowerCase();
+      let currentGroup = "";
+      const withGroup = extendBaoRows.map((r) => { if (!r.serial) currentGroup = r.packageName; return { ...r, group: currentGroup }; });
+      const matched = withGroup.filter((r) => r.serial && (!q || [r.group, r.serial, r.packageName, r.extraGimmick].some((v) => String(v || "").toLowerCase().includes(q))));
+      const groups = new Set(matched.map((r) => r.group));
+      const rows = withGroup.filter((r) => r.serial ? matched.includes(r) : groups.has(r.packageName));
+      const lowestBtl = matched.reduce((min, r) => r.btlPriceAfter ? Math.min(min, r.btlPriceAfter) : min, Infinity);
+      contentEl.innerHTML = `
+        <section class="kpis">
+          ${kpi("Package", num(matched.length), "Hidden row/column sheet tidak ditampilkan")}
+          ${kpi("Harga BTL Terendah", Number.isFinite(lowestBtl) ? rupiah(lowestBtl) : "-", "Sesuai filter")}
+          ${kpi("Group", num(groups.size), "Section dari sheet")}
+          ${kpi("Sumber", EXTEND_BAO_SHEET_NAME, "Spreadsheet Extend BAO")}
+        </section>
+        <section class="card">
+          <div class="section-title"><h2>Extend Brain Academy Online · ${esc(EXTEND_BAO_SHEET_NAME)}</h2><a class="button" href="https://docs.google.com/spreadsheets/d/${EXTEND_BAO_SHEET_ID}/edit?gid=${EXTEND_BAO_GID}" target="_blank" rel="noreferrer">Buka Sheet</a></div>
+          ${extendBaoError ? `<div class="note" style="color:#b42318">Gagal memuat sheet Extend: ${esc(extendBaoError)}</div>` : ""}
+          ${extendBaoNote ? `<div class="note" style="margin:6px 0 10px;padding:10px 12px;border:1px dashed #F2A33A;border-radius:8px;background:#FFF8EC">${esc(extendBaoNote)}</div>` : ""}
+          ${extendBaoTable(rows)}
+        </section>`;
+    }
+    function extendBaoTable(rows) {
+      const money = (v) => v ? rupiah(v) : "-";
+      return `<div class="table-wrap"><table><thead><tr><th>PKG Serial</th><th>Package Name</th><th>Deeplink</th><th>Active End Date</th><th class="number">Base Price</th><th class="number">BTL Disc After</th><th class="number">BTL Price After Disc</th><th>Extra Gimmick</th><th class="number">Cashback E-Wallet</th></tr></thead><tbody>${rows.map((r) => {
+        if (!r.serial) return `<tr><td colspan="9" style="font-weight:700;background:var(--soft, #f3f7f7)">${esc(r.packageName)}</td></tr>`;
+        return `<tr><td>${esc(r.serial)}</td><td>${esc(r.packageName)}</td><td><a class="button" href="${esc(r.deeplink)}" target="_blank" rel="noreferrer">Buka</a></td><td>${esc(r.activeEndDate)}</td><td class="number">${rupiah(r.basePrice)}</td><td class="number">${esc(r.btlDiscountAfter || "-")}</td><td class="number">${money(r.btlPriceAfter)}</td><td>${esc(r.extraGimmick || "-")}</td><td class="number">${money(r.cashback)}</td></tr>`;
+      }).join("") || `<tr><td colspan="9">Tidak ada data.</td></tr>`}</tbody></table></div>`;
+    }
     function renderRuangbelajar() {
       const q = searchFilter.value.trim().toLowerCase();
       const rubelRows = earlybirdRubelRows.filter((r) => !q || [r.group, r.packageType, r.serial, r.packageName].some((v) => String(v || "").toLowerCase().includes(q)));
@@ -2382,7 +2449,7 @@
         errorEl.style.display = "none";
         statusEl.textContent = "Memuat RAW dan Incentive...";
         if (!rawTable || !incentiveTable || force) {
-          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, baoTopupTableData, earlybirdRubelTableData, jadwalBacTableData, hargaBacTableData, universeTableData, presentationTableData] = await Promise.all([
+          [rawTable, incentiveTable, calculatorTable, baoEarlTableData, baoTopupTableData, earlybirdRubelTableData, jadwalBacTableData, hargaBacTableData, universeTableData, presentationTableData, extendBaoTableData] = await Promise.all([
             loadJsonp("RAW"),
             loadJsonp("Incentive"),
             loadJsonp("Kalkulator Incentive"),
@@ -2392,7 +2459,8 @@
             loadOptionalJsonp("PLOTING JADWAL BAC 26/27", { sheetId: JADWAL_BAC_SHEET_ID, gid: JADWAL_BAC_GID }),
             loadOptionalJsonp("Harga BAC", { sheetId: JADWAL_BAC_SHEET_ID, gid: HARGA_BAC_GID }),
             loadJsonp("incentive", { sheetId: SHEET_ID, gid: "457299491", range: "BK:CJ" }),
-            loadJsonp("QUERY!", { sheetId: PRESENTATION_SHEET_ID, gid: PRESENTATION_GID })
+            loadJsonp("QUERY!", { sheetId: PRESENTATION_SHEET_ID, gid: PRESENTATION_GID }),
+            loadOptionalJsonp(EXTEND_BAO_SHEET_NAME, { sheetId: EXTEND_BAO_SHEET_ID, gid: EXTEND_BAO_GID })
           ]);
           rawRows = parseRaw(rawTable);
           incentiveRows = parseIncentive(incentiveTable);
@@ -2402,6 +2470,8 @@
             ...parseBaoEarl(baoEarlTableData, BAO_EARL_SHEET_NAME)
           ];
           baoTopupRows = parseBaoTopup(baoTopupTableData);
+          extendBaoRows = parseExtendBao(extendBaoTableData.table);
+          extendBaoError = extendBaoTableData.error;
           earlybirdRubelRows = parseEarlybirdRubel(earlybirdRubelTableData);
           const jadwalBacParsed = parseJadwalBac(jadwalBacTableData.table);
           jadwalBacHeaders = jadwalBacParsed.headers;
