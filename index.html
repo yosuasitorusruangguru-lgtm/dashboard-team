@@ -705,6 +705,7 @@
     const WEEK_34_35_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_45_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
     const WEEK_46_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
+    const WEEK_47_LAYER_TIERS = [0, 0.5, 0.75, 1, 1.25];
     
     const PROMPTER_INBOUND_AGENT_TARGET = 128800000;
     const PROMPTER_INBOUND_WEEK_30_AGENT_TARGET = 110000000;
@@ -903,6 +904,30 @@
       "Math Champs Online": { 0: 0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
       "Skill Academy": { 0: 0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
     };
+    const WEEK_47_LAYER_1_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0.0, 0.5: 0.011, 0.75: 0.0135, 1: 0.025, 1.25: 0.029 },
+      "BAON Elite": { 0: 0.0, 0.5: 0.012, 0.75: 0.0135, 1: 0.0235, 1.25: 0.0265 },
+      "BAON Prem": { 0: 0.0, 0.5: 0.0218, 0.75: 0.0255, 1: 0.05, 1.25: 0.061 },
+      "BAON Reg": { 0: 0.0, 0.5: 0.0188, 0.75: 0.022, 1: 0.044, 1.25: 0.054 },
+      "Others": { 0: 0.0, 0.5: 0.0155, 0.75: 0.0175, 1: 0.0188, 1.25: 0.0198 },
+      "RB": { 0: 0.0, 0.5: 0.0195, 0.75: 0.0235, 1: 0.0455, 1.25: 0.058 },
+      "RGP Online": { 0: 0.0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0.0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0.0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0.0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
+    const WEEK_47_LAYER_2_RATES = {
+      "BAC & Mathchamps Offline": { 0: 0.0, 0.5: 0.0085, 0.75: 0.0105, 1: 0.019, 1.25: 0.0223 },
+      "BAON Elite": { 0: 0.0, 0.5: 0.0095, 0.75: 0.011, 1: 0.019, 1.25: 0.0223 },
+      "BAON Prem": { 0: 0.0, 0.5: 0.0175, 0.75: 0.021, 1: 0.038, 1.25: 0.048 },
+      "BAON Reg": { 0: 0.0, 0.5: 0.0148, 0.75: 0.0175, 1: 0.034, 1.25: 0.042 },
+      "Others": { 0: 0.0, 0.5: 0.0108, 0.75: 0.0123, 1: 0.013, 1.25: 0.014 },
+      "RB": { 0: 0.0, 0.5: 0.026, 0.75: 0.0315, 1: 0.0613, 1.25: 0.076 },
+      "RGP Online": { 0: 0.0, 0.5: 0.009, 0.75: 0.015, 1: 0.03, 1.25: 0.035 },
+      "RGP Offline": { 0: 0.0, 0.5: 0.003, 0.75: 0.005, 1: 0.01, 1.25: 0.01 },
+      "Math Champs Online": { 0: 0.0, 0.5: 0.01, 0.75: 0.01, 1: 0.01, 1.25: 0.01 },
+      "Skill Academy": { 0: 0.0, 0.5: 0.02, 0.75: 0.02, 1: 0.02, 1.25: 0.02 }
+    };
     const WEEK_46_LAYER_1_RATES = {
       "BAC & Mathchamps Offline": { 0: 0.0, 0.5: 0.013, 0.75: 0.0158, 1: 0.0295, 1.25: 0.034 },
       "BAON Elite": { 0: 0.0, 0.5: 0.014, 0.75: 0.016, 1: 0.0275, 1.25: 0.031 },
@@ -953,8 +978,10 @@
     };
     const JUNE_INCENTIVE_WEEKS = new Set(["23", "24"]);
     // Week dengan target sudah ada tetapi schema incentive masih to be confirmed (rate = 0 sampai schema masuk)
-    const TBC_SCHEMA_WEEKS = new Set(["47"]);
+    const TBC_SCHEMA_WEEKS = new Set([]); // agent
     function isTbcSchemaWeek(week) { return TBC_SCHEMA_WEEKS.has(String(week)); }
+    const TBC_LEADER_SCHEMA_WEEKS = new Set(["47"]); // leader/coach
+    function isTbcLeaderSchemaWeek(week) { return TBC_LEADER_SCHEMA_WEEKS.has(String(week)); }
     function tbcSchemaNote(week) { return `<div class="note" style="margin-top:8px;padding:10px 12px;border:1px dashed #F2A33A;border-radius:8px;background:#FFF8EC">Schema incentive Week ${esc(week)} masih <b>to be confirmed</b>. Incentive Week ${esc(week)} sementara tampil Rp0 sampai schema resmi masuk.</div>`; }
     function isExcludedTopIncentiveAgent(name) {
       return EXCLUDED_TOP_INCENTIVE_AGENTS.has(String(name || "").trim().toLowerCase());
@@ -2068,6 +2095,10 @@
         const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_46_LAYER_2_RATES : WEEK_46_LAYER_1_RATES;
         return layer1RateFor(rates, category, achievement, WEEK_46_LAYER_TIERS);
       }
+      if (String(week) === "47") {
+        const rates = normalizedTeamCategory(teamCategory) === "LAYER 2" ? WEEK_47_LAYER_2_RATES : WEEK_47_LAYER_1_RATES;
+        return layer1RateFor(rates, category, achievement, WEEK_47_LAYER_TIERS);
+      }
       if (isTbcSchemaWeek(week)) return 0;
       if (!calculatorSchema) return 0;
       let selected = null;
@@ -2196,6 +2227,7 @@
       if (["32", "33"].includes(String(week))) return layer === "LAYER 2" ? WEEK_32_33_LAYER_2_RATES : WEEK_32_33_LAYER_1_RATES;
       if (["34", "35"].includes(String(week))) return layer === "LAYER 2" ? WEEK_34_35_LAYER_2_RATES : WEEK_34_35_LAYER_1_RATES;
       if (String(week) === "45") return layer === "LAYER 2" ? WEEK_45_LAYER_2_RATES : WEEK_45_LAYER_1_RATES;
+      if (String(week) === "47") return layer === "LAYER 2" ? WEEK_47_LAYER_2_RATES : WEEK_47_LAYER_1_RATES;
       if (String(week) === "46") return layer === "LAYER 2" ? WEEK_46_LAYER_2_RATES : WEEK_46_LAYER_1_RATES;
       return layer === "LAYER 2" ? WEEK_23_24_LAYER_2_RATES : WEEK_23_24_LAYER_1_RATES;
     }
@@ -2252,7 +2284,7 @@
         if (isTbcSchemaWeek(week)) return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetForWeek(week, layer))}</span></div>${tbcSchemaNote(week)}`;
         const rates = schemaRatesFor(week, layer);
         const targetRevenue = targetForWeek(week, layer);
-        const tiers = String(week) === "46" ? WEEK_46_LAYER_TIERS : String(week) === "45" ? WEEK_45_LAYER_TIERS : (["34", "35"].includes(String(week)) ? WEEK_34_35_LAYER_TIERS : (["32", "33"].includes(String(week)) ? WEEK_32_33_LAYER_TIERS : (["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS))));
+        const tiers = String(week) === "47" ? WEEK_47_LAYER_TIERS : String(week) === "46" ? WEEK_46_LAYER_TIERS : String(week) === "45" ? WEEK_45_LAYER_TIERS : (["34", "35"].includes(String(week)) ? WEEK_34_35_LAYER_TIERS : (["32", "33"].includes(String(week)) ? WEEK_32_33_LAYER_TIERS : (["30", "31"].includes(String(week)) ? WEEK_30_LAYER_TIERS : (["28", "29"].includes(String(week)) ? WEEK_28_LAYER_1_TIERS : WEEK_25_LAYER_1_TIERS))));
         return `<div class="section-title" style="margin-top:14px"><h2>${esc(layer)}</h2><span class="note">Week ${esc(week)} Target ${rupiah(targetRevenue)}</span></div>${schemaRateTable(rates, tiers)}${targetSimulationTable(rates, targetRevenue, "Target x TH x rate product", tiers)}`;
       }).join("");
     }
