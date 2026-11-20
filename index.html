@@ -1179,7 +1179,36 @@
           th: String(fmt(row, thIdx) || cell(row, thIdx) || "").trim(),
           user: String(fmt(row, userIdx) || cell(row, userIdx) || "").trim()
         };
-      }).filter((r) => r.agent && r.week && r.amount > 0);
+      }).filter((r) => r.agent && r.week && r.amount > 0).map((r, _i, all) => {
+        // samakan penulisan nama agent (mis. "risa Listiani Putri" = "Risa Listiani Putri")
+        if (!all.canonicalNames) {
+          all.canonicalNames = new Map();
+          all.forEach((x) => { const k = x.agent.toLowerCase(); if (!all.canonicalNames.has(k) || /^[A-Z]/.test(x.agent)) all.canonicalNames.set(k, x.agent); });
+        }
+        return { ...r, agent: all.canonicalNames.get(r.agent.toLowerCase()) || r.agent };
+      });
+    }
+    // Week yang schema incentive-nya sudah diinfokan user; tab Universe menghitung incentive dari schema ini.
+    const UNIVERSE_SCHEMA_WEEKS = new Set(["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"]);
+    const UNIVERSE_SCHEMA_PRODUCTS = ["BAC & Mathchamps Offline", "BAON Elite", "BAON Prem", "BAON Reg", "Others", "RB", "RGP Online", "RGP Offline", "Math Champs Online", "Skill Academy"];
+    function universeSchemaCategory(row) {
+      const product = String(row.product || "").trim();
+      const key = product.toLowerCase();
+      if (key === "bac" || key === "bac & mathchamps offline" || key === "mathchamps offline" || key === "math champs offline") return "BAC & Mathchamps Offline";
+      const exact = UNIVERSE_SCHEMA_PRODUCTS.find((p) => p.toLowerCase() === key);
+      if (exact) return exact;
+      return week25ProductCategory(row) || "Others";
+    }
+    function universeSchemaIncentiveMap(teamRows) {
+      const weeks = new Set(teamRows.map((r) => String(r.week)));
+      const schemaRows = universeRows.filter((r) => UNIVERSE_SCHEMA_WEEKS.has(String(r.week)) && weeks.has(String(r.week)));
+      const map = new Map();
+      calculateSchemaIncentives(schemaRows, universeSchemaCategory).weekly.forEach((w) => {
+        if (!teamRows.some((r) => r.agent === w.agent && String(r.week) === String(w.week))) return;
+        map.set(w.agent, (map.get(w.agent) || 0) + w.incentive);
+      });
+      teamRows.filter((r) => !UNIVERSE_SCHEMA_WEEKS.has(String(r.week))).forEach((r) => map.set(r.agent, (map.get(r.agent) || 0) + (r.incentive || 0)));
+      return map;
     }
     function parsePresentationRows(table) {
       const m = colMap(table);
@@ -1837,7 +1866,7 @@
       const byAgent = groupBy(teamRows, (r) => r.agent, (r) => ({ amount: r.amount, txn: r.txn }));
       const byWeek = buildTeamWeekly(teamRows, []);
       const universeIncentiveMap = universeRows.length
-        ? new Map(groupBy(teamRows, (r) => r.agent, (r) => ({ incentive: r.incentive })).map((r) => [r.key, r.incentive]))
+        ? universeSchemaIncentiveMap(teamRows)
         : new Map(calculateSchemaIncentives(teamRows.filter(isAllIncentiveSchemaRow)).agents.map((r) => [r.key, r.incentive]));
       byAgent.forEach((agent) => {
         const agentRows = teamRows.filter((row) => row.agent === agent.key);
@@ -2108,7 +2137,7 @@
       if (!selected) return 0;
       return selected.rates[category] ?? selected.rates.Others ?? 0;
     }
-    function calculateSchemaIncentives(rows) {
+    function calculateSchemaIncentives(rows, categoryFn = null) {
       const grouped = new Map();
       rows.forEach((row) => {
         const teamCategory = normalizedTeamCategory(row.teamCategory) || "-";
@@ -2126,7 +2155,7 @@
         const categories = {};
         let incentive = 0;
         group.rows.forEach((row) => {
-          const category = ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
+          const category = categoryFn ? categoryFn(row) : ["23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "45", "46", "47"].includes(String(group.week)) ? week25ProductCategory(row) : productCategory(row);
           const amount = row.amount;
           const rate = schemaRateFor(category, achievement, group.week, schemaTeamCategory);
           const value = amount * rate;
